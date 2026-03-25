@@ -1,130 +1,77 @@
-# Context Hygiene: Nap, Reskill, and Compact
+# 上下文卫生：小憩、重新技能和压缩
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-
-**Try this to compact your team's memory:**
+**试试这个压缩团队的记忆：**
 ```
-Team, take a nap
-```
-
-**Try this to refresh agent skills:**
-```
-Team, reskill
+团队，小憩一下
 ```
 
-**Try this to do both and report results:**
+**试试这个刷新智能体技能：**
 ```
-Team, reskill, take a nap, and let me know how much context you cleared out collectively for future iterations
+团队，重新技能
 ```
 
-Over multiple sessions, Squad's `.squad/` files grow — agent histories, decisions, skill files. Context hygiene commands let you actively manage that growth so agents stay fast and focused.
+**试试这个两者都做并报告结果：**
+```
+团队，重新技能，小憩一下，让我知道你们为未来迭代集体清除了多少上下文
+```
+
+跨多个会话，Squad 的 `.squad/` 文件增长 —— 智能体历史、决策、技能文件。上下文卫生命令让你主动管理该增长，以便智能体保持快速和专注。
 
 ---
 
-## Nap
+## 小憩
 
-**What it does:** Summarizes accumulated work into smaller, more efficient memory files. This is the same as running `/compact` in the CLI or `squad nap` from the command line.
+**它做什么：** 将累积的工作总结为更小、更高效的内存文件。这与在 CLI 中运行 `/compact` 或从命令行运行 `squad nap` 相同。
 
-When you tell the team to "take a nap," each agent:
+当你告诉团队"小憩一下"时，每个智能体：
 
-1. Reviews its `history.md` and other state files
-2. Compresses older entries into concise summaries
-3. Archives verbose detail while preserving key decisions and learnings
-4. Reports how much context was reclaimed
+1. 审查其 `history.md` 和其他状态文件
+2. 将旧条目压缩为简洁摘要
+3. 归档冗长细节同时保留关键决策和学习
+4. 报告回收了多少上下文
 
-### Nap ≠ Shutting Down
+### 小憩 ≠ 关闭
 
-This is the most common misconception:
+这是最常见的误解：
 
-| Action | What happens to `.squad/` files |
+| 行动 | `.squad/` 文件发生什么 |
 |--------|-------------------------------|
-| **Shutting down Squad** (closing the CLI, killing the process) | Files stay exactly as they are. Nothing is summarized or compacted. |
-| **Nap** (`team, take a nap` or `squad nap`) | Files are actively summarized and compacted. Older entries are archived, working context gets leaner. |
+| **关闭 Squad**（关闭 CLI、终止进程） | 文件保持原样。没有总结或压缩。 |
+| **小憩**（`team, take a nap` 或 `squad nap`） | 文件被主动总结和压缩。旧条目归档，工作上下文变得更精简。 |
 
-Shutting down Squad every night does **not** perform context hygiene. You must explicitly tell the team to take a nap.
+每晚关闭 Squad 并**不**执行上下文卫生。你必须明确告诉团队小憩。
 
-### CLI equivalents
+### CLI 等效
 
 ```bash
-squad nap              # Standard context hygiene
-squad nap --deep       # Thorough cleanup with recursive descent
-squad nap --dry-run    # Preview what would be cleaned up
+squad nap              # 标准上下文卫生
+squad nap --deep       # 带递归深入彻底清理
+squad nap --dry-run    # 预览将要清理的内容
 ```
 
-In the interactive shell, use `/compact` for the same effect.
+在交互式 shell 中，使用 `/compact` 获得相同效果。
 
 ---
 
-## Reskill
+## 重新技能
 
-**What it does:** Tells agents to re-examine their skills, validate them against the current codebase, and potentially discover new patterns.
+**它做什么：** 告诉智能体重新检查他们的技能，根据当前代码库验证它们，并可能发现新模式。
 
-When you tell the team to "reskill," agents:
+当你告诉团队"重新技能"时，智能体：
 
-1. Review existing skill files in `.squad/skills/`
-2. Validate that documented patterns still apply
-3. Look for new reusable patterns from recent work
-4. Update skill confidence levels based on current evidence
+1. 审查 `.squad/skills/` 中的现有技能文件
+2. 验证记录的模式仍然适用
+3. 从最近工作中寻找新的可复用模式
+4. 基于当前证据更新技能信心级别
 
-### Availability
+### 可用性
 
-> **Note:** As of now, reskill requires running Squad from source (via symlink). It is not yet available through `squad upgrade`. This will change in a future release.
-
----
-
-## Combined Commands
-
-You can trigger nap and reskill together in a single prompt:
-
-```
-Team, reskill, take a nap, and let me know how much context you cleared out collectively for future iterations
-```
-
-This runs both behaviors and gives you a report on how much context was reduced — useful for understanding how lean your team's working memory is before the next session.
+> **注意：** 目前，重新技能需要从源代码运行 Squad（通过符号链接）。它还不可通过 `squad upgrade` 获得。这将在未来版本中改变。
 
 ---
 
-## When to Use These
+## 组合命令
 
-| Situation | Command |
-|-----------|---------|
-| After several work sessions, agents feel slow or unfocused | `team, take a nap` |
-| Codebase has changed significantly and skills may be stale | `team, reskill` |
-| Before a major new phase of work | Combine both |
-| End of sprint / milestone | `squad nap --deep` |
-
----
-
-## Tips
-
-- **Nap regularly.** A few sessions of heavy work can bloat history files. Napping keeps context budgets in check.
-- **Don't rely on shutdown.** Closing the CLI preserves files as-is — it does not compact anything.
-- **Reskill after refactors.** If you've restructured the codebase, agent skills may reference outdated patterns.
-- **Check the dry run first.** Use `squad nap --dry-run` to preview cleanup actions before committing to them.
-
-## Sample Prompts
-
-```
-team, take a nap
-```
-
-Compacts and summarizes all agent memory files, reclaiming context space.
-
-```
-team, reskill
-```
-
-Agents re-examine and validate their skills against the current codebase.
-
-```
-team, reskill, take a nap, and let me know how much context you cleared out collectively for future iterations
-```
-
-Combines both behaviors and reports back on total context reduction.
-
-```
-squad nap --dry-run
-```
-
-Previews what a nap would clean up without making any changes.
+你可以在单个提示中一起触发小憩和重新技能：

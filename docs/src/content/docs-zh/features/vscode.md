@@ -1,212 +1,78 @@
-# Squad in VS Code
+# VS Code 中的 Squad
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
+Squad 在 VS Code 中完全受支持（v0.4.0+）。你的团队与 CLI 相同地运行，具有相同的 `.squad/` 状态、相同的智能体、相同的决策 —— 但带有 VS Code 特定的工具和约束。
 
-Squad is fully supported in VS Code (v0.4.0+). Your team runs identically to the CLI, with the same `.squad/` state, same agents, same decisions — but with VS Code-specific tooling and constraints.
-
-This guide covers what's different, what's the same, and when to use CLI vs VS Code.
+本指南涵盖不同之处、相同之处，以及何时使用 CLI vs VS Code。
 
 ---
 
-## Getting Started
+## 开始
 
-### Prerequisites
+### 前置条件
 
-- **VS Code** — Latest version
-- **GitHub Copilot extension** — `GitHub.copilot` (installed, authenticated)
-- **Workspace trust** — Your workspace must be trusted (VS Code security)
-- **Node.js 20+ (LTS)** — If running CLI to initialize Squad
-- **Squad installed** — Either in the repo already (from CLI), or initialized fresh via agent selection
+- **VS Code** — 最新版本
+- **GitHub Copilot 扩展** — `GitHub.copilot`（已安装、已认证）
+- **工作区信任** — 你的工作区必须受信任（VS Code 安全）
+- **Node.js 20+ (LTS)** — 如果运行 CLI 初始化 Squad
+- **Squad 已安装** — 仓库中已存在（来自 CLI），或通过智能体选择器全新初始化
 
-### Initial Setup
+### 初始设置
 
-**Option A: Initialize with CLI (recommended)**
+**选项 A：用 CLI 初始化（推荐）**
 
 ```bash
 npm install -g @bradygaster/squad-cli
 ```
 
-Creates `.github/agents/squad.agent.md` and `.squad/templates/`. Then open VS Code and select **Squad** from the agent picker.
+创建 `.github/agents/squad.agent.md` 和 `.squad/templates/`。然后在 VS Code 中打开并从智能体选择器中选择 **Squad**。
 
-**Option B: Fresh in VS Code**
+**选项 B：在 VS Code 中全新开始**
 
-Open Copilot in VS Code, select **Squad** from `/agents`. Squad detects it's running in VS Code and bootstraps normally. The `.squad/` directory is created on first run.
-
----
-
-## How It Works
-
-Squad detects VS Code automatically and adapts its spawning mechanism:
-
-- **In CLI:** Uses `task` tool with full control (model selection, agent type, background mode)
-- **In VS Code:** Uses `runSubagent` for **parallel synchronous execution**
-
-When you assign work to an agent, the coordinator spawns that agent as a sub-agent in VS Code. Multiple sub-agents spawn in **the same turn** run in **parallel**. Each completes, then you get all results at once — no intermediate "launch table" feedback like CLI shows.
+在 VS Code 中打开 Copilot，从 `/agents` 中选择 **Squad**。Squad 检测它在 VS Code 中运行并正常引导。`.squad/` 目录在首次运行时创建。
 
 ---
 
-## What's Different from CLI
+## 如何工作
 
-### No Per-Spawn Model Selection
+Squad 自动检测 VS Code 并调整其生成机制：
 
-VS Code accepts the session model (your Copilot model picker). No per-spawn dynamic selection. Cost optimization deferred — use Haiku via model picker for cheaper runs.
+- **在 CLI 中：** 使用具有完全控制的 `task` 工具（模型选择、智能体类型、后台模式）
+- **在 VS Code 中：** 使用 **并行同步执行** 的 `runSubagent`
 
-### Sub-Agents Run Sync (But Parallel)
-
-Agents launch in the same turn and run in parallel, but block as a group. Results arrive all at once — no launch table or `read_agent` polling.
-
-### SQL Tool Not Available
-
-SQL unavailable in VS Code agents. Workflows needing SQL should live in CLI, or use file-based state (JSON in `.squad/state/`).
-
-### File Writes May Prompt for Approval
-
-VS Code security feature: approve file modifications once with "Always allow in this workspace".
+当你分配工作给智能体时，协调器在 VS Code 中将其生成为子智能体。在**同一轮中生成的多个子智能体**以**并行**方式运行。每个完成后，你一次性获得所有结果 —— 不像 CLI 显示中间"启动表"反馈。
 
 ---
 
-## What's the Same
+## 与 CLI 的不同之处
 
-### Same `.squad/` State
+### 无每次生成模型选择
 
-Initialize in CLI, use in VS Code, or vice versa. Team roster, decisions, histories are identical across both.
+VS Code 接受会话模型（你的 Copilot 模型选择器）。无每次生成动态选择。成本优化推迟 —— 通过模型选择器使用 Haiku 进行更便宜的运行。
 
-### Same Team, Same Skills
+### 子智能体同步运行（但并行）
 
-Charters, histories, agent roles persist. Decisions made in CLI are visible in VS Code.
+智能体在同轮中启动并并行运行，但作为一个组阻塞。结果一次性到达 —— 没有启动表或 `read_agent` 轮询。
 
-### Parallel Execution Works
+### SQL 工具不可用
 
-Multiple agents in one turn → all run in parallel. Equivalent throughput to CLI background mode.
+VS Code 智能体中 SQL 不可用。需要 SQL 的工作流应保留在 CLI 中，或使用基于文件的状态（`.squad/state/` 中的 JSON）。
 
-### Full File Access (Workspace-Scoped)
+### 文件写入可能提示批准
 
-Read/write your entire workspace and `.squad/` directory. Cannot reach outside workspace.
-
-### MCP Tools Inherited
-
-If workspace has MCP servers configured, sub-agents inherit them (GitHub MCP, semantic search, terminal).
+VS Code 安全功能：通过"始终允许在此工作区"一次性批准文件修改。
 
 ---
 
-## Tips
+## 相同之处
 
-Use single-root workspaces (multi-root has path resolution bugs).
+### 相同的 `.squad/` 状态
 
-Accept file modification approval once — subsequent writes are automatic.
+在 CLI 中初始化，在 VS Code 中使用，或反之亦然。团队花名册、决策、历史在两者间完全相同。
 
-For initial setup, heavy parallel work (5+ agents), SQL workflows, or cost optimization (per-spawn model selection) → use CLI.
+### 相同的团队，相同的技能
 
-Check the model picker at top of chat if agents seem slow or expensive — switch to Haiku for cost savings.
+Charter、历史、智能体角色持久保留。在 CLI 中做出的决策在 VS Code 中可见。
 
----
-
-## Known Limitations
-
-- **JetBrains IDEs** — Untested. Agent spawning mechanism undocumented.
-- **GitHub.com (web)** — Untested. Copilot Chat on GitHub.com doesn't support Squad.
-- **Custom agent model selection** — Phase 2 future feature.
-
-See [Getting Started](../get-started/first-session.md) for your first VS Code session.
-
----
-
-## Extension Developer Guide
-
-If you're building a VS Code extension that integrates with Squad, follow these patterns.
-
-### Detect Client Mode
-
-```typescript
-const isVSCodeMode = process.env.SQUAD_CLIENT === 'vscode';
-
-if (!isVSCodeMode) {
-  console.warn('SquadUI should only run in VS Code');
-  return;
-}
-```
-
-### Import SDK Safely
-
-**DO:** Import specific types and functions
-
-```typescript
-import type { CastMember, AgentCharter } from '@bradygaster/squad-sdk';
-import { loadConfig, resolveSquad } from '@bradygaster/squad-sdk';
-```
-
-**DON'T:** Import the CLI entry point — this will call `process.exit()` and crash your extension.
-
-### Load Configuration
-
-```typescript
-import { loadConfig, resolveSquad } from '@bradygaster/squad-sdk';
-
-try {
-  const squadPath = resolveSquad(workspaceRoot);
-  const config = await loadConfig(squadPath);
-  console.log('Squad loaded:', config.team.name);
-} catch (err) {
-  console.warn('Squad not found:', err.message);
-  return;
-}
-```
-
-### Spawn Agents
-
-```typescript
-import { SquadCoordinator } from '@bradygaster/squad-sdk';
-
-const coordinator = new SquadCoordinator({ teamRoot: squadPath });
-await coordinator.initialize();
-
-const decision = await coordinator.route('refactor this function');
-await coordinator.execute(decision, 'refactor this function');
-```
-
-### Stream Responses
-
-```typescript
-import { startStreaming } from '@bradygaster/squad-sdk';
-
-const stream = await startStreaming(agentResponse);
-for await (const chunk of stream) {
-  vscodePanel.append(chunk);
-}
-```
-
-### Handle Errors Gracefully
-
-```typescript
-try {
-  const result = await coordinator.route(userTask);
-} catch (err) {
-  vscode.window.showErrorMessage(`Squad error: ${err.message}`);
-}
-```
-
-Never call `process.exit()` in an extension — it crashes VS Code.
-
-### Pass Editor Context
-
-```typescript
-const editor = vscode.window.activeTextEditor;
-
-const decision = await coordinator.route(userTask, {
-  fileContent: editor.document.getText(),
-  fileName: editor.document.fileName,
-  selection: editor.selection,
-  language: editor.document.languageId,
-});
-```
-
----
-
-## See Also
-
-- [Getting Started](../get-started/installation.md) — Installation and setup guide
-- [Parallel Execution](parallel-execution.md) — How Squadron fan-outs agents
-- [Model Selection](model-selection.md) — Cost-first routing strategy
-- [Interactive Shell](../guide/shell.md) — Shell commands and features
-- [SDK API Reference](../reference/api-reference.md) — Full SDK type and function reference
+### 并行执行有效

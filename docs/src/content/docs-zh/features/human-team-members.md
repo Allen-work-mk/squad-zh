@@ -1,134 +1,79 @@
-# Human Team Members
+# 人类团队成员
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-
-**Try this to add a human specialist:**
+**试试这个添加人类专家：**
 ```
-Add Sarah (sarah@example.com) as a frontend developer to the team
-```
-
-**Try this to add a human reviewer:**
-```
-Add Jordan as design reviewer
+添加 Sarah (sarah@example.com) 作为前端开发到团队
 ```
 
-Not every team member needs to be AI. Add real people to the roster for decisions that require a human — design sign-off, security review, product approval.
+**试试这个添加人类审查员：**
+```
+添加 Jordan 作为设计审查员
+```
+
+不是每个团队成员都需要是 AI。将真人添加到花名册，用于需要人类的决策 —— 设计签字、安全审查、产品批准。
 
 ---
 
-## Adding a Human
+## 添加人类
 
 ```
-> Add Sarah as design reviewer
+> 添加 Sarah 作为设计审查员
 ```
 
-Sarah appears in the team roster with a 👤 Human badge, distinct from AI agents.
+Sarah 出现在团队花名册上，带有 👤 人类徽章，与 AI 智能体不同。
 
 ---
 
-## How Humans Differ from AI Agents
+## 人类与 AI 智能体的区别
 
-| | AI Agent | Human Member |
+| | AI 智能体 | 人类成员 |
 |---|----------|-------------|
-| Badge | Role-specific emoji | 👤 Human |
+| 徽章 | 角色特定表情 | 👤 人类 |
 | Charter | ✅ | ❌ |
-| History | ✅ | ❌ |
-| Spawned as sub-agent | ✅ | ❌ |
-| Can review work | ✅ | ✅ |
+| 历史 | ✅ | ❌ |
+| 作为子智能体生成 | ✅ | ❌ |
+| 可以评审工作 | ✅ | ✅ |
 
-Human team members have no charter, no history file, and are never spawned as sub-agents. They exist on the roster as routing targets.
-
----
-
-## What Happens When Work Routes to a Human
-
-When the coordinator determines that a task should go to a human team member:
-
-1. **Squad pauses** and tells you that a human needs to act
-2. You relay the task to the person outside of Squad
-3. When they respond, you tell Squad what happened
-
-If the human hasn't responded after a while, Squad sends **stale reminders** prompting you to follow up.
+人类团队成员没有 charter，没有历史文件，永远不会作为子智能体生成。他们作为路由目标存在于花名册上。
 
 ---
 
-## Humans as Reviewers
+## 工作路由给人类时发生什么
 
-Human team members can serve as reviewers in the [reviewer protocol](../concepts/your-team.md#reviewer-protocol). This is useful when you want a real person to sign off before work is considered done.
+当协调器确定任务应该交给人类团队成员时：
 
-```
-> Add Jordan as security reviewer
-```
+1. **Squad 暂停** 并告诉你人类需要行动
+2. 你在 Squad 外部将任务传递给该人
+3. 当他们回应时，你告诉 Squad 发生了什么
 
-When work requires security review, Squad routes it to Jordan and waits.
-
----
-
-## Removing a Human
-
-Same as removing any team member — they move to alumni:
-
-```
-> Remove Sarah from the team
-```
-
-Their entry moves to `.squad/agents/_alumni/`. They can be re-added later.
+如果人类一段时间后没有回应，Squad 发送**陈旧提醒**提示你跟进。
 
 ---
 
-## When to add a human member
+## 人类作为审查员
 
-Not every collaborator needs a roster entry. Use this table to decide:
+人类团队成员可以在[审查员协议](../concepts/your-team.md#reviewer-protocol)中担任审查员。当你希望真人在工作完成前签字时，这很有用。
 
-| Scenario | Add to roster? | Why |
-|----------|---------------|-----|
-| Approves architecture decisions before implementation | ✅ Yes | Decision gate — agents route and wait |
-| Reviews all docs PRs as a standing reviewer | ✅ Yes | Recurring review gate |
-| Makes the final ship/no-ship call | ✅ Yes | Approval gate |
-| Occasionally reviews PRs when tagged | ❌ No | Use @mention on the PR instead |
-| Files issues and contributes code | ❌ No | Normal GitHub collaboration |
+```
+> 添加 Jordan 作为安全审查员
+```
 
-**Litmus test:** If you want agents to *stop and wait* for someone's input before proceeding, add them. If they review asynchronously through normal GitHub flows, a roster entry adds no value.
-
-**You don't need to add yourself.** Squad reads `git config user.name` every session, so the team always knows who's driving. Adding yourself to the roster is optional — it formalizes routing and review tracking but isn't required for day-to-day interaction.
+当工作需要安全审查时，Squad 将其路由给 Jordan 并等待。
 
 ---
 
-## Tips
+## 移除人类
 
-- Use human members for approval gates — design review, compliance, final sign-off.
-- Human members work well alongside [ceremonies](ceremonies.md) — add a human as a required participant in a design review ceremony.
-- You're the relay. Squad can't message humans directly — it tells you, and you coordinate.
-
-## Sample Prompts
+与移除任何团队成员相同 —— 他们移动到校友：
 
 ```
-add Maria as security reviewer
+> 从团队中移除 Sarah
 ```
 
-Adds a human team member with a specific review responsibility.
+他们的条目移动到 `.squad/agents/_alumni/`。他们可以稍后重新添加。
 
-```
-route this auth work to Jordan for approval
-```
+---
 
-Assigns a task to a human team member for external handling.
-
-```
-Jordan approved the design — we can proceed
-```
-
-Unblocks work that was waiting on human input.
-
-```
-who's on the roster?
-```
-
-Shows all team members including both AI agents and human members.
-
-```
-remove Sarah from the team
-```
-
-Moves a human team member to the alumni list.
+## 何时添加人类成员

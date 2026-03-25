@@ -1,24 +1,24 @@
 # Squad SubSquads
 
-> Scale Squad across multiple Codespaces by partitioning work into labeled SubSquads.
+通过将工作划分为带标签的 SubSquads，在多个 Codespaces 中扩展 Squad。
 
-## What Are SubSquads?
+## 什么是 SubSquads？
 
-A **SubSquad** is a named partition of work within a Squad project. Each SubSquad targets a specific GitHub label (e.g., `team:ui`, `team:backend`) and optionally restricts agents to certain directories. Multiple Squad instances — each running in its own Codespace — can each activate a different SubSquad, enabling parallel work across teams.
+**SubSquad** 是 Squad 项目中工作的命名分区。每个 SubSquad 针对特定的 GitHub 标签（例如 `team:ui`、`team:backend`），并可选地将智能体限制到某些目录。多个 Squad 实例 —— 每个在自己的 Codespace 中运行 —— 可以各自激活不同的 SubSquad，实现跨团队的并行工作。
 
-## Why SubSquads?
+## 为什么用 SubSquads？
 
-Squad was originally designed for a single team per repository. As projects grow, a single Codespace becomes a bottleneck:
+Squad 最初设计为每个仓库一个团队。随着项目增长，单个 Codespace 成为瓶颈：
 
-- **Model rate limits** — One Codespace hitting API limits slows the whole team
-- **Context overload** — Ralph picks up all issues, not just the relevant ones
-- **Folder conflicts** — Multiple agents editing the same files causes merge pain
+- **模型速率限制** —— 一个 Codespace 达到 API 限制会减慢整个团队
+- **上下文过载** —— Ralph 获取所有 issues，不只是相关的
+- **文件夹冲突** —— 多个智能体编辑相同文件导致合并痛苦
 
-SubSquads solve this by giving each Codespace a scoped view of the project.
+SubSquads 通过给每个 Codespace 项目的限定视图来解决这个问题。
 
-## Configuration
+## 配置
 
-### 1. Create `.squad/streams.json`
+### 1. 创建 `.squad/streams.json`
 
 ```json
 {
@@ -28,38 +28,38 @@ SubSquads solve this by giving each Codespace a scoped view of the project.
       "labelFilter": "team:ui",
       "folderScope": ["apps/web", "packages/ui"],
       "workflow": "branch-per-issue",
-      "description": "Frontend team — React, CSS, components"
+      "description": "前端团队 —— React、CSS、组件"
     },
     {
       "name": "backend-team",
       "labelFilter": "team:backend",
       "folderScope": ["apps/api", "packages/core"],
       "workflow": "branch-per-issue",
-      "description": "Backend team — APIs, database, services"
+      "description": "后端团队 —— API、数据库、服务"
     },
     {
       "name": "infra-team",
       "labelFilter": "team:infra",
       "folderScope": [".github", "infrastructure"],
       "workflow": "direct",
-      "description": "Infrastructure — CI/CD, deployment, monitoring"
+      "description": "基础设施 —— CI/CD、部署、监控"
     }
   ],
   "defaultWorkflow": "branch-per-issue"
 }
 ```
 
-### 2. Activate a SubSquad
+### 2. 激活 SubSquad
 
-There are three ways to tell Squad which SubSquad to use:
+有三种方式告诉 Squad 使用哪个 SubSquad：
 
-#### Environment Variable (recommended for Codespaces)
+#### 环境变量（Codespaces 推荐）
 
 ```bash
 export SQUAD_TEAM=ui-team
 ```
 
-Set this in your Codespace's environment or devcontainer.json:
+在你的 Codespace 环境或 devcontainer.json 中设置：
 
 ```json
 {
@@ -69,80 +69,31 @@ Set this in your Codespace's environment or devcontainer.json:
 }
 ```
 
-#### .squad-workstream File (local activation)
+#### .squad-workstream 文件（本地激活）
 
 ```bash
 squad subsquads activate ui-team
 ```
 
-This writes a `.squad-workstream` file (gitignored) so the setting is local to your machine.
+这会写入一个 `.squad-workstream` 文件（gitignored），所以设置是本地到你的机器。
 
-#### Auto-select (single SubSquad)
+#### 自动选择（单个 SubSquad）
 
-If `streams.json` contains only one SubSquad, it's automatically selected.
+如果 `streams.json` 只包含一个 SubSquad，它会自动选择。
 
-### 3. Resolution Priority
+### 3. 解析优先级
 
-1. `SQUAD_TEAM` env var (highest)
-2. `.squad-workstream` file
-3. Single-SubSquad auto-select
-4. No SubSquad (classic single-squad mode)
+1. `SQUAD_TEAM` 环境变量（最高）
+2. `.squad-workstream` 文件
+3. 单-SubSquad 自动选择
+4. 无 SubSquad（经典单 squad 模式）
 
-## SubSquad Definition Fields
+## SubSquad 定义字段
 
-| Field | Required | Description |
+| 字段 | 必需 | 描述 |
 |-------|----------|-------------|
-| `name` | Yes | Unique SubSquad identifier (kebab-case) |
-| `labelFilter` | Yes | GitHub label to filter issues |
-| `folderScope` | No | Directories this SubSquad may modify |
-| `workflow` | No | `branch-per-issue` (default) or `direct` |
-| `description` | No | Human-readable purpose |
-
-## CLI Reference
-
-```bash
-# List configured SubSquads
-squad subsquads list
-
-# Show SubSquad activity (branches, PRs)
-squad subsquads status
-
-# Activate a SubSquad locally
-squad subsquads activate <name>
-```
-
-> **Note:** `squad workstreams` and `squad streams` are deprecated aliases for `squad subsquads`.
-
-## How It Works
-
-### Triage (Ralph)
-
-When a SubSquad is active, Ralph's triage only picks up issues labeled with the SubSquad's `labelFilter`. Unmatched issues are left for other SubSquads or the main squad.
-
-### Workflow Enforcement
-
-- **branch-per-issue** (default): Every issue gets its own branch and PR. Agents never commit directly to main.
-- **direct**: Agents may commit directly (useful for infra/ops SubSquads).
-
-### Folder Scope
-
-When `folderScope` is set, agents should primarily modify files within those directories. However, `folderScope` is **advisory, not a hard lock** — agents may still touch shared files (types, configs, package exports) when their issue requires it. The real protection comes from `branch-per-issue` workflow: each issue gets its own branch, so two SubSquads editing the same file won't conflict until merge time.
-
-> **Tip:** If two SubSquads' PRs touch the same file, Git resolves non-overlapping changes automatically. For semantic conflicts (incompatible API changes), use PR review to catch them.
-
-### Cost Optimization: Single-Machine Multi-SubSquad
-
-You don't need a separate Codespace per SubSquad. One machine can serve multiple SubSquads:
-
-```bash
-# Switch between SubSquads manually
-squad subsquads activate ui-team      # Ralph works team:ui issues
-# ... later ...
-squad subsquads activate backend-team # now works team:backend issues
-```
-
-This gives you 1× Codespace cost instead of N×, at the expense of serial (not parallel) execution. Each issue still gets its own branch — no conflicts.
-
-## Example: Multi-Codespace Setup
-
-See [Multi-Codespace Scenario](../scenarios/multi-codespace.md) for a complete walkthrough.
+| `name` | 是 | 唯一 SubSquad 标识符（kebab-case） |
+| `labelFilter` | 是 | 筛选 issues 的 GitHub 标签 |
+| `folderScope` | 否 | 此 SubSquad 可以修改的目录 |
+| `workflow` | 否 | `branch-per-issue`（默认）或 `direct` |
+| `description` | 否 | 人类可读的目的 |

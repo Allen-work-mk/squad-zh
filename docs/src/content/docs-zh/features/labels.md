@@ -1,151 +1,80 @@
-# Label Taxonomy
+# 标签分类法
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-
-**Try this to apply workflow labels:**
+**试试这个应用工作流标签：**
 ```
-Apply the go:yes label to issue #42 and target it for v0.5.0
-```
-
-**Try this to filter by priority:**
-```
-Show me all issues with priority:p0
+将 go:yes 标签应用到 issue #42 并针对 v0.5.0
 ```
 
-**Try this to route work to a specific agent:**
+**试试这个按优先级筛选：**
 ```
-Add squad:fenster to issue #23
+展示所有带 priority:p0 的 issues
 ```
 
-Squad uses structured, namespaced labels as the state machine. Labels drive workflow automation — not just tags. Five namespaces control lifecycle, priority, ownership, and release targeting.
+**试试这个将工作路由给特定智能体：**
+```
+将 squad:fenster 添加到 issue #23
+```
+
+Squad 使用结构化的、命名空间的标签作为状态机。标签驱动工作流自动化 —— 不只是标签。五个命名空间控制生命周期、优先级、所有权和发布目标。
 
 ---
 
-## The Five Namespaces
+## 五个命名空间
 
-| Namespace | Purpose | Values | Mutual Exclusivity |
+| 命名空间 | 目的 | 值 | 互斥性 |
 |-----------|---------|--------|-------------------|
-| `go:` | Verdict — yes/no/needs-research | `go:yes`, `go:no`, `go:needs-research` | ✅ One per issue |
-| `release:` | Release target | `release:v0.4.0`, `release:v0.5.0`, `release:backlog` | ✅ One per issue |
-| `type:` | Issue category | `type:feature`, `type:bug`, `type:spike`, `type:docs`, `type:chore`, `type:epic` | ✅ One per issue |
-| `priority:` | Urgency level | `priority:p0`, `priority:p1`, `priority:p2` | ✅ One per issue |
-| `squad:{member}` | Agent assignment | `squad:fenster`, `squad:mcmanus`, `squad:hockney` | ❌ Can have multiple (pair work) |
+| `go:` | 裁决 —— 是/否/需要研究 | `go:yes`、`go:no`、`go:needs-research` | ✅ 每个 issue 一个 |
+| `release:` | 发布目标 | `release:v0.4.0`、`release:v0.5.0`、`release:backlog` | ✅ 每个 issue 一个 |
+| `type:` | 问题类别 | `type:feature`、`type:bug`、`type:spike`、`type:docs`、`type:chore`、`type:epic` | ✅ 每个 issue 一个 |
+| `priority:` | 紧急程度 | `priority:p0`、`priority:p1`、`priority:p2` | ✅ 每个 issue 一个 |
+| `squad:{member}` | 智能体分配 | `squad:fenster`、`squad:mcmanus`、`squad:hockney` | ❌ 可以有多个（配对工作） |
 
-## Mutual Exclusivity Rules
+## 互斥规则
 
-Within `go:`, `release:`, `type:`, and `priority:` namespaces, **only one label is allowed**. Applying a second label in the same namespace auto-removes the first.
+在 `go:`、`release:`、`type:` 和 `priority:` 命名空间内，**只允许一个标签**。应用同一命名空间中的第二个标签会自动移除第一个。
 
-Example:
-- Issue has `go:needs-research`
-- You apply `go:yes`
-- Result: `go:needs-research` removed, `go:yes` applied
+示例：
+- Issue 有 `go:needs-research`
+- 你应用 `go:yes`
+- 结果：`go:needs-research` 被移除，`go:yes` 被应用
 
-The `squad:{member}` namespace allows **multiple labels** for collaborative work:
-- `squad:fenster` + `squad:hockney` = pair programming or handoff
+`squad:{member}` 命名空间允许多个标签用于协作工作：
+- `squad:fenster` + `squad:hockney` = 结对编程或交接
 
-## Workflow Automation
+## 工作流自动化
 
-Labels drive four automation layers:
+标签驱动四个自动化层：
 
-### 1. Enforcement (Mutual Exclusivity)
+### 1. 执行（互斥）
 
-GitHub Actions workflow `label-enforcement.yml` watches for label changes. If multiple labels from the same namespace are applied, it removes all but the most recent.
+GitHub Actions 工作流 `label-enforcement.yml` 监视标签更改。如果同一命名空间应用了多个标签，它会移除除最近一个之外的所有标签。
 
-### 2. Sync (Cross-Namespace Consistency)
+### 2. 同步（跨命名空间一致性）
 
-Some label changes trigger cascading updates:
-- `go:no` applied → auto-adds `release:backlog`, removes other release targets
-- `priority:p0` applied → ensures `go:yes` is set (p0 implies approved)
+某些标签更改触发级联更新：
+- `go:no` 应用 → 自动添加 `release:backlog`，移除其他发布目标
+- `priority:p0` 应用 → 确保设置 `go:yes`（p0 意味着已批准）
 
-### 3. Triage (Auto-Assignment)
+### 3. 分流（自动分配）
 
-Ralph (work monitor) uses labels to route work:
-- `squad:fenster` → Fenster picks it up
-- No `squad:*` + `type:bug` → Routes to Tester or Lead based on routing.md
-- `go:needs-research` → Routes to Lead for investigation
+Ralph（工作监控器）使用标签路由工作：
+- `squad:fenster` → Fenster 获取它
+- 没有 `squad:*` + `type:bug` → 基于 routing.md 路由给测试人员或组长
+- `go:needs-research` → 路由给组长进行调查
 
-### 4. Heartbeat (Periodic Check)
+### 4. 心跳（定期检查）
 
-The `squad-heartbeat.yml` workflow runs every 30 minutes and:
-- Finds issues with `squad` label but no `squad:{member}` → auto-triages
-- Finds `go:yes` + `squad:{member}` but no assignee → spawns agent
-- Finds stale `go:needs-research` (>7 days) → escalates to Lead
+`squad-heartbeat.yml` 工作流每 30 分钟运行一次并：
+- 查找带有 `squad` 标签但没有 `squad:{member}` 的 issues → 自动分流
+- 查找 `go:yes` + `squad:{member}` 但没有负责人的 → 生成智能体
+- 查找陈旧的 `go:needs-research`（>7 天）→ 升级给组长
 
-## State Machine Flow
+## 状态机流程
 
 ```
-New issue → squad label → Triage
+新问题 → squad 标签 → 分流
                             ↓
-                       Lead assigns go:* + type:* + priority:*
-                            ↓
-                      go:yes → squad:{member} assigned
-                            ↓
-                      Agent works → Draft PR
-                            ↓
-                      Review → Approved
-                            ↓
-                      Merge → Issue closed
+                       组长分配 go:* + type:* + priority:*
 ```
-
-## Adding Labels
-
-Labels are created automatically during `init` or `upgrade`. To add custom labels:
-
-```bash
-gh label create "squad:designer" --color "0366d6" --description "Work assigned to Designer"
-```
-
-Or via the GitHub UI: Issues → Labels → New label
-
-## Label Colors
-
-Squad uses a consistent color scheme:
-
-| Namespace | Color | Hex |
-|-----------|-------|-----|
-| `go:` | Green (yes), Red (no), Yellow (research) | `#0e8a16`, `#d73a4a`, `#fbca04` |
-| `release:` | Blue | `#0366d6` |
-| `type:` | Purple | `#6f42c1` |
-| `priority:` | Orange (p0), Yellow (p1), Gray (p2) | `#d93f0b`, `#fbca04`, `#d4c5f9` |
-| `squad:{member}` | Teal | `#008672` |
-
-## Querying by Label
-
-```bash
-# All approved features for v0.4.0
-gh issue list --label "go:yes,release:v0.4.0,type:feature"
-
-# All p0 bugs assigned to Fenster
-gh issue list --label "priority:p0,type:bug,squad:fenster"
-
-# All issues needing research
-gh issue list --label "go:needs-research"
-```
-
-## Sample Prompts
-
-```
-Mark issue #42 as approved for v0.4.0
-```
-Applies `go:yes` and `release:v0.4.0` labels. Removes any conflicting labels.
-
-```
-Change issue #15 from needs-research to no
-```
-Updates verdict: removes `go:needs-research`, applies `go:no`, adds `release:backlog`.
-
-```
-Assign issue #28 to Fenster and Hockney for pair work
-```
-Applies `squad:fenster` and `squad:hockney` labels. Both agents can pick it up.
-
-```
-List all p0 features approved for the next release
-```
-Queries: `priority:p0 + type:feature + go:yes + release:{current milestone}`.
-
-```
-Show me all issues in the backlog
-```
-Filters for `release:backlog` or `go:no` labels.
