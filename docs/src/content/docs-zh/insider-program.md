@@ -1,79 +1,79 @@
-# Insider Program
+# 内测计划
 
-Get early access to Squad development builds and shape the future of the project.
-
----
-
-## What Is the Insider Program?
-
-The Insider Program gives you continuous access to development builds of Squad. Insiders run code from the `insider` branch — the bleeding edge where new features land first. It's a lightweight, honor-system program designed for developers who want to:
-
-- **Try new features early** — Before they ship in a release
-- **Help catch bugs** — Report issues before they reach stable versions
-- **Shape the roadmap** — Your feedback directly influences what we build next
-- **Move fast** — No waiting for monthly releases; updates flow as commits land
+获取 Squad 开发构建的早期访问权限，塑造项目的未来。
 
 ---
 
-## How to Install and Upgrade
+## 什么是内测计划？
 
-### Install Insider Build
+内测计划让你持续访问 Squad 的开发构建。内测者运行来自 `insider` 分支的代码 —— 新功能首先落地的最前沿。这是一个轻量级、诚信系统的计划，专为希望以下功能的开发者设计：
+
+- **提前尝试新功能** —— 在发布前
+- **帮助发现 bug** —— 在稳定版本之前报告问题
+- **塑造路线图** —— 你的反馈直接影响我们构建的内容
+- **快速迭代** —— 无需等待月度发布；更新随提交落地而流动
+
+---
+
+## 如何安装和升级
+
+### 安装内测构建
 
 ```bash
 npm install -g @bradygaster/squad-cli@insider
 ```
 
-### Upgrade Existing Repo to Insider
+### 将现有仓库升级到内测版
 
 ```bash
 npm install -g @bradygaster/squad-cli@insider
 squad upgrade
 ```
 
-This updates Squad-owned files (`squad.agent.md`, workflows, templates) to the latest insider build. Your `.squad/` team state (agents, decisions, casting, history) is always preserved.
+这将 Squad 管理的文件（`squad.agent.md`、工作流、模板）更新到最新的内测构建。你的 `.squad/` 团队状态（智能体、决策、选角、历史）始终保留。
 
 ---
 
-## What to Expect
+## 会有什么体验
 
-### You'll Get
+### 你会得到
 
-- **Continuous updates** — The insider branch is always ahead of `main`
-- **New features** — Preview functionality months before stable releases
-- **Direct access** — Pull latest with a single command
-- **Community input** — Your feedback shapes prioritization
+- **持续更新** —— `insider` 分支始终领先于 `main`
+- **新功能** —— 在稳定发布前数月预览功能
+- **直接访问** —— 一个命令拉取最新
+- **社区输入** —— 你的反馈影响优先级
 
-### You Might Hit
+### 你可能会遇到
 
-- **Rough edges** — Features may not be fully polished
-- **Occasional bugs** — Development builds are less tested than releases
-- **Breaking changes** — API surface may shift between insider versions
-- **Missing documentation** — New features may not have guides yet
+- **粗糙边缘** —— 功能可能尚未完全打磨
+- **偶尔的 bug** —— 开发构建的测试少于发布版
+- **破坏性变更** —— API 表面可能在内部版本之间变化
+- **缺少文档** —— 新功能可能还没有指南
 
-**This is expected.** The insider program trades stability for speed.
+**这是预期的。** 内测计划以稳定性换取速度。
 
 ---
 
-## Version Format
+## 版本格式
 
-Insider builds use this version scheme:
+内测构建使用此版本方案：
 
 ```
 v0.5.2-insider+abc1234f
 ```
 
-Where:
-- `v0.5.2` — The semver for the upcoming release
-- `insider` — Insider build flag
-- `abc1234f` — Commit hash (first 8 chars)
+其中：
+- `v0.5.2` —— 即将发布的语义化版本
+- `insider` —— 内测构建标志
+- `abc1234f` —— 提交哈希（前 8 个字符）
 
-You'll see this in your `squad.agent.md` HTML version comment:
+你会在 `squad.agent.md` HTML 版本注释中看到它：
 
 ```markdown
 <!-- version: v0.5.2-insider+abc1234f -->
 ```
 
-**Pin a specific tagged version:**
+**固定特定标记版本：**
 
 ```bash
 npm install -g @bradygaster/squad-cli@0.5.2-insider
@@ -81,80 +81,80 @@ npm install -g @bradygaster/squad-cli@0.5.2-insider
 
 ---
 
-## Reporting Issues
+## 报告问题
 
-Found a bug? We want to hear about it.
+发现 bug？我们想听听。
 
-**Open a GitHub issue** with:
+**打开 GitHub issue** 并提供：
 
-1. **Version** — Full version from your `squad.agent.md`
-2. **What happened** — Clear description of the bug
-3. **Steps to reproduce** — Exact steps to trigger it
-4. **Environment** — CLI or VS Code, Node version, OS
+1. **版本** —— 来自你的 `squad.agent.md` 的完整版本
+2. **发生了什么** —— 对 bug 的清晰描述
+3. **复现步骤** —— 触发它的确切步骤
+4. **环境** —— CLI 或 VS Code、Node 版本、操作系统
 
-**Label it with `[INSIDER]`** so we can track insider-specific issues.
+**用 `[INSIDER]` 标记它** 以便我们跟踪内部特定问题。
 
-Example:
+示例：
 
 ```
-Title: [INSIDER] Squad crashes on init with Node 20
+标题：[INSIDER] Squad 在 Node 20 上初始化时崩溃
 
-Version: v0.4.2-insider+abc1234f
-Environment: CLI on macOS 14.1, Node 20.11.0
+版本：v0.4.2-insider+abc1234f
+环境：macOS 14.1 上的 CLI，Node 20.11.0
 
-Steps:
+步骤：
 1. npm install -g @bradygaster/squad-cli@insider
-2. Follow quick start
-3. Error in squad.agent.md...
+2. 按照快速开始
+3. squad.agent.md 中的错误...
 ```
 
 ---
 
-## Opting Out
+## 退出
 
-Want to go back to stable releases?
+想回到稳定发布？
 
 ```bash
 npm install -g @bradygaster/squad-cli@latest
 ```
 
-This installs the latest stable version. Your `.squad/` state is safe — it'll work with any version.
+这会安装最新的稳定版本。你的 `.squad/` 状态是安全的 —— 它可以在任何版本上工作。
 
 ---
 
-## FAQ
+## 常见问题
 
-### Q: Will insider builds break my project?
+### 问：内测构建会破坏我的项目吗？
 
-**A:** Unlikely, but possible. The insider branch is tested before pushing, but it's less stable than releases. Make sure you can roll back if needed.
+**答：** 不太可能，但有可能。内测分支在推送前经过测试，但比发布版稳定性差。确保你可以根据需要回滚。
 
-### Q: Can I switch between insider and stable builds?
+### 问：我可以在内测和稳定构建之间切换吗？
 
-**A:** Yes. Insider builds are backward compatible with stable installs. Your `.squad/` directory works with any version.
+**答：** 可以。内测构建与稳定安装向后兼容。你的 `.squad/` 目录可以在任何版本上工作。
 
-### Q: How often do insider builds update?
+### 问：内测构建多久更新一次？
 
-**A:** As often as commits land on the `insider` branch. Could be daily, could be weekly — depends on the dev cycle. Run `npm install -g @bradygaster/squad-cli@insider` again to fetch the latest.
+**答：** 视提交在 `insider` 分支上的落地频率而定。可能是每天，可能是每周 —— 取决于开发周期。再次运行 `npm install -g @bradygaster/squad-cli@insider` 以获取最新。
 
-### Q: Will my team state be preserved?
+### 问：我的团队状态会保留吗？
 
-**A:** Yes. `.squad/` is never overwritten on upgrade. All your agents, decisions, and histories are safe.
+**答：** 是的。`.squad/` 在升级时永远不会被覆盖。你所有的智能体、决策和历史都是安全的。
 
-### Q: What if an insider build has a bad bug?
+### 问：如果内测构建有严重 bug 怎么办？
 
-**A:** Roll back immediately:
+**答：** 立即回滚：
 
 ```bash
-npm install -g @bradygaster/squad-cli@latest   # Back to stable
-squad upgrade                                   # Apply stable version
+npm install -g @bradygaster/squad-cli@latest   # 回到稳定版
+squad upgrade                                   # 应用稳定版本
 ```
 
-Then [report the issue](https://github.com/bradygaster/squad/issues).
+然后[报告问题](https://github.com/bradygaster/squad/issues)。
 
 ---
 
-## Thank You
+## 感谢
 
-Insiders help us ship better software. Your bug reports, feature requests, and feedback make Squad stronger. Thank you for being part of the journey.
+内测者帮助我们发布更好的软件。你的 bug 报告、功能请求和反馈使 Squad 更强大。感谢你参与这段旅程。
 
-Have questions? [Start a discussion](https://github.com/bradygaster/squad/discussions).
+有问题？[开始讨论](https://github.com/bradygaster/squad/discussions)。

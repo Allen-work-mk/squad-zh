@@ -1,412 +1,409 @@
-# Sample Prompts
+# 示例提示
 
-Ready-to-use prompts for Squad. Copy any prompt, open Copilot, select **Squad**, and paste it in.
-
----
-
-## Quick Builds
-
-Small projects that ship in a single session. Good for parallel fan-out and fast iteration.
+Squad 的即用型提示。复制任何提示，打开 Copilot，选择 **Squad**，然后粘贴。
 
 ---
 
-### 1. CLI Pomodoro Timer
+## 快速构建
 
-```
-I'm building a cross-platform CLI pomodoro timer in Python:
-- Configurable work/break intervals (25/5/15 defaults)
-- Persistent stats tracker (local JSON)
-- Desktop notifications (macOS, Windows, Linux)
-- Focus mode: blocks domains via /etc/hosts (with undo)
-- --report flag for weekly stats table
-
-Set up the team. I want this done fast — everyone works at once.
-```
-
-**What it demonstrates:**
-- Parallel fan-out on a small, well-scoped project
-- Backend handles timer logic while systems agent tackles cross-platform notifications
-- Tester writes test cases from spec while implementation is in flight
+单个会话内完成的小型项目。适合并行展开和快速迭代。
 
 ---
 
-### 2. Markdown Static Site Generator
+### 1. CLI 番茄钟计时器
 
 ```
-Zero-dependency static site generator in Node.js: markdown→HTML with built-in template, generates index page, outputs to dist/. Support front matter (title, date, tags), tag index pages, RSS feed. No frameworks — just fs, path, and a custom markdown parser.
+我正在用 Python 构建一个跨平台 CLI 番茄钟计时器：
+- 可配置的工作/休息间隔（默认 25/5/15）
+- 持久统计跟踪器（本地 JSON）
+- 桌面通知（macOS、Windows、Linux）
+- 专注模式：通过 /etc/hosts 阻止域名（可撤销）
+- --report 标志用于每周统计表
 
-Set up the team and start building.
+设置团队。我想要快速完成 —— 所有人同时工作。
 ```
 
-**What it demonstrates:**
-- Agents own distinct pipeline components (parser, template engine, RSS, file I/O)
-- Tester writes test cases from spec while others build in parallel
-- Front matter format decisions propagate via decisions.md
+**它演示了什么：**
+- 小型、范围明确的项目上的并行展开
+- 后端处理计时器逻辑，而系统智能体处理跨平台通知
+- 测试人员在实现进行中根据规范编写测试用例
 
 ---
 
-### 3. Retro Snake Game
+### 2. Markdown 静态站点生成器
 
 ```
-Browser Snake game (vanilla HTML/CSS/JS, no frameworks):
-- Canvas rendering at 60fps
-- Arrow keys and WASD controls
-- Score tracking with localStorage high scores
-- Progressive speed increase every 5 points
-- Retro CRT-style CSS filters
-- Mobile: touch swipe controls
-- Sound effects via Web Audio API
+零依赖静态站点生成器：markdown→HTML，内置模板，生成索引页，输出到 dist/。支持 front matter（标题、日期、标签）、标签索引页、RSS 订阅源。不使用框架 —— 只用 fs、path 和自定义 markdown 解析器。
 
-Start building — I want to play in 20 minutes.
+设置团队并开始构建。
 ```
 
-**What it demonstrates:**
-- Frontend, audio, and input handling built in parallel
-- Tester writes Playwright tests while game is under construction
-- Fast iteration with visible progress across agents
+**它演示了什么：**
+- 智能体拥有不同的流水线组件（解析器、模板引擎、RSS、文件 I/O）
+- 测试人员在其他人并行构建时根据规范编写测试用例
+- front matter 格式决策通过 decisions.md 传播
 
 ---
 
-### 4. Turn-by-Turn Text Adventure Engine
+### 3. 复古贪吃蛇游戏
 
 ```
-Text-based adventure engine in TypeScript:
-- Load worlds from JSON (rooms, items, NPCs, transitions)
-- Command parser: go [dir], look, take [item], use [item] on [target], talk to [npc], inventory
-- Sample adventure: 10 rooms, 5 items, 3 NPCs, 2 puzzles
-- Save/load game state to JSON
-- Terminal via Node.js with colored output (chalk)
-- Narrator voice: descriptions vary by inventory/actions
+浏览器贪吃蛇游戏（原生 HTML/CSS/JS，无框架）：
+- 60fps Canvas 渲染
+- 方向键和 WASD 控制
+- 本地存储高分跟踪
+- 每 5 分渐进加速
+- 复古 CRT 风格 CSS 滤镜
+- 移动端：触摸滑动手势
+- 通过 Web Audio API 的音效
 
-Build engine and sample adventure simultaneously. Content writer and engine builder work in parallel.
+开始构建 —— 我想在 20 分钟内玩到。
 ```
 
-**What it demonstrates:**
-- Natural split between engine logic and content creation
-- Both streams run fully in parallel with shared data format decisions
-- Tester writes test cases from spec before implementation completes
+**它演示了什么：**
+- 前端、音频和输入处理并行构建
+- 测试人员在游戏构建时编写 Playwright 测试
+- 跨智能体的快速迭代和可见进度
 
 ---
 
-### 5. Arcane Duel — A Card Battle Game
+### 4. 回合制文字冒险引擎
 
 ```
-Strategic card duel game (browser, inspired by MTG):
-- 30+ cards across 4 types: Attack, Defense, Spell, Trap (with mana cost, power, toughness, effects)
-- Turn phases: Draw → Main → Combat → End
-- Mana system: +1 per turn (max 10), some cards generate bonus mana
-- Stack-based spell resolution
-- HP: 20 each, win at 0
-- AI opponent with basic strategy
-- HTML/CSS grid battlefield showing fields, hands, graveyards
-- Card hover preview
+基于 TypeScript 的文字冒险引擎：
+- 从 JSON 加载世界（房间、物品、NPC、过渡）
+- 命令解析器：go [dir]、look、take [item]、use [item] on [target]、talk to [npc]、inventory
+- 示例冒险：10 个房间、5 个物品、3 个 NPC、2 个谜题
+- 将游戏状态保存/加载到 JSON
+- 通过 Node.js 的终端，带彩色输出（chalk）
+- 旁白声音：描述随库存/动作变化
 
-One agent designs cards/balance, another builds engine/rules, another builds UI, tester validates combat math. Go.
+同时构建引擎和示例冒险。内容编写者和引擎构建者并行工作。
 ```
 
-**What it demonstrates:**
-- Deep parallelism requiring early data format alignment via decisions.md
-- UI scaffolding proceeds while card design is underway
-- Scribe's decision propagation becomes critical (mana curve affects engine and AI)
+**它演示了什么：**
+- 引擎逻辑和内容创建之间的自然分离
+- 两个流通过共享数据格式决策完全并行运行
+- 测试人员在实现完成前根据规范编写测试用例
 
 ---
 
-### Squad Blog Engine (Meta Demo)
+### 5. 奥秘对决 —— 卡牌战斗游戏
 
 ```
-Static blog engine rendering markdown posts to HTML (no frameworks):
+战略卡牌对决游戏（浏览器，灵感来自万智牌）：
+- 30+ 张卡牌，4 种类型：攻击、防御、法术、陷阱（带法力消耗、力量、坚韧、效果）
+- 回合阶段：抽牌 → 主阶段 → 战斗 → 结束
+- 法力系统：每回合 +1（最多 10），某些卡牌产生额外法力
+- 基于堆栈的法术结算
+- HP：每人 20，降至 0 获胜
+- 带基本策略的 AI 对手
+- HTML/CSS 网格战场显示场地、手牌、墓地
+- 卡牌悬停预览
 
-Input: docs/blog/ markdown with YAML frontmatter (title, date, author, wave, tags, status, hero).
-
-Output:
-- Index page: posts sorted by date, with title/hero/author/tags
-- Post pages: clean typography, syntax-highlighted code, responsive tables
-- Tag index grouping posts by tag
-- Wave navigation: ← Previous | Next → links
-- Dark mode toggle (CSS custom properties, localStorage)
-- RSS feed (feed.xml)
-
-Design: Clean, modern, developer-focused. Monospace headings, proportional body. Dark code blocks with copy button. Mobile responsive. Fast — no JS for reading (JS only for dark mode and copy).
-
-Build parser, template engine, RSS generator, static output (dist/). Include `node build.js` script. Set up team and build in one session.
+一个智能体设计卡牌/平衡，另一个构建引擎/规则，另一个构建 UI，测试人员验证战斗数学。开始。
 ```
 
-**What it demonstrates:**
-- Meta-demo where Squad builds its own publishing tool
-- All components (parser, templating, RSS, CSS) build in parallel
-- Finished product is visual, functional, and self-documenting
+**它演示了什么：**
+- 通过 decisions.md 进行早期数据格式对齐的深度并行
+- UI 脚手架在卡牌设计进行时进行
+- Scribe 的决策传播变得关键（法力曲线影响引擎和 AI）
 
 ---
 
-## Mid-Size Projects
+### Squad 博客引擎（元演示）
 
-Real coordination needed. Agents make architectural decisions, share them, and build across multiple rounds.
+```
+将 markdown 文章渲染为 HTML 的静态博客引擎（无框架）：
+
+输入：带 YAML frontmatter 的 docs/blog/ markdown（标题、日期、作者、wave、标签、状态、主图）。
+
+输出：
+- 索引页：按日期排序的文章，带标题/主图/作者/标签
+- 文章页：干净的排版、语法高亮代码、响应式表格
+- 按标签分组文章的标签索引
+- Wave 导航：← 上一篇 | 下一篇 → 链接
+- 暗色模式切换（CSS 自定义属性、localStorage）
+- RSS 订阅源（feed.xml）
+
+设计：干净、现代、面向开发者。等宽标题，比例正文。深色代码块带复制按钮。移动端响应式。快速 —— 阅读无需 JS（JS 仅用于暗色模式和复制）。
+
+构建解析器、模板引擎、RSS 生成器、静态输出（dist/）。包含 `node build.js` 脚本。设置团队并在一个会话内构建。
+```
+
+**它演示了什么：**
+- Squad 构建自己的发布工具的元演示
+- 所有组件（解析器、模板、RSS、CSS）并行构建
+- 成品是可视的、功能性的、自文档化的
 
 ---
 
-### 6. Cloud-Native E-Commerce Store
+## 中型项目
 
-```
-Build an event-driven e-commerce store:
-- Product Catalog API (Node.js/Express, PostgreSQL) — CRUD + search
-- Order Service (Node.js) — async processing via message queue, payment stubs, events
-- Notification Service — listens for order events, emails confirmations
-- API Gateway — auth (JWT), rate limiting
-- RabbitMQ or in-memory stub for local dev
-- React SPA: product grid, cart, checkout
-
-Each service with its own Dockerfile. Include docker-compose.yml. Orders return 202 Accepted, status polled/pushed via WebSocket.
-
-Set up a team. One agent per service. Coordinate on API contracts and event schemas early, then build in parallel.
-```
-
-**What it demonstrates:**
-- True microservice parallelism with contract-first coordination
-- Event schema decisions must propagate early via Scribe
-- API gateway scaffolds while downstream services build independently
+需要真正的协调。智能体做出架构决策，共享它们，并在多轮中构建。
 
 ---
 
-### 7. Playwright-Tested Dashboard App
+### 6. 云原生电商商店
 
 ```
-Build a project management dashboard (React + TypeScript, Node.js/Express):
-- Kanban board with drag-and-drop (Backlog, In Progress, Review, Done)
-- Task creation: title, description, assignee, priority, due date
-- Filtering by assignee, priority, status
-- Real-time updates via WebSocket
-- User auth: login/signup (JWT, bcrypt)
+构建事件驱动的电商商店：
+- 产品目录 API（Node.js/Express、PostgreSQL）—— CRUD + 搜索
+- 订单服务（Node.js）—— 通过消息队列的异步处理、支付存根、事件
+- 通知服务 —— 监听订单事件，邮件确认
+- API 网关 —— 认证（JWT）、速率限制
+- 用于本地开发的 RabbitMQ 或内存存根
+- React SPA：产品网格、购物车、结账
+
+每个服务有自己的 Dockerfile。包含 docker-compose.yml。订单返回 202 Accepted，状态通过 WebSocket 轮询/推送。
+
+设置一个团队。每个服务一个智能体。早期协调 API 契约和事件模式，然后并行构建。
+```
+
+**它演示了什么：**
+- 真正的微服务并行和契约优先协调
+- 事件模式决策必须通过 Scribe 早期传播
+- API 网关搭建，而下游服务独立构建
+
+---
+
+### 7. Playwright 测试仪表板应用
+
+```
+构建项目管理仪表板（React + TypeScript、Node.js/Express）：
+- 带拖放的看板（待办、进行中、评审、完成）
+- 任务创建：标题、描述、负责人、优先级、截止日期
+- 按负责人、优先级、状态筛选
+- 通过 WebSocket 的实时更新
+- 用户认证：登录/注册（JWT、bcrypt）
 - SQLite + Drizzle ORM
 
-Full Playwright test suite covering login, CRUD, drag-and-drop, filtering, real-time sync (two browser contexts). Write Gherkin feature files FIRST, then implement Playwright step definitions. Runnable with `npx playwright test`.
+完整的 Playwright 测试套件，覆盖登录、CRUD、拖放、筛选、实时同步（两个浏览器上下文）。首先编写 Gherkin 特性文件，然后实现 Playwright 步骤定义。用 `npx playwright test` 运行。
 
-Set up the team. Write Gherkin specs and test skeletons before implementation starts, update as UI takes shape.
+设置团队。在实现开始前编写 Gherkin 规范和测试骨架，随着 UI 成型更新。
 ```
 
-**What it demonstrates:**
-- Test-first development with Gherkin specs written before implementation
-- Frontend and backend build in parallel while tests scaffold
-- Anticipatory work pattern: tests and implementation converge without blocking
+**它演示了什么：**
+- 测试优先开发，Gherkin 规范在实现前编写
+- 前端和后端在测试搭建时并行构建
+- 预期工作模式：测试和实现无需阻塞即可收敛
 
 ---
 
-### 8. GitHub Copilot Extension
+### 8. GitHub Copilot 扩展
 
 ```
-Build a GitHub Copilot Chat extension (Copilot Extensions SDK):
-- Act as @code-reviewer agent
-- Accept GitHub repo URL or PR number
-- Fetch diff via GitHub API, analyze for security (SQL injection, XSS, secrets), performance (N+1 queries), style violations (configurable .code-reviewer.yml)
-- Return structured feedback with file-level annotations
-- Blackbeard-style SSE streaming response
-- Deploy as Vercel serverless function
-- Include GitHub App manifest
+构建 GitHub Copilot Chat 扩展（Copilot Extensions SDK）：
+- 作为 @code-reviewer 智能体
+- 接受 GitHub 仓库 URL 或 PR 编号
+- 通过 GitHub API 获取差异，分析安全（SQL 注入、XSS、密钥）、性能（N+1 查询）、风格违规（可配置的 .code-reviewer.yml）
+- 返回带文件级注释的结构化反馈
+- 黑胡子风格 SSE 流式响应
+- 部署为 Vercel 无服务器函数
+- 包含 GitHub App 清单
 
-Read SDK docs carefully. One agent owns SDK integration/streaming, another owns analysis engine, another owns GitHub API. Set up the team.
+仔细阅读 SDK 文档。一个智能体负责 SDK 集成/流式，另一个负责分析引擎，另一个负责 GitHub API。设置团队。
 ```
 
-**What it demonstrates:**
-- Agents read external SDK docs and build to prescribed patterns
-- SDK integration and analysis engine work in parallel with shared interface contract
-- Real-world API integration with deployment considerations
+**它演示了什么：**
+- 智能体阅读外部 SDK 文档并按规定模式构建
+- SDK 集成和分析引擎通过共享接口契约并行工作
+- 带部署考虑的真实世界 API 集成
 
 ---
 
-### 9. .NET Aspire Cloud-Native App
+### 9. .NET Aspire 云原生应用
 
 ```
-Build a cloud-native app with .NET Aspire (read https://learn.microsoft.com/en-us/dotnet/aspire/):
-- AppHost orchestrating all services
-- Blazor Server dashboard: current conditions + 5-day forecast for saved cities
-- Weather API service: wraps OpenWeatherMap with Redis caching
-- User Preferences service: stores cities (PostgreSQL)
-- Background Worker: refreshes cache every 15 minutes
-- Service discovery via Aspire (no hardcoded URLs)
-- Health checks and OpenTelemetry tracing
+使用 .NET Aspire 构建云原生应用（阅读 https://learn.microsoft.com/en-us/dotnet/aspire/）：
+- AppHost 编排所有服务
+- Blazor Server 仪表板：当前天气 + 保存城市的 5 天预报
+- 天气 API 服务：用 Redis 缓存包装 OpenWeatherMap
+- 用户偏好服务：存储城市（PostgreSQL）
+- 后台工作器：每 15 分钟刷新缓存
+- 通过 Aspire 的服务发现（无硬编码 URL）
+- 健康检查和 OpenTelemetry 追踪
 
-Team organized by Aspire integration: AppHost/discovery, Redis caching, PostgreSQL, Blazor frontend, background worker. Tester validates service discovery and end-to-end data flow. Set up the team.
+团队按 Aspire 集成组织：AppHost/发现、Redis 缓存、PostgreSQL、Blazor 前端、后台工作器。测试人员验证服务发现和端到端数据流。设置团队。
 ```
 
-**What it demonstrates:**
-- Agents specialized by infrastructure component rather than traditional roles
-- AppHost coordinates wiring while service agents build independently
-- Infrastructure decisions (service names, connection strings) propagate via decisions.md
+**它演示了什么：**
+- 按基础设施组件而非传统角色专业化的智能体
+- AppHost 协调布线，而服务智能体独立构建
+- 基础设施决策（服务名称、连接字符串）通过 decisions.md 传播
 
 ---
 
-## Large Projects
+## 大型项目
 
-Complex coordination, memory, and team size. Multiple rounds, cross-cutting decisions, agents remember earlier work.
-
----
-
-### 10. Legacy .NET-to-Azure Migration
-
-```
-Migrate legacy .NET Framework to Azure. Clone:
-1. https://github.com/bradygaster/ProductCatalogApp — ASP.NET MVC with WCF SOAP, in-memory repo, MSMQ orders
-2. https://github.com/bradygaster/IncomingOrderProcessor — Windows Service monitoring MSMQ
-
-Target:
-- ProductCatalogApp → ASP.NET Core/.NET 10 or Blazor on App Service. WCF→REST API, MSMQ→Service Bus
-- IncomingOrderProcessor → Azure Functions with Service Bus trigger
-- Shared models → .NET 10 class library
-- Infrastructure: Bicep for App Service, Function App, Service Bus
-- CI/CD: GitHub Actions
-- Local dev: docker-compose or Aspire
-
-Preserve all business logic. SOAP→REST with same data structures, MSMQ→Service Bus compatible format.
-
-Team: web app migration, WCF-to-API, Windows Service-to-Functions, shared models, Azure infrastructure, CI/CD, tester. Start with migration plan.
-```
-
-**What it demonstrates:**
-- Realistic enterprise migration from legacy .NET Framework to modern Azure
-- Agents analyze unfamiliar code and translate to Azure-native patterns
-- Business logic preservation while modernizing infrastructure (WCF→REST, MSMQ→Service Bus)
+复杂的协调、记忆和团队规模。多轮、跨领域决策、智能体记住早期工作。
 
 ---
 
-### 11. Multiplayer Space Trading Game
+### 10. 遗留 .NET 到 Azure 迁移
 
 ```
-Build multiplayer space trading game (browser-based):
-- Galaxy: 50+ procedural star systems with stations, trade routes
-- Economy: dynamic commodity prices (fuel, ore, food, tech, luxuries) driven by supply/demand
-- Ships: 3 tiers with cargo capacity, fuel range, hull strength
-- Trading: buy low, sell high. Prices shift with player activity and events
-- Combat: turn-based encounters with pirates/players
-- Multiplayer: WebSocket real-time. Players see each other, chat, PvP opt-in
-- Persistence: PostgreSQL (credits, cargo, location, ship)
-- Frontend: Canvas galaxy map, HTML/CSS panels for station/trading/inventory
+将遗留 .NET Framework 迁移到 Azure。克隆：
+1. https://github.com/bradygaster/ProductCatalogApp —— 带 WCF SOAP 的 ASP.NET MVC、内存仓库、MSMQ 订单
+2. https://github.com/bradygaster/IncomingOrderProcessor —— 监控 MSMQ 的 Windows 服务
 
-Tech: Node.js, PostgreSQL, WebSocket, vanilla HTML/CSS/Canvas.
+目标：
+- ProductCatalogApp → App Service 上的 ASP.NET Core/.NET 10 或 Blazor。WCF→REST API、MSMQ→Service Bus
+- IncomingOrderProcessor → 带 Service Bus 触发器的 Azure Functions
+- 共享模型 → .NET 10 类库
+- 基础设施：App Service、Function App、Service Bus 的 Bicep
+- CI/CD：GitHub Actions
+- 本地开发：docker-compose 或 Aspire
 
-One agent per system: economy/trading, galaxy generator/map, combat, multiplayer/networking, frontend UI, tester. Economy and galaxy work simultaneously — agree on star system data format early. Go.
+保留所有业务逻辑。SOAP→REST 保持相同数据结构，MSMQ→Service Bus 兼容格式。
+
+团队：Web 应用迁移、WCF 到 API、Windows 服务到 Functions、共享模型、Azure 基础设施、CI/CD、测试人员。从迁移计划开始。
 ```
 
-**What it demonstrates:**
-- Complex game with 6+ agents owning distinct but interoperating systems
-- Data format decisions shared early and respected across all agents
-- Economy and galaxy agents work in parallel from turn 1
+**它演示了什么：**
+- 从遗留 .NET Framework 到现代 Azure 的真实企业迁移
+- 智能体分析不熟悉的代码并转换为 Azure 原生模式
+- 现代化基础设施时保留业务逻辑（WCF→REST、MSMQ→Service Bus）
 
 ---
 
-### 12. AI Recipe App with Image Recognition
+### 11. 多人太空贸易游戏
 
 ```
-Build recipe app with image recognition (React Native Expo, Python FastAPI, SQLite):
-- Camera: photograph ingredients
-- Image analysis: GPT-4 Vision to identify ingredients
-- Recipe matching: match against database (50+ recipes)
-- Recipe display: ingredients (have vs. need), instructions, time
-- Favorites: save, rate, notes
-- Shopping list: auto-generate missing ingredients
-- Dietary filters: vegetarian, vegan, gluten-free, dairy-free
+构建多人太空贸易游戏（基于浏览器）：
+- 银河系：50+ 程序生成的星系，带空间站、贸易路线
+- 经济：动态商品价格（燃料、矿石、食品、科技、奢侈品）由供需驱动
+- 飞船：3 个等级，带货运容量、燃料范围、船体强度
+- 贸易：低买高卖。价格随玩家活动和事件变化
+- 战斗：与海盗/玩家的回合制遭遇
+- 多人：WebSocket 实时。玩家看到彼此、聊天、选择加入 PvP
+- 持久化：PostgreSQL（信用、货物、位置、飞船）
+- 前端：Canvas 银河地图、用于空间站/贸易/库存的 HTML/CSS 面板
 
-One agent: React Native frontend. One: FastAPI backend + DB. One: vision/AI integration. One: recipe curation/seed data. Tester: API tests with mocked vision responses. Set up team.
+技术：Node.js、PostgreSQL、WebSocket、原生 HTML/CSS/Canvas。
+
+每个系统一个智能体：经济/贸易、银河生成器/地图、战斗、多人/网络、前端 UI、测试人员。经济和银河同时工作 —— 早期就星系数据格式达成一致。开始。
 ```
 
-**What it demonstrates:**
-- Cross-platform mobile + backend + AI integration in one project
-- Recipe curator and AI integration agent work simultaneously with shared taxonomy
-- Tester mocks vision API responses for deterministic testing before real integration
+**它演示了什么：**
+- 6+ 智能体拥有不同但互操作系统的大型游戏
+- 数据格式决策早期共享并被所有智能体尊重
+- 经济和银河智能体从第 1 轮就开始并行工作
 
 ---
 
-### 13. DevOps Pipeline Builder
+### 12. 带图像识别的 AI 食谱应用
 
 ```
-Build self-service DevOps platform (React, Go, PostgreSQL, Docker):
-- Pipeline designer: drag-and-drop UI composing stages (build, test, deploy, notify)
-- Stage templates: npm build, Docker build, Helm deploy, Slack notify
-- Pipeline execution: stages run as Docker containers (Go orchestration)
-- Live logs: stream to browser via SSE
-- Pipeline-as-code: export/import YAML (GitHub Actions compatible)
-- Secrets management: encrypted storage
-- Execution history: searchable logs with status, duration, artifacts
+构建带图像识别的食谱应用（React Native Expo、Python FastAPI、SQLite）：
+- 食谱匹配：与数据库匹配（50+ 食谱）
+- 食谱显示：食材（有 vs 需要）、说明、时间
+- 收藏：保存、评分、备注
+- 购物清单：自动生成缺失食材
+- 饮食筛选：素食、纯素、无麸质、无乳制品
 
-Team: frontend (drag-and-drop), backend (execution engine), Docker/infrastructure, security (secrets), tester. Set up team.
+一个智能体：React Native 前端。一个：FastAPI 后端 + 数据库。一个：视觉/AI 集成。一个：食谱策划/种子数据。测试人员：带模拟视觉响应的 API 测试。设置团队。
 ```
 
-**What it demonstrates:**
-- Agents with diverse expertise (UI, containers, cryptography) on one product
-- Execution engine and pipeline designer build in parallel with shared data model
-- Security agent works independently on secrets encryption
+**它演示了什么：**
+- 一个项目中跨平台移动端 + 后端 + AI 集成
+- 食谱策划者和 AI 集成智能体通过共享分类法同时工作
+- 测试人员在真实集成前模拟视觉 API 响应以进行确定性测试
 
 ---
 
-### 14. Roguelike Dungeon Crawler
+### 13. DevOps 流水线构建器
 
 ```
-Build browser-based roguelike dungeon crawler:
-- Dungeons: procedural rooms/corridors (BSP or cellular automata), 10 floors, scaling difficulty
-- Character: warrior/mage/rogue with unique abilities (3 each), health/mana/stamina
-- Combat: turn-based, grid-positioned. Enemy AI flanks, retreats at low HP
-- Items: weapons, armor, potions, scrolls. Random loot tables. Unidentified items until used
-- Fog of war: tile-based visibility with raycasting
-- Rendering: Canvas with tilemap (16x16 or 32x32 colored squares)
-- Permadeath: high score table with name, class, floor, cause of death
-- Save: save-on-exit only (LocalStorage)
+构建自助 DevOps 平台（React、Go、PostgreSQL、Docker）：
+- 流水线设计器：拖放 UI 组合阶段（构建、测试、部署、通知）
+- 阶段模板：npm 构建、Docker 构建、Helm 部署、Slack 通知
+- 流水线执行：阶段作为 Docker 容器运行（Go 编排）
+- 实时日志：通过 SSE 流式传输到浏览器
+- 流水线即代码：导出/导入 YAML（兼容 GitHub Actions）
+- 密钥管理：加密存储
+- 执行历史：可搜索日志，带状态、持续时间、工件
 
-One agent per: dungeon gen, combat + AI, items + loot, rendering + fog of war, tester. All build simultaneously with shared tile/entity data model. Start building.
+团队：前端（拖放）、后端（执行引擎）、Docker/基础设施、安全（密钥）、测试人员。设置团队。
 ```
 
-**What it demonstrates:**
-- Four independently buildable systems converging on shared data model
-- Early data model decision via decisions.md enables full parallelism
-- Tester validates game math from specs while systems are under construction
+**它演示了什么：**
+- 不同专长的智能体（UI、容器、加密）在一个产品上工作
+- 执行引擎和流水线设计器通过共享数据模型并行构建
+- 安全智能体独立工作在密钥加密上
 
 ---
 
-### 15. Real-Time Collaborative Whiteboard
+### 14. Roguelike 地牢爬行游戏
 
 ```
-Build real-time collaborative whiteboard using React Flow (React + TypeScript, Node.js, WebSocket):
-- Built on React Flow (https://reactflow.dev/)
-- Shapes: rectangles, circles, text, sticky notes, arrows/edges
-- Drag-and-drop from palette, reposition, resize (handles)
-- Color picker, stroke width, fill/background per shape
-- Multi-select (bounding box), group operations
-- Real-time sync: cursor + edits via WebSocket
-- Rooms: shareable URL
-- Undo/redo per user
-- Export: PNG and SVG
-- Persistence: PostgreSQL (nodes, edges, viewport), auto-save every 30s
+构建基于浏览器的 roguelike 地牢爬行游戏：
+- 地牢：程序房间/走廊（BSP 或细胞自动机）、10 层、难度递增
+- 角色：战士/法师/盗贼，带独特能力（各 3 个）、生命/法力/耐力
+- 战斗：回合制、网格定位。敌人 AI 侧翼、低生命时撤退
+- 物品：武器、护甲、药水、卷轴。随机战利品表。使用前有未识别物品
+- 战争迷雾：基于图块的可见性，带光线投射
+- 渲染：带图块地图的 Canvas（16x16 或 32x32 彩色方块）
+- 永久死亡：高分表，带名字、职业、层数、死因
+- 保存：仅退出时保存（LocalStorage）
 
-Frontend agent: React Flow + drag-and-drop. Networking: WebSocket sync + conflict resolution. Backend: rooms + persistence. Tester: Playwright multi-user drag-and-drop tests. Set up team.
+每个一个：地牢生成、战斗 + AI、物品 + 战利品、渲染 + 战争迷雾、测试人员。都通过共享图块/实体数据模型同时构建。开始构建。
 ```
 
-**What it demonstrates:**
-- Networking and frontend agents coordinate closely on React Flow data model
-- Frontend leverages React Flow's built-in features while networking syncs across users
-- Tester writes multi-context Playwright tests for real-time sync validation
+**它演示了什么：**
+- 四个独立构建的系统汇聚在共享数据模型上
+- 通过 decisions.md 的早期数据模型决策实现完全并行
+- 测试人员根据规范验证游戏数学，而系统正在构建中
 
 ---
 
-### 16. Multiplayer Dice Roller — Bar Games PWA
+### 15. 实时协作白板
 
 ```
-Build mobile-first PWA dice roller (React + TypeScript, Three.js/React Three Fiber, Node.js + WebSocket, PostgreSQL):
-- Mobile-first responsive, PWA installable, works offline
-- Double-tap to roll: realistic 3D dice with physics (Three.js)
-- Customizable: 1-10 dice, die types (d6, d10, d12, d20), colors
-- Multiplayer: rooms with 6-digit code or QR, real-time roll sync, chat
-- Game modes: Freeroll, Yahtzee (auto-scoring), Liar's Dice, custom rules
-- Score history: roll log, replay animations, export JSON
-- Sound effects, haptic feedback, night mode
+使用 React Flow 构建实时协作白板（React + TypeScript、Node.js、WebSocket）：
+- 基于 React Flow（https://reactflow.dev/）
+- 形状：矩形、圆形、文本、便签、箭头/边
+- 从调色板拖放、重新定位、调整大小（手柄）
+- 颜色选择器、描边宽度、每个形状的填充/背景
+- 多选（边界框）、组操作
+- 实时同步：通过 WebSocket 的光标 + 编辑
+- 房间：可共享 URL
+- 每个用户的撤销/重做
+- 导出：PNG 和 SVG
+- 持久化：PostgreSQL（节点、边、视口），每 30 秒自动保存
 
-One agent: 3D dice/physics. One: PWA/gesture handling. One: multiplayer backend (rooms, WebSocket, scores). One: game logic. Tester: mobile Playwright for touch + multiplayer. Set up team.
+前端智能体：React Flow + 拖放。网络：WebSocket 同步 + 冲突解决。后端：房间 + 持久化。测试人员：Playwright 多用户拖放测试。设置团队。
 ```
 
-**What it demonstrates:**
-- Mobile-first project with agents specialized by concern (3D, touch, networking, logic)
-- 3D and gesture agents coordinate on tap-to-roll triggers and animation states
-- PWA requirements and mobile testing showcase production mobile app concerns
+**它演示了什么：**
+- 网络和后端智能体在 React Flow 数据模型上密切协调
+- 前端利用 React Flow 的内置功能，而网络跨用户同步
+- 测试人员编写多上下文 Playwright 测试以验证实时同步
 
 ---
 
-## Advanced Features
+### 16. 多人骰子滚轮 —— 酒吧游戏 PWA
 
-For detailed guidance on advanced features like export/import, GitHub Issues integration, ceremonies, PRD mode, human team members, and skills, see [Tips and Tricks](tips-and-tricks.md).
+```
+构建移动端优先的 PWA 骰子滚轮（React + TypeScript、Three.js/React Three Fiber、Node.js + WebSocket、PostgreSQL）：
+- 移动端优先响应式，PWA 可安装，离线工作
+- 双击滚动：逼真的 3D 骰子带物理效果（Three.js）
+- 可定制：1-10 个骰子、骰子类型（d6、d10、d12、d20）、颜色
+- 多人：带 6 位代码或二维码的房间、实时滚动同步、聊天
+- 游戏模式：自由滚动、快艇骰子（自动计分）、骗子骰子、自定义规则
+- 分数历史：滚动日志、重放动画、导出 JSON
+- 音效、触觉反馈、夜间模式
 
+一个智能体：3D 骰子/物理。一个：PWA/手势处理。一个：多人后端（房间、WebSocket、分数）。一个：游戏逻辑。测试人员：用于触摸 + 多人的移动端 Playwright。设置团队。
+```
+
+**它演示了什么：**
+- 按关注点专业化的智能体的移动端优先项目（3D、触摸、网络、逻辑）
+- 3D 和手势智能体在点击滚动触发器和动画状态上协调
+- PWA 要求和移动端测试展示生产移动端应用关注点
+
+---
+
+## 高级功能
+
+有关导出/导入、GitHub Issues 集成、仪式、PRD 模式、人类团队成员和技能等高级功能的详细指导，请参阅[技巧和窍门](tips-and-tricks.md)。

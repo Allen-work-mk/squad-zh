@@ -1,26 +1,25 @@
-# Your First Session
+# 你的首次会话
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-
-A step-by-step walkthrough from install to parallel fan-out. Follow along in your terminal.
+从安装到并行展开的逐步导览。在终端中跟随操作。
 
 ---
 
-## Try this:
+## 试试这个：
 
 ```bash
 mkdir my-app && cd my-app && git init
 squad
 ```
 
-Then tell your team what you're building.
+然后告诉你的团队你在构建什么。
 
 ---
 
-## 1. Install Squad
+## 1. 安装 Squad
 
-Start with a git repo — new or existing:
+从 git 仓库开始 —— 新的或现有的：
 
 ```bash
 mkdir my-app && cd my-app
@@ -28,276 +27,73 @@ git init
 squad
 ```
 
-You'll see:
+你会看到：
 
 ```
-✅ Squad installed.
-   .github/agents/squad.agent.md — coordinator agent
-   .squad/templates/ — 11 template files
+✅ Squad 已安装。
+   .github/agents/squad.agent.md —— 协调智能体
+   .squad/templates/ —— 11 个模板文件
 
-Open GitHub Copilot and select Squad from the agent list.
+打开 GitHub Copilot 并从智能体列表中选择 Squad。
 ```
 
 ---
 
-## 2. Open Copilot — Your Team Forms
+## 2. 打开 Copilot —— 你的团队形成
 
-Start the Copilot CLI:
+启动 Copilot CLI：
 
 ```bash
 copilot
 ```
 
-Select **Squad** from the `/agent` list (CLI) or `/agents` (VS Code). Squad greets you by name:
+从 `/agent` 列表（CLI）或 `/agents`（VS Code）中选择 **Squad**。Squad 会通过名字问候你：
 
 ```
-Hey Brady, what are you building?
+嘿 Brady，你在构建什么？
 ```
 
-Describe your project:
+描述你的项目：
 
 ```
-> I'm building a recipe sharing app with React and Node.js. Users can
-> post recipes, search by ingredient, and save favorites.
+> 我正在构建一个 React 和 Node.js 的食谱分享应用。用户可以
+> 发布食谱、按食材搜索并收藏。
 ```
 
-Squad proposes a team. The coordinator analyzes your description and suggests specialists:
+Squad 提议一个团队。协调器分析你的描述并建议专家：
 
 ```
-Here's your team:
+这是你的团队：
 
-🏗️  Hicks    — Lead          Scope, decisions, code review
-⚛️  Ripley   — Frontend Dev  React, UI, components
-🔧  Dallas   — Backend Dev   Node.js, APIs, database
-🧪  Lambert  — Tester        Tests, quality, edge cases
-📋  Scribe   — (silent)      Memory, decisions, session logs
+🏗️  Hicks    —— 组长          范围、决策、代码评审
+⚛️  Ripley   —— 前端开发      React、UI、组件
+🔧  Dallas   —— 后端开发      Node.js、API、数据库
+🧪  Lambert  —— 测试          测试、质量、边界情况
+📋  Scribe   ——（静默）       记忆、决策、会话日志
 
-**Scribe** and **Ralph** are always on every roster — you don't manage them.
+**Scribe** 和 **Ralph** 始终在每台阵容上 —— 你不用管理它们。
 
-Look right? Say yes, add someone, or change a role.
-(Or just give me a task to start!)
+看起来对吗？说 yes、添加某人或更改角色。
+（或者直接给我任务开始！）
 ```
 
 ---
 
-## 3. Confirm and Give Your First Task
+## 3. 确认并给出第一个任务
 
-Say "yes" or skip straight to a task (which is implicit confirmation):
+说 "yes" 或直接跳到任务（这是隐式确认）：
 
 ```
-> Yes. Dallas, set up the Express server with basic routing.
+> 是的。Dallas，设置 Express 服务器和基本路由。
 ```
 
-Squad creates the `.squad/` directory structure — team roster, routing rules, casting state, ceremony config, agent charters, and histories — all seeded with your project context. Each agent spawns to do their work.
+Squad 创建 `.squad/` 目录结构 —— 团队花名册、路由规则、选角状态、仪式配置、智能体 charter 和历史 —— 都根据你的项目上下文初始化。每个智能体生成以完成他们的工作。
 
-### What's inside .squad/?
+### .squad/ 里面有什么？
 
-| File/Directory | Purpose |
+| 文件/目录 | 用途 |
 |---|---|
-| `team.md` | Team roster, roles, and member info |
-| `routing.md` | Work routing rules (which agent handles what) |
-| `decisions.md` | Team decisions — all agents read this before working |
-| `agents/` | Each agent's charter and history (their memory) |
-| `ceremonies.md` | Ceremony schedule (retrospectives, reviews, etc.) |
-| `casting/` | Team formation history and casting state |
-| `skills/` | Reusable capabilities agents can learn |
-| `templates/` | Format reference files for docs, PRDs, charters |
-
-**You own these files.** Edit them anytime — change roles, add routing rules, fix decisions. Squad reads them before every spawn.
-
-**Commit `.squad/` to version control.** It's your team's brain. Anyone who clones the repo gets the team with all their knowledge.
-
-Then it spawns Dallas:
-
-```
-🔧 Dallas — setting up Express server with routing
-
-Dallas is on it — building the Express server now.
-```
-
----
-
-## 4. Parallel Fan-Out — The Launch Table
-
-Now give a bigger task to see parallel work:
-
-```
-> Team, build the recipe listing page. We need an API endpoint
-> that returns recipes and a React component that displays them.
-```
-
-Squad decomposes the work and launches agents simultaneously:
-
-```
-🏗️ Hicks   — reviewing requirements, defining API contract
-⚛️ Ripley  — building RecipeList component
-🔧 Dallas  — creating GET /api/recipes endpoint
-🧪 Lambert — writing test cases from requirements
-📋 Scribe  — logging session
-```
-
-All five agents are working at the same time in separate context windows. The tester writes test cases from the requirements *while* the implementation is being built — no waiting.
-
----
-
-## 5. Results Labeled by Agent
-
-When agents finish, you see results tagged with each agent's identity:
-
-```
-🏗️ Hicks — Defined API contract: GET /api/recipes returns
-   { recipes: [{ id, title, ingredients, prepTime }] }.
-   Decided on cursor-based pagination for large result sets.
-
-⚛️ Ripley — Built RecipeList component at src/components/RecipeList.tsx.
-   Uses React Query for data fetching. Card layout with title,
-   prep time, and ingredient count.
-
-🔧 Dallas — Created GET /api/recipes endpoint at src/routes/recipes.ts.
-   Connected to MongoDB. Supports ?cursor= pagination per Hicks' spec.
-   Also added GET /api/recipes/:id for detail view (proactive).
-
-🧪 Lambert — Wrote 8 test cases in test/recipes.test.ts:
-   📌 Proactive: Written from requirements while Dallas was building.
-   May need adjustment once implementation is final.
-   - List returns paginated results
-   - Empty database returns empty array
-   - Invalid cursor returns 400
-   - Detail endpoint returns 404 for missing recipe
-   [+4 more]
-```
-
-Behind the scenes, the Scribe merged decisions from each agent into `decisions.md` and logged the session.
-
----
-
-## 6. Ask "Where Are We?" — Instant Status
-
-At any point, check status:
-
-```
-> Where are we?
-```
-
-The coordinator reads recent logs:
-
-```
-Last session: Recipe listing page (15 minutes ago)
-
-Who worked:
-- Hicks defined the API contract (cursor pagination)
-- Ripley built RecipeList component
-- Dallas created recipes endpoint + detail endpoint
-- Lambert wrote 8 test cases
-
-Key decisions:
-- Cursor-based pagination for recipe lists
-- React Query for frontend data fetching
-- MongoDB as database
-
-3 decisions in decisions.md, 4 agent history entries updated.
-```
-
----
-
-## 7. Follow-Up — Watch Decisions Accumulate
-
-Give a follow-up task:
-
-```
-> Now add a search feature. Users should be able to search
-> recipes by ingredient name.
-```
-
-Squad fans out again:
-
-```
-🔧 Dallas  — adding search endpoint with ingredient filtering
-⚛️ Ripley  — building search UI with ingredient input
-🧪 Lambert — writing search test cases
-📋 Scribe  — logging session
-```
-
-After completion, check decisions:
-
-```
-> Show me the decisions
-```
-
-```
-### 2025-07-15: Cursor-based pagination for recipe lists
-**By:** Hicks
-**What:** All list endpoints use cursor-based pagination
-**Why:** Scales better than offset pagination for growing datasets
-
-### 2025-07-15: React Query for data fetching
-**By:** Ripley
-**What:** All API calls use React Query with stale-while-revalidate
-**Why:** Built-in caching, refetching, and loading states
-
-### 2025-07-15: Full-text search via MongoDB text index
-**By:** Dallas
-**What:** Search uses $text index on recipe title and ingredients array
-**Why:** Native MongoDB capability, no external search service needed
-```
-
-Every agent reads these decisions before working. As the list grows, the team self-aligns — agents respect each other's architectural choices without you repeating them.
-
----
-
-## 8. Set a Directive
-
-You notice something you want to standardize:
-
-```
-> Always use Zod for API input validation
-```
-
-Squad captures it — no agent spawn needed:
-
-```
-📌 Captured. All API input validation must use Zod.
-```
-
-This gets written to `decisions.md`. Every agent will see it in their next spawn.
-
----
-
-## 9. Export Your Squad
-
-After a productive session, export your team for portability:
-
-```bash
-squad export
-```
-
-```
-✅ Exported to squad-export.json
-   5 agents, 3 skills, 6 decisions
-```
-
-This snapshot contains charters, histories, casting state, skills, and decisions. Import into another repo anytime:
-
-```bash
-cd ../other-project
-squad
-squad import ../my-app/squad-export.json
-```
-
----
-
-## Tips
-
-- **First session is slowest.** Agents have no history yet. After 2–3 sessions, they know your conventions.
-- **Commit `.squad/`** — your team's brain. Anyone who clones the repo gets the full team.
-- **Say "team" for big tasks.** The word "team" triggers parallel fan-out across multiple agents.
-- **Name an agent for focused work.** `"Dallas, fix the login bug"` sends work to one specific agent.
-- **Directives are sticky.** Once captured, they persist across all future sessions.
-
----
-
-## What to Try Next
-
-- [**Your Team**](../concepts/your-team.md) — How agents form, specialize, and collaborate
-- [**Memory & Knowledge**](../concepts/memory-and-knowledge.md) — Decisions, skills, and persistent context
-- [**Existing Repo Scenario**](../scenarios/existing-repo.md) — Bring Squad into a project that's already in flight
+| `team.md` | 团队花名册、角色和成员信息 |
+| `routing.md` | 工作路由规则（哪个智能体处理什么） |
+| `decisions.md` | 团队决策 —— 所有智能体在工作前阅读 |
+| `agents/` | 每个智能体的 charter 和历史（他们的记忆） |

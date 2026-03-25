@@ -1,640 +1,362 @@
-# Tips and Tricks for Managing Your Squad
+# 管理 Squad 的技巧和窍门
 
-> **Quick Start Prompts:**  
-> `"Team, build the login feature — include UI, API endpoints, and tests"`  
-> `"Always use TypeScript strict mode and named exports"`  
-> `"Ralph, start monitoring — handle the backlog while I work on urgent tasks"`  
-> `"What did the team accomplish last session?"`
+> **快速开始提示：**
+> `"团队，构建登录功能 —— 包括 UI、API 端点和测试"`
+> `"始终使用 TypeScript 严格模式和命名导出"`
+> `"Ralph，开始监控 —— 处理积压工作，我处理紧急任务"`
+> `"团队上次会话完成了什么？"`
 
-Real patterns from using Squad effectively. These are techniques that work.
+有效使用 Squad 的真实模式。这些是有效的技巧。
 
 ---
 
-## Effective Prompt Patterns
+## 有效提示模式
 
-### 1. Be Specific About Scope
+### 1. 明确范围
 
-Good prompts describe the boundary, not just the task.
-
-```
-❌ "Build the auth system"
-✅ "Build JWT authentication for login/logout/refresh. Sessions stored in Redis. 
-   Passwords hashed with bcrypt. No OAuth yet — that's phase 2."
-```
-
-The second one tells the team: what's in, what's out, what's coming. Agents don't have to guess or ask.
-
-### 2. Name the Team Roster in Your Spec
-
-If you need specialized agents, say so in the prompt.
+好的提示描述边界，而不仅是任务。
 
 ```
-I'm building a data pipeline that:
-- Reads CSV files and validates schema (Backend handles I/O)
-- Transforms data with custom rules (Data Specialist handles logic)
-- Loads into PostgreSQL with migration tracking (Backend handles schema)
-- Generates reports as HTML dashboards (Frontend handles UI)
-
-I need Backend, a Data Specialist (who knows ETL patterns), and Frontend. 
-Set up the team and start with the data validation layer.
+❌ "构建认证系统"
+✅ "为登录/登出/刷新构建 JWT 认证。会话存储在 Redis 中。
+   密码用 bcrypt 哈希。还没有 OAuth —— 那是第 2 阶段。"
 ```
 
-This creates exactly the team you need instead of defaulting to the generic roster.
+第二个告诉团队：什么在内、什么在外、什么将来会来。智能体不必猜测或询问。
 
-### 3. Use "Team" When Parallel Work Matters
+### 2. 在规范中命名团队阵容
 
-```
-> Team, build the login page.
-```
-
-This spawns frontend (UI), backend (endpoints), tester (test cases), and lead (architecture) — all at once. They divide the work naturally.
-
-For sequential work, name the agent:
+如果你需要专业智能体，在提示中说明。
 
 ```
-> Dallas (Frontend), build the dashboard layout first.
-> When you're done, Kane (Backend) will add the data binding.
+我正在构建一个数据流水线：
+- 读取 CSV 文件并验证模式（后端处理 I/O）
+- 用自定义规则转换数据（数据专家处理逻辑）
+- 加载到带迁移追踪的 PostgreSQL（后端处理模式）
+- 生成 HTML 仪表板报告（前端处理 UI）
+
+我需要后端、数据专家（懂 ETL 模式）和前端。
+设置团队并从数据验证层开始。
 ```
 
-### 4. Stack Decisions in Your Prompt
+这会创建你需要的精确团队，而不是默认通用阵容。
 
-Decisions made early prevent agents from asking questions later.
+### 3. 当并行工作重要时使用"团队"
 
 ```
-> Here are the rules for this sprint:
-> - Always use TypeScript strict mode
-> - Component file names are PascalCase, never kebab-case
-> - All exports are named (no default exports)
-> - React hooks only, no class components
+> 团队，构建登录页。
+```
+
+这会同时生成前端（UI）、后端（端点）、测试人员（测试用例）和组长（架构）—— 同时。他们自然地分工。
+
+对于顺序工作，命名智能体：
+
+```
+> Dallas（前端），先构建仪表板布局。
+> 完成后，Kane（后端）将添加数据绑定。
+```
+
+### 4. 在提示中堆叠决策
+
+早期做出的决策防止智能体稍后询问问题。
+
+```
+> 以下是本次冲刺的规则：
+> - 始终使用 TypeScript 严格模式
+> - 组件文件名是 PascalCase，绝不用 kebab-case
+> - 所有导出都是命名的（无默认导出）
+> - 只用 React hooks，不用类组件
 > 
-> Frontend team, build the form components. These rules are permanent.
+> 前端团队，构建表单组件。这些规则是永久的。
 ```
 
-These go into `decisions.md` automatically. Future agents read them before working.
+这些自动进入 `decisions.md`。未来的智能体在工作前阅读它们。
 
-### 5. Use Bullet Points for Multi-Part Tasks
+### 5. 对多部分任务使用项目符号
 
-Agents process lists better than paragraphs.
+智能体处理列表比处理段落更好。
 
 ```
-❌ "We need to update the user model to include profile fields like bio and avatar 
-   and we should also add validation for those fields and write tests."
+❌ "我们需要更新用户模型以包括个人资料字段如简介和头像
+   而且我们还应该为这些字段添加验证并编写测试。"
 
-✅ "Update the user model:
-   - Add bio (string, 500 char max)
-   - Add avatar (string, URL)
-   - Add phoneNumber (string, optional, E.164 format)
-   - Validate all fields
-   - Write test cases for validation edge cases"
+✅ "更新用户模型：
+   - 添加简介（字符串，最多 500 字符）
+   - 添加头像（字符串，URL）
+   - 添加电话号码（字符串，可选，E.164 格式）
+   - 验证所有字段
+   - 为验证边界情况编写测试用例"
 ```
 
 ---
 
-## When to Use Direct Commands vs Team Requests
+## 何时使用直接命令 vs 团队请求
 
-### Use Direct Commands (Name an Agent)
+### 使用直接命令（命名智能体）
 
-When the work is **sequential** or **highly specialized**.
+当工作是**顺序的**或**高度专业化的**。
 
 ```
-> Keaton, review this PR for architectural fit.
+> Keaton，评审这个 PR 的架构适配性。
 ```
 
-| Use Case | Example | Why |
+| 用例 | 示例 | 原因 |
 |----------|---------|-----|
-| Code review | "Keaton, review the auth endpoints" | Only the lead does design review |
-| Specialized skill | "Felix, optimize the database queries" | The performance expert works alone |
-| Fix a specific mistake | "Dallas, fix the button styling" | Don't spawn the whole team for one file |
-| Unblock someone | "Kane, help Lambert debug the test failure" | Point conversation between two agents |
+| 代码审查 | "Keaton，评审认证端点" | 只有组长做设计评审 |
+| 专业技能 | "Felix，优化数据库查询" | 性能专家独自工作 |
+| 修复特定错误 | "Dallas，修复按钮样式" | 不要为单个文件生成整个团队 |
+| 解除某人阻塞 | "Kane，帮 Lambert 调试测试失败" | 两个智能体之间的点对点对话 |
 
-### Use Team Requests (Say "Team")
+### 使用团队请求（说"团队"）
 
-When the work is **parallel** or **cross-functional**.
+当工作是**并行的**或**跨功能的**。
 
 ```
-> Team, build the checkout flow.
+> 团队，构建结账流程。
 ```
 
-| Use Case | Example | Why |
+| 用例 | 示例 | 原因 |
 |----------|---------|-----|
-| New feature | "Team, build the search feature" | Frontend, backend, tests all start together |
-| Sprint planning | "Team, plan the next two weeks" | Lead scopes, backend estimates, tester defines test cases |
-| Problem-solving | "Team, we have a performance problem — investigate" | Frontend measures, backend profiles, infra checks caching |
-| Iteration round | "Team, fix the feedback from the design review" | Multiple people can tackle different issues in parallel |
+| 新功能 | "团队，构建搜索功能" | 前端、后端、测试同时开始 |
+| 冲刺规划 | "团队，规划接下来两周" | 组长确定范围、后端估算、测试人员定义测试用例 |
+| 问题解决 | "团队，我们有性能问题 —— 调查" | 前端测量、后端分析、基础设施检查缓存 |
+| 迭代轮次 | "团队，修复设计评审的反馈" | 多人可以并行处理不同问题 |
 
-### Use General Requests (No Name)
+### 使用通用请求（无名称）
 
-When you don't care who handles it, or when it's context-dependent.
+当你不关心谁处理它，或当它取决于上下文时。
 
 ```
-> Add error logging to the API.
+> 向 API 添加错误日志。
 ```
 
-Squad routes this intelligently. Could be backend, could be ops, depends on team.
+Squad 智能路由。可能是后端，可能是运维，取决于团队。
 
 ---
 
-## Getting the Most Out of Parallel Work
+## 充分利用并行工作
 
-### 1. Wait for Work to Complete Before Following Up
+### 1. 在跟进前等待工作完成
 
-Squad agents chain their own work. When you give a task, **don't interrupt**.
+Squad 智能体自己链接工作。当你给出任务时，**不要打断**。
 
 ```
-You:  "Team, build the login page."
-      [Squad spawns frontend, backend, tester, lead]
-      [Frontend finishes UI, backend finishes endpoints, tester writes test cases]
+你：  "团队，构建登录页。"
+      [Squad 生成前端、后端、测试人员、组长]
+      [前端完成 UI，后端完成端点，测试人员编写测试用例]
       
-      [Test failures show up → backend picks them up automatically]
-      [Tester finds edge cases → backend fixes them → tester re-runs]
-
-      [5 minutes later, everything is done]
+      [测试失败出现 → 后端自动获取]
+      [测试人员发现边界情况 → 后端修复 → 测试人员重新运行]
+      
+你：  [稍后] "团队，构建注册流程。"
 ```
 
-If you jump in after 2 minutes with "Did you test the form submission?", you break the chain. Let it finish.
+智能体处理链接。除非工作停滞，否则不要微观管理。
 
-### 2. Check the Work Log, Not the Output
+### 2. 让智能体互相提问
 
-When agents finish a batch, read the logs, not the code.
-
-```
-> What did the team just do?
-```
-
-This asks Scribe to summarize. You'll see:
-- What was built
-- What decisions were made
-- What's left to do
-- What surprised them
-
-Much faster than reading 5 agent outputs.
-
-### 3. Run Ralph When the Board is Full
-
-If you have a backlog of issues or PRs, let Ralph process them.
+智能体可以直接互相交谈。
 
 ```
-> Ralph, go
+> Lambert（测试人员），API 是否足够覆盖边缘情况？
+
+Lambert：@Kane，认证端点缺少 429 测试。
+
+Kane：添加速率限制测试。Lambert，确认。
+
+Lambert：已确认。
 ```
 
-Ralph will:
-1. Triage untriaged issues
-2. Assign to team members
-3. Spawn agents to work through them
-4. Report progress every 3-5 rounds
-5. Keep going until the board is clear
+这比来回更快。不要代理对话 —— 让智能体直接交谈。
 
-You can keep using the team for urgent work while Ralph grinds through the backlog.
-
-### 4. Use Parallel Decision-Making
-
-Agents can write decisions in parallel (they go to `/decisions/inbox/`). Scribe merges them.
+### 3. 并行时尽早检查决策
 
 ```
-You: "Frontend team, decide on component structure. 
-      Backend team, decide on API versioning. 
-      Both write your decisions to decisions.md. Don't wait for each other."
-
-[Frontend writes decision about component structure]
-[Backend writes decision about API versioning]
-[Both decisions merge automatically via Scribe]
-[Every agent reads both before the next task]
+> 在团队深入之前，我们确定 API 契约了吗？
 ```
 
-This prevents "we decided different things" surprises.
+这会促使组长生成并记录契约。早期记录防止后期返工。
 
 ---
 
-## Tips for Working with Ralph (Work Monitor)
+## 与 Ralph 一起管理队列
 
-### 1. Activate Ralph When You Have Backlog
+Ralph 是 Squad 的积压监控智能体。以下是有效使用它的方法。
 
-Ralph is most useful when you have open issues.
-
-```
-> Ralph, start monitoring
-```
-
-Ralph will:
-- Check GitHub Issues for untriaged work
-- Ask the Lead to triage
-- Assign issues to team members
-- Spawn agents to work through them
-- Report every 3 rounds
-
-### 2. Give Ralph a Scope If Needed
-
-By default, Ralph monitors issues, PRs, and CI.
+### 1. 让 Ralph 处理积压
 
 ```
-> Ralph, scope: just issues
+> Ralph，开始监控。处理待办事项中的任何问题，我专注于发布。
 ```
 
-Useful when:
-- You're in the middle of a PR and don't want Ralph to merge it yet
-- You only care about triaging issues, not closing them
-- You want to focus on one type of work
+Ralph 分流 issues，分配智能体，并在你能处理时报告。
 
-### 3. Ralph Reports Automatically Every 3-5 Rounds
-
-Don't ask for status — Ralph tells you.
+### 2. 让 Ralph 按优先级排序
 
 ```
-🔄 Ralph: Round 3 complete.
-   ✅ 2 issues closed, 1 PR merged
-   📋 3 items remaining: #42, #45, PR #12
-   Continuing... (say "Ralph, idle" to stop)
+> Ralph，按紧急程度排列积压事项并处理前 3 个。
 ```
 
-When you see this, you can:
-- Let Ralph keep working (he will)
-- Say "Ralph, idle" to stop
-- Jump in with a different task
-- Check a specific issue
+Ralph 阅读标签、截止日期和描述以排序工作。
 
-### 4. Use Ralph Between Sessions
-
-The `squad-heartbeat` workflow runs Ralph on event-based triggers (issue close, PR merge, manual dispatch). For persistent polling when you're away from the keyboard, use `squad watch` locally.
-
-Ralph will:
-- Triage new issues
-- Assign them to team members
-- Trigger `@copilot` if you have the coding agent enabled
-
-This means your squad works even when you're not at the keyboard.
-
-### 5. Check Ralph's Status Before Wrapping Up
+### 3. 向 Ralph 询问状态
 
 ```
-> Ralph, status
-```
+> Ralph，积压状态如何？
 
-Ralph does one check and reports:
-
-```
-📊 Board Status:
-   🔴 Untriaged:    0 issues need triage
-   🟡 In Progress:  1 issue assigned, 0 draft PRs
-   🟢 Ready:        0 PRs approved
-   ✅ Done:         7 issues closed this session
-```
-
-If the board is clean, you can wrap up. If there's work, start Ralph for the next session.
-
----
-
-## Managing Decisions and Team Memory
-
-### 1. Set Permanent Rules Early
-
-The first or second session, establish conventions.
-
-```
-> Here are the permanent rules for this team:
-> - Always use TypeScript strict mode
-> - Component naming: PascalCase (never kebab-case)
-> - All exports are named exports (no defaults)
-> - Test coverage must be > 80%
-> - PR must have at least one review before merge
-```
-
-These go to `decisions.md`. Every agent reads them before working. **You only have to say them once.**
-
-### 2. Use User Directives for "Never Again" Lessons
-
-When an agent makes a mistake, turn it into a directive.
-
-```
-> Never use inline styles. Use CSS classes instead.
-> Always validate user input on the backend, not just the frontend.
-> Never commit environment variables to git.
-```
-
-These get stored as directives and agents follow them automatically in future sessions.
-
-### 3. Check decisions.md When Agents Disagree
-
-If Frontend does something one way and Backend does it another way, the decision is usually missing.
-
-```
-Agent A: "I used kebab-case for the file names"
-Agent B: "I used PascalCase for the file names"
-
-[You check .ai-team/decisions.md]
-[No decision about file naming conventions]
-
-> Here's the permanent rule: all component files are PascalCase.
-```
-
-Now it's in the shared brain. Next agent to work on components will see this.
-
-### 4. Archive Outdated Decisions
-
-When a decision no longer applies, move it to a "Superseded" section.
-
-You can edit `.ai-team/decisions.md` directly:
-
-```markdown
-## Superseded Decisions
-
-- **File naming (v1)**: "All files kebab-case" — SUPERSEDED by PascalCase convention in v2
-- **API versioning (v1)**: "Use URL paths for versioning" — SUPERSEDED by headers-based versioning
-
-## Active Decisions
-...
-```
-
-Agents know to ignore "Superseded" sections.
-
-### 5. Let Scribe Handle Decision Merging
-
-Agents write decisions to `/decisions/inbox/`, Scribe merges them into `/decisions.md`.
-
-You don't have to manually merge. Just ask:
-
-```
-> Scribe, merge pending decisions
-```
-
-Scribe will:
-- Read all files in `/decisions/inbox/`
-- Merge them into the canonical `decisions.md`
-- Deduplicate overlaps
-- Clean up the inbox
-
-This happens automatically in mature teams, but you can force it anytime.
-
-### 6. Personal History Files Build Over Time
-
-Each agent's `.ai-team/agents/{name}/history.md` grows with every session. Check it when an agent seems lost.
-
-```
-[Dallas's history shows]
-- React expertise: hooks, context, performance patterns
-- Knowledge of routing: react-router v6
-- Knows about the design system: established in session 3
-- Familiar with the component structure: 50+ components in src/components/
-```
-
-If an agent keeps asking "where are the components?", their history might not have the right info. Edit it directly or remind them:
-
-```
-> Dallas, your last 5 sessions were all in the same component library. 
-> Check your history.md for the path.
+Ralph：队列中有 12 个问题。2 个标记为高优先级（都已分配）。
+       3 个准备好开始（2 个前端，1 个后端）。
+       等待信息：1 个（#247 需要复现步骤）。
 ```
 
 ---
 
-## Common Pitfalls and How to Avoid Them
+## 使用决策和指令
 
-### Pitfall 1: Vague Scope = Agents Ask Questions Instead of Building
-
-**Problem:** "Build the API" — unclear what endpoints, what data model, what auth.
-
-**Solution:** Be specific. Agents will ask if unclear, but clarity upfront saves rounds.
+### 1. 在一次对话中做出多个决策
 
 ```
-✅ "Build a REST API for a recipe app. Endpoints: /recipes (list, create), 
-   /recipes/:id (get, update, delete), /recipes/:id/ingredients (list, add). 
-   Auth via JWT. Database: PostgreSQL."
+> 以下是新项目的规则：
+> 1. 我们使用 Next.js 14 与 App Router
+> 2. 所有 API 调用通过 React Query 进行服务器状态管理
+> 3. Tailwind CSS 用于样式，无自定义 CSS
+> 4. 所有表单使用 React Hook Form + Zod 验证
+> 5. 测试使用 Vitest + React Testing Library
+> 
+> 团队，构建用户仪表板。
 ```
 
-### Pitfall 2: Interrupting Parallel Work
+所有这些都进入 `decisions.md`。智能体立即知道约定。
 
-**Problem:** You give a task to the team, then jump in after 2 minutes with a follow-up question.
-
-**Solution:** Let parallel work finish. Squad agents chain automatically. Your interruption breaks the chain.
+### 2. 让智能体为你捕获指令
 
 ```
-❌ You: "Team, build the checkout page"
-   [2 minutes later]
-   You: "Did you test the payment flow yet?"
-   
-✅ You: "Team, build the checkout page"
-   [Wait for them to finish]
-   You: "What did you build?"
+> 从这次对话开始的所有代码必须使用 TypeScript 严格模式。
 ```
 
-### Pitfall 3: Forgetting That Decisions Persist
+这是指令捕获模式。Squad 将其写入 `decisions.md`，每个智能体都会看到。
 
-**Problem:** You set a rule in session 1, forget about it, contradict it in session 5.
-
-**Solution:** Read `decisions.md` at the start of every session, or ask Scribe:
+### 3. 让智能体升级指令
 
 ```
-> Scribe, remind me of the permanent rules.
+> 团队，回顾我们的测试约定。它们是否足够？
+
+测试人员：建议升级到 "所有 API 端点都需要 400/500 测试"。
+
+你：批准。写入决策。
 ```
 
-### Pitfall 4: Not Using Ralph on a Full Backlog
+智能体可以提议决策升级，你批准它们。
 
-**Problem:** You have 10 open issues, but you keep working on small tasks manually.
+---
 
-**Solution:** Use Ralph for the backlog, stay focused on urgent work.
+## 有效使用仪式
 
-```
-> Ralph, start monitoring. I'm going to focus on the payment bug.
-```
-
-Ralph handles the backlog, you handle the critical path.
-
-### Pitfall 5: Too Many Agents at Once
-
-**Problem:** You spawn a huge team and context gets confusing.
-
-**Solution:** Start small. 4-5 agents is a good team. Add specialists only when needed.
+### 1. 大型功能前运行设计评审
 
 ```
-✅ "Start with Lead, Frontend, Backend, Tester. If we need DevOps later, we'll add them."
-
-❌ "I want Lead, Frontend, Backend, Tester, DevOps, Data Engineer, Designer, and a Scribe."
+> 在我们开始之前运行设计评审。
 ```
 
-### Pitfall 6: Lost Work Because You Didn't Commit `.ai-team/`
+这会促使组长召集后端、前端和测试人员评审架构。在构建前捕获问题。
 
-**Problem:** You deleted the repo and lost all your team knowledge.
+### 2. 失败后运行回顾
 
-**Solution:** **Commit `.ai-team/` to git.** It's permanent team memory.
+```
+> 运行回顾分析构建失败。
+```
+
+智能体重走失败，记录根本原因，并更新 `decisions.md` 以防止重复发生。
+
+### 3. 让智能体建议仪式
+
+```
+> 团队，我们准备好开始了吗？
+
+组长：建议为认证系统运行设计评审。这是跨领域的。
+
+你：批准。运行它。
+```
+
+---
+
+## 导出和导入模式
+
+### 1. 里程碑处导出
+
+```
+> 导出团队。这是 v1.0 检查点。
+
+Squad：导出到 squad-v1.0.json（8 个智能体、12 个技能、23 个决策）
+```
+
+现在你可以恢复到这个确切状态。
+
+### 2. 将团队导入新仓库
 
 ```bash
-git add .ai-team/
-git commit -m "Add squad team state"
-git push
+cd new-project
+squad init
+squad import ../old-project/squad-v1.0.json
 ```
 
-Now anyone who clones the repo gets your team with all their learned knowledge.
+相同的智能体、技能、决策 —— 但现在在新代码库上。
 
-### Pitfall 7: Agents Stuck on the Same Mistake
-
-**Problem:** An agent keeps making the same error even though you fixed it in session 3.
-
-**Solution:** The decision might not be in `decisions.md`. Add it.
+### 3. 分支团队进行实验
 
 ```
-> Agent keeps importing with `require` instead of `import`. 
-> Here's the rule: Always use ES6 import/export syntax.
+> 导出为 squad-experiment.json。我将分支功能 X，我们稍后合并回来。
 ```
 
-This goes to `decisions.md`. Next time that agent works, they'll read it.
-
-### Pitfall 8: Ralph Running Out of Work Too Quietly
-
-**Problem:** Ralph finishes all the work but doesn't tell you, so you think he's still working.
-
-**Solution:** Ralph reports every 3-5 rounds. If you don't see a report in a while, ask:
-
-```
-> Ralph, status
-```
-
-Ralph will check once and report. If the board is empty, you know you're done.
+安全地进行实验。如果失败，导入原始。
 
 ---
 
-## Advanced Patterns
+## 有效使用记忆
 
-### Pattern 1: Decision First, Implementation Second
-
-Before any agent writes code, the team agrees on the design.
+### 1. 询问智能体知道什么
 
 ```
-> Team, design the user model. Don't code yet. 
-> Frontend, what fields do you need? Backend, what do you need to persist? 
-> Tester, what are the validation edge cases? 
-> Write your decisions to decisions.md.
+> Dallas，你对我项目的前端约定了解多少？
 
-[Team agrees on the design]
-
-> Team, now build it.
+Dallas：从你的历史：
+       - 我们使用 React 函数组件
+       - 数据获取通过 React Query
+       - 状态：Zustand 用于全局，useState 用于本地
+       - 所有表单使用 React Hook Form
+       - 每个组件有自己的测试文件
 ```
 
-This prevents "we built different things" surprises.
+智能体在回答前阅读自己的 `history.md`。
 
-### Pattern 2: Run Two Parallel Teams on One Repo
-
-If you have a large project, you can run one team on one feature, another team on another.
+### 2. 让智能体忘记过时的知识
 
 ```
-Squad 1: "Team A, build the admin dashboard. You own features/admin/."
-Squad 2: "Team B, build the mobile app. You own features/mobile/."
+> Dallas，忘记 Redux。我们改用 Zustand。
 
-[Both teams work in parallel]
-[Shared decisions in .ai-team/decisions.md prevent conflicts]
+Dallas：从 history.md 删除 Redux 引用。现在使用 Zustand。
 ```
 
-Requires good routing rules and clear ownership, but it works.
+保持历史准确。
 
-### Pattern 3: Spike → Decision → Build
-
-For hard problems, do a spike first.
+### 3. 使用 Scribe 获取完整上下文
 
 ```
-> Keaton (Lead), do a spike on authentication patterns for this stack. 
-> Spend 30 minutes exploring. Write your findings to a decision.
+> Scribe，过去 5 个会话的摘要是什么？
 
-[Keaton researches, writes decision about auth strategy]
-
-> Team, now build the auth system using the strategy Keaton decided.
+Scribe：会话 45-49 摘要：
+        - 完成的：用户认证、仪表板布局、设置页面
+        - 决策：使用 JWT、React Query、Zod
+        - 当前：API 集成（进行中）
+        - 阻塞：CI 配置（等待 DevOps）
 ```
 
-This prevents agents from building the wrong thing.
-
-### Pattern 4: Post-Mortem Decisions
-
-When something goes wrong, capture the lesson.
-
-```
-> The API is returning user passwords in the response. This was a mistake.
-> Here's the rule going forward: Never include password fields in API responses.
-```
-
-This prevents it from happening again.
+Scribe 有所有会话的全局视图。
 
 ---
 
-## Prompts You Can Copy
+## 接下来
 
-### Getting Started
-
-```
-I'm building [brief description]. Set up the team.
-Stack: [language, framework, database]
-Key requirements:
-- [requirement 1]
-- [requirement 2]
-- [requirement 3]
-```
-
-### Asking for Status
-
-```
-What did the team accomplish last session? Any blockers?
-```
-
-### Parallel Work on Different Features
-
-```
-Team, I want you to work on two things in parallel:
-
-Feature A (Frontend + Backend):
-- [spec]
-
-Feature B (Backend + Tester):
-- [spec]
-
-Divide the team. Start both immediately.
-```
-
-### Spike Before Building
-
-```
-Keaton, do a 20-minute spike on [problem]. 
-Research [specific areas]. 
-Write a decision with your recommendation.
-When you're done, tell me what you learned.
-```
-
-### Closing a Phase
-
-```
-Team, we're closing the MVP phase. 
-Keaton, what's the current architecture?
-Kane, what's left to do on the backend?
-Dallas, what UX work is pending?
-Lambert, what tests are missing?
-
-Write your summary to history.md.
-```
-
----
-
-## Session Flow Template
-
-A typical high-performing session:
-
-1. **Start:** Open Copilot, say "Team" or name an agent
-2. **Set context:** Describe the work (scope, decisions, rules)
-3. **Parallel execution:** Let agents work (don't interrupt)
-4. **Check logs:** Ask Scribe what happened while you were reading code
-5. **Next round:** Based on what Scribe told you, give follow-up work or start Ralph
-6. **Wrap up:** Ask Ralph for status, commit `.ai-team/`, go home
-
-**Time to productive work: usually < 2 minutes.**
-
----
-
-## Reference: Who Does What
-
-When you're unsure who to ask:
-
-| Task | Ask | Why |
-|------|-----|-----|
-| Architecture review | Lead (Keaton) | Design decisions are the lead's job |
-| Fix a feature | The assigned agent | They know the context |
-| Debug a test | Tester + Backend | Usually a logic error or missing setup |
-| Design decision | Team (parallel) | All perspectives needed |
-| Code review | Lead | Final arbiter |
-| What happened last session? | Scribe | Scribe tracks everything |
-| What's on the backlog? | Ralph | Ralph monitors the board |
-| New decision | Any agent can propose, Scribe merges | Decisions are shared |
-| Edit decisions.md | You or Scribe | Plain markdown, editable anytime |
-
+- [GitHub Issues 教程](tour-github-issues.md) —— 连接 Squad 到你的问题跟踪器
+- [首次会话教程](tour-first-session.md) —— 完整的第一会话导览
+- [SDK 优先模式](sdk-first-mode.md) —— 使用 TypeScript 配置而非 markdown
