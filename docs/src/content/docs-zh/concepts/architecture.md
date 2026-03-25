@@ -1,70 +1,70 @@
-# Architecture
+# 架构
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-How Squad works — one page, no handwaving.
-
----
-
-## System diagram
-
-```
-User request
-    ↓
-Coordinator (routing engine)
-    ↓
-Spawns agents in parallel
-    ↓
-Agents read memory (.squad/) → work → write results
-    ↓
-Scribe merges decisions, Ralph tracks issues
-    ↓
-Results returned to user
-```
+Squad 如何工作 —— 一页纸，不废话。
 
 ---
 
-## Components
+## 系统图
 
-### Coordinator
+```
+用户请求
+    ↓
+协调器（路由引擎）
+    ↓
+并行生成智能体
+    ↓
+智能体读取记忆（.squad/）→ 工作 → 写入结果
+    ↓
+Scribe 合并决策，Ralph 跟踪问题
+    ↓
+结果返回给用户
+```
 
-The coordinator is Squad's routing engine. It reads your request, checks routing rules in `.squad/routing.md`, and decides which agents to spawn. If you say "team," it decomposes the work and launches multiple agents in parallel. If you name an agent, it routes directly to them.
+---
 
-### Agents
+## 组件
 
-Each agent is a specialist with a charter, role, and persistent memory. Agents are spawned as independent subprocesses with their own context windows and tools. They read `.squad/decisions.md` and their own history before working, then write results back. Agents never see each other's conversations — the coordinator orchestrates coordination.
+### 协调器
 
-### Memory (.squad/)
+协调器是 Squad 的路由引擎。它读取你的请求，检查 `.squad/routing.md` 中的路由规则，并决定生成哪些智能体。如果你说"团队"，它分解工作并并行启动多个智能体。如果你命名一个智能体，它直接路由到他们。
 
-All team state lives in `.squad/`. This includes the roster (`team.md`), routing rules (`routing.md`), decisions (`decisions.md`), agent charters and histories (`agents/`), and ceremony schedules (`ceremonies.md`). Agents read this before every spawn. You own these files — edit them anytime.
+### 智能体
 
-### Routing
+每个智能体都是具有 charter、角色和持久记忆的专家。智能体作为独立的子进程生成，有自己的上下文窗口和工具。他们在工作前阅读 `.squad/decisions.md` 和自己的历史，然后写回结果。智能体永远不会看到彼此的对话 —— 协调器编排协调。
 
-Routing rules in `.squad/routing.md` define which agent handles which work. The coordinator reads these rules before spawning. You can override routing by naming an agent directly in your request.
+### 记忆（.squad/）
+
+所有团队状态都存在于 `.squad/` 中。这包括花名册（`team.md`）、路由规则（`routing.md`）、决策（`decisions.md`）、智能体 charter 和历史（`agents/`）以及仪式时间表（`ceremonies.md`）。智能体在每次生成前阅读这些。你拥有这些文件 —— 随时编辑。
+
+### 路由
+
+`.squad/routing.md` 中的路由规则定义哪个智能体处理哪项工作。协调器在生成前阅读这些规则。你可以通过在请求中直接命名智能体来覆盖路由。
 
 ### Scribe
 
-The Scribe is a silent agent that tracks decisions and logs sessions. Every team has a Scribe. You never talk to them directly — they work in the background, merging decisions from all agents into `.squad/decisions.md`.
+Scribe 是一个静默的智能体，跟踪决策和记录会话。每个团队都有一个 Scribe。你从不直接与他们交谈 —— 他们在后台工作，将所有智能体的决策合并到 `.squad/decisions.md` 中。
 
 ### Ralph
 
-Ralph is the work monitor. He watches your GitHub or GitLab issues, tracks work in progress, and alerts the team when something is ready. Every team has a Ralph. He's silent unless you ask him for status.
+Ralph 是工作监控器。他监视你的 GitHub 或 GitLab 问题，跟踪正在进行的工作，并在某事准备好时提醒团队。每个团队都有一个 Ralph。除非你向他询问状态，否则他是静默的。
 
 ---
 
-## What happens when you say "Team, build X"?
+## 当你说"团队，构建 X"时会发生什么？
 
-1. **Coordinator reads the request** and checks `.squad/routing.md` for decomposition rules.
-2. **Coordinator spawns multiple agents in parallel** — one for frontend, one for backend, one for tests, etc.
-3. **Each agent reads `.squad/decisions.md`** and their own history (`agents/{name}/history.md`), then works independently.
-4. **Agents write results** to their history files and propose decisions.
-5. **Scribe merges all decisions** into `.squad/decisions.md`.
-6. **Coordinator returns labeled results** to you, tagged with each agent's name.
+1. **协调器读取请求** 并检查 `.squad/routing.md` 中的分解规则。
+2. **协调器并行生成多个智能体** —— 一个用于前端，一个用于后端，一个用于测试，等等。
+3. **每个智能体读取 `.squad/decisions.md`** 和他们自己的历史（`agents/{name}/history.md`），然后独立工作。
+4. **智能体写入结果** 到他们的历史文件并提出决策。
+5. **Scribe 合并所有决策** 到 `.squad/decisions.md`。
+6. **协调器返回标记的结果** 给你，标记每个智能体的名称。
 
 ---
 
-## Learn more
+## 了解更多
 
-- [**Work routing**](../features/routing) — How the coordinator decides which agents to spawn
-- [**Memory and knowledge**](memory-and-knowledge) — How decisions, skills, and history persist
-- [**Parallel work**](parallel-work) — How agents work simultaneously without conflicts
+- [**工作路由**](../features/routing) —— 协调器如何决定生成哪些智能体
+- [**记忆与知识**](memory-and-knowledge) —— 决策、技能和历史如何持久化
+- [**并行工作**](parallel-work) —— 智能体如何同时工作而不冲突

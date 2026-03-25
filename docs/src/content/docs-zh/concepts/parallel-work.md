@@ -1,43 +1,42 @@
-# Parallel Work & Models
+# 并行工作与模型
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-
-Squad launches independent work in parallel by default — multiple agents working simultaneously, no waiting. It also picks the right AI model for each agent based on what they're doing, so you get quality where it counts and speed everywhere else.
-
----
-
-## Try This
-
-```
-Have three agents work on this in parallel: UI mockups, API spec, and database schema
-```
-
-```
-Use Sonnet for code, Haiku for everything else
-```
-
-```
-Work on issues #12, #15, and #18 at the same time
-```
+Squad 默认启动独立的并行工作 —— 多个智能体同时工作，无需等待。它还根据每个智能体在做什么选择正确的 AI 模型，所以你在重要地方获得质量，在其他地方获得速度。
 
 ---
 
-## How Parallel Execution Works
+## 试试这个
 
-When the coordinator receives a multi-part task, it follows a fan-out pattern:
+```
+让三个智能体并行处理这个：UI 模型、API 规范、数据库模式
+```
+
+```
+代码用 Sonnet，其他用 Haiku
+```
+
+```
+同时处理 issues #12、#15 和 #18
+```
+
+---
+
+## 并行执行如何工作
+
+当协调器收到多部分任务时，它遵循展开模式：
 
 ```mermaid
 graph TD
-    A["Coordinator<br/>receives work"]
-    B["Dependency<br/>Analysis"]
-    C["Agent A<br/>background"]
-    D["Agent B<br/>background"]
-    E["Agent C<br/>background"]
-    F["Result A"]
-    G["Result B"]
-    H["Result C"]
-    I["Collect &<br/>Synthesize"]
+    A["协调器<br/>接收工作"]
+    B["依赖<br/>分析"]
+    C["智能体 A<br/>后台"]
+    D["智能体 B<br/>后台"]
+    E["智能体 C<br/>后台"]
+    F["结果 A"]
+    G["结果 B"]
+    H["结果 C"]
+    I["收集 &<br/>综合"]
     
     A --> B
     B --> C
@@ -51,313 +50,313 @@ graph TD
     H --> I
 ```
 
-1. **Dependency Analysis** — Check if tasks have data dependencies (A needs output from B).
-2. **Fan-Out** — Launch all independent agents in parallel using background mode.
-3. **Wait** — Coordinator polls agent status until all complete.
-4. **Collect** — Aggregate results, check for errors, route to next step.
+1. **依赖分析** —— 检查任务是否有数据依赖（A 需要 B 的输出）。
+2. **展开** —— 使用后台模式并行启动所有独立智能体。
+3. **等待** —— 协调器轮询智能体状态直到全部完成。
+4. **收集** —— 聚合结果，检查错误，路由到下一步。
 
-### Example
+### 示例
 
-> "Implement user authentication: API endpoints, frontend form, tests, and documentation"
+> "实现用户认证：API 端点、前端表单、测试和文档"
 
-Coordinator spawns **4 agents in parallel**:
-- Backend → API endpoints
-- Frontend → Login/signup form
-- Tester → Integration tests
-- DevRel → Auth documentation
+协调器**并行生成 4 个智能体**：
+- 后端 → API 端点
+- 前端 → 登录/注册表单
+- 测试人员 → 集成测试
+- 开发者关系 → 认证文档
 
-All work simultaneously. No agent waits unless there's a code dependency.
+所有同时工作。除非有代码依赖，否则没有智能体等待。
 
 ---
 
-## Background vs. Sync
+## 后台 vs 同步
 
-| Mode | When Used | Behavior |
+| 模式 | 何时使用 | 行为 |
 |------|-----------|----------|
-| **Background** | Independent work, no data dependencies | Agents run in parallel, coordinator polls for completion |
-| **Sync** | One agent needs another's output | Agents run sequentially, coordinator waits |
-| **Sync** | Reviewer gate (Lead must approve first) | Agent runs, coordinator waits for [review](your-team.md#reviewer-protocol) decision |
+| **后台** | 独立工作，无数据依赖 | 智能体并行运行，协调器轮询完成 |
+| **同步** | 一个智能体需要另一个的输出 | 智能体顺序运行，协调器等待 |
+| **同步** | 评审者门禁（组长必须先批准） | 智能体运行，协调器等待[评审](your-team.md#reviewer-protocol)决策 |
 
-### Background (Fan-Out)
+### 后台（展开）
 
 ```mermaid
 graph LR
-    A["Coordinator"] --> B["Agent 1<br/>background"]
-    A --> C["Agent 2<br/>background"]
-    A --> D["Agent 3<br/>background"]
-    B --> E["Result 1"]
-    C --> F["Result 2"]
-    D --> G["Result 3"]
-    E --> H["Coordinator<br/>collects all"]
+    A["协调器"] --> B["智能体 1<br/>后台"]
+    A --> C["智能体 2<br/>后台"]
+    A --> D["智能体 3<br/>后台"]
+    B --> E["结果 1"]
+    C --> F["结果 2"]
+    D --> G["结果 3"]
+    E --> H["协调器<br/>收集全部"]
     F --> H
     G --> H
 ```
 
-Agents don't see each other's output until the coordinator collects and synthesizes.
+智能体在协调器收集和综合之前看不到彼此的输出。
 
-### Sync (Dependencies & Gates)
+### 同步（依赖和门禁）
 
 ```mermaid
 graph TD
-    A["Coordinator"] --> B["Agent 1<br/>sync"]
-    B --> C["Result 1"]
-    C --> D["Coordinator"]
-    D --> E["Agent 2<br/>sync uses Result 1"]
-    E --> F["Result 2"]
-    F --> G["Coordinator"]
-    G --> H["Reviewer<br/>sync gates"]
+    A["协调器"] --> B["智能体 1<br/>同步"]
+    B --> C["结果 1"]
+    C --> D["协调器"]
+    D --> E["智能体 2<br/>同步使用结果 1"]
+    E --> F["结果 2"]
+    F --> G["协调器"]
+    G --> H["评审者<br/>同步门禁"]
 ```
 
-Each step blocks until the previous completes.
+每一步阻塞直到前一步完成。
 
-### Eager Execution
+### 急切执行
 
-Squad's default is **eager parallelism** — launch everything that can run, let the coordinator handle synchronization.
+Squad 的默认是**急切并行** —— 启动一切可以运行的，让协调器处理同步。
 
-- **Faster throughput** — no artificial sequencing
-- **Better utilization** — multiple agents saturate available compute
-- **Resilient** — if one agent stalls, others keep working
+- **更快吞吐** —— 无人工排序
+- **更好利用** —— 多个智能体饱和可用计算
+- **有弹性** —— 如果一个智能体停滞，其他继续工作
 
-Trade-off: increased API cost. If cost is a concern:
+权衡：增加 API 成本。如果成本是问题：
 
 ```
-Work sequentially to save costs
+顺序工作以节省成本
 ```
 
-### Deadlock Avoidance
+### 死锁避免
 
-When agents have circular dependencies (A needs B, B needs A), the coordinator detects the cycle and asks you to pick a resolution: run A first, run B first, or redesign.
+当智能体有循环依赖（A 需要 B，B 需要 A）时，协调器检测循环并要求你选择一个解决方案：先运行 A、先运行 B，或重新设计。
 
-### Concurrency Limits
+### 并发限制
 
-- **Default:** 5 agents in parallel
-- **Adjustable:** `"Run at most 2 agents at once"` → Coordinator batches work accordingly
+- **默认：** 5 个智能体并行
+- **可调整：** `"最多同时运行 2 个智能体"` → 协调器相应地批处理工作
 
 ---
 
-## Model Selection
+## 模型选择
 
-Squad routes each agent to the right AI model based on what they're doing — not a one-size-fits-all default.
+Squad 根据每个智能体在做什么将他们路由到正确的 AI 模型 —— 不是一刀切默认。
 
-### Selection Layers
+### 选择层
 
-First match wins:
+第一个匹配获胜：
 
-| Layer | How It Works |
+| 层 | 如何工作 |
 |-------|-------------|
-| **1. User Override** | You said `"use opus"` or `"save costs"` — done, session-wide |
-| **2. Charter Preference** | Agent's charter has a `## Model` section |
-| **3. Task-Aware Auto** | Coordinator checks what the agent is actually doing (see table below) |
-| **4. Default** | `claude-haiku-4.5` — cost wins when in doubt |
+| **1. 用户覆盖** | 你说 `"使用 opus"` 或 `"节省成本"` —— 完成，会话范围 |
+| **2. Charter 偏好** | 智能体的 charter 有 `## 模型` 部分 |
+| **3. 任务感知自动** | 协调器检查智能体实际在做什么（见下表） |
+| **4. 默认** | `claude-haiku-4.5` —— 有疑义时成本优先 |
 
-### Task-Aware Defaults
+### 任务感知默认
 
-| Task Output | Model | Tier |
+| 任务输出 | 模型 | 等级 |
 |-------------|-------|------|
-| Writing code (implementation, refactoring, tests, bug fixes) | `claude-sonnet-4.5` | Standard |
-| Writing prompts or agent designs | `claude-sonnet-4.5` | Standard |
-| Non-code work (docs, planning, triage, changelogs) | `claude-haiku-4.5` | Fast |
-| Visual/design work requiring image analysis | `claude-opus-4.5` | Premium |
+| 编写代码（实现、重构、测试、bug 修复） | `claude-sonnet-4.5` | 标准 |
+| 编写提示或智能体设计 | `claude-sonnet-4.5` | 标准 |
+| 非代码工作（文档、规划、分流、变更日志） | `claude-haiku-4.5` | 快速 |
+| 需要图像分析的视觉/设计工作 | `claude-opus-4.5` | 高级 |
 
-### Role-to-Model Mapping
+### 角色到模型映射
 
-| Role | Default Model | Why |
+| 角色 | 默认模型 | 原因 |
 |------|--------------|-----|
-| Core Dev / Backend / Frontend | `claude-sonnet-4.5` | Writes code — quality first |
-| Tester / QA | `claude-sonnet-4.5` | Writes test code |
-| Lead / Architect | auto (per-task) | Mixed: code review vs. planning |
-| Prompt Engineer | auto (per-task) | Prompt design is like code |
-| DevRel / Writer | `claude-haiku-4.5` | Docs — not code |
-| Scribe / Logger | `claude-haiku-4.5` | Mechanical file ops |
-| Git / Release | `claude-haiku-4.5` | Changelogs, tags, version bumps |
-| Designer / Visual | `claude-opus-4.5` | Vision capability required |
+| 核心开发 / 后端 / 前端 | `claude-sonnet-4.5` | 编写代码 —— 质量优先 |
+| 测试人员 / QA | `claude-sonnet-4.5` | 编写测试代码 |
+| 组长 / 架构师 | 自动（按任务） | 混合：代码审查 vs 规划 |
+| 提示工程师 | 自动（按任务） | 提示设计就像代码 |
+| 开发者关系 / 编写者 | `claude-haiku-4.5` | 文档 —— 不是代码 |
+| 书记员 / 记录器 | `claude-haiku-4.5` | 机械文件操作 |
+| Git / 发布 | `claude-haiku-4.5` | 变更日志、标签、版本提升 |
+| 设计师 / 视觉 | `claude-opus-4.5` | 需要视觉能力 |
 
-### Model Catalog (16 models)
+### 模型目录（16 个模型）
 
-Squad supports models across three tiers:
+Squad 支持三个等级的模型：
 
-- **Premium:** claude-opus-4.6, claude-opus-4.6-fast, claude-opus-4.5
-- **Standard:** claude-sonnet-4.5, gpt-5.2-codex, claude-sonnet-4, gpt-5.2, gpt-5.1-codex, gpt-5.1, gpt-5, gemini-3-pro-preview
-- **Fast/Cheap:** claude-haiku-4.5, gpt-5.1-codex-mini, gpt-4.1, gpt-5-mini, gpt-5.1-codex-mini
+- **高级：** claude-opus-4.6、claude-opus-4.6-fast、claude-opus-4.5
+- **标准：** claude-sonnet-4.5、gpt-5.2-codex、claude-sonnet-4、gpt-5.2、gpt-5.1-codex、gpt-5.1、gpt-5、gemini-3-pro-preview
+- **快速/便宜：** claude-haiku-4.5、gpt-5.1-codex-mini、gpt-4.1、gpt-5-mini、gpt-5.1-codex-mini
 
-### Fallback Chains
+### 回退链
 
-If a model is unavailable (plan restriction, rate limit, deprecation), Squad silently retries with the next in chain. Never falls back **up** in tier — a fast task won't land on a premium model.
+如果模型不可用（计划限制、速率限制、弃用），Squad 静默重试链中的下一个。永远不会**向上**回退 —— 快速任务不会落到高级模型。
 
 ```
-Premium:  claude-opus-4.6 → claude-opus-4.6-fast → claude-opus-4.5 → claude-sonnet-4.5
-Standard: claude-sonnet-4.5 → gpt-5.2-codex → claude-sonnet-4 → gpt-5.2
-Fast:     claude-haiku-4.5 → gpt-5.1-codex-mini → gpt-4.1 → gpt-5-mini
+高级：  claude-opus-4.6 → claude-opus-4.6-fast → claude-opus-4.5 → claude-sonnet-4.5
+标准： claude-sonnet-4.5 → gpt-5.2-codex → claude-sonnet-4 → gpt-5.2
+快速：     claude-haiku-4.5 → gpt-5.1-codex-mini → gpt-4.1 → gpt-5-mini
 ```
 
 ---
 
-## Copilot Coding Agent (@copilot)
+## Copilot 编码智能体 (@copilot)
 
-Add the GitHub Copilot coding agent to your Squad as an autonomous team member. It picks up issues, creates branches, and opens PRs — all without a chat session.
+将 GitHub Copilot 编码智能体作为自治团队成员添加到你的 Squad。它获取问题、创建分支、打开 PR —— 所有这些都无需聊天会话。
 
-### Prerequisites
+### 前置条件
 
-1. **Copilot coding agent enabled** on the repo (Settings → Copilot → Coding agent)
-2. **`copilot-setup-steps.yml`** exists in `.github/`
-3. **GitHub Actions** enabled on the repo
+1. 仓库上启用了 **Copilot 编码智能体**（Settings → Copilot → Coding agent）
+2. `.github/` 中存在 **`copilot-setup-steps.yml`**
+3. 仓库上启用了 **GitHub Actions**
 
-### Quick Start
+### 快速开始
 
 ```bash
-# Add @copilot with auto-assign
+# 添加带自动分配的 @copilot
 squad copilot --auto-assign
 
-# Create a classic PAT (repo scope) and add as secret
+# 创建经典 PAT（repo 范围）并作为 secret 添加
 gh secret set COPILOT_ASSIGN_TOKEN
 
-# Commit and push
-git add .github/ .squad/ && git commit -m "feat: add copilot to squad" && git push
+# 提交并推送
+git add .github/ .squad/ && git commit -m "feat: 添加 copilot 到 squad" && git push
 
-# Test — label any issue with squad:copilot
+# 测试 —— 用 squad:copilot 标记任何 issue
 ```
 
-Or in conversation: `"Add copilot to the squad with auto-assign enabled"`
+或在对话中：`"添加带自动分配功能的 copilot 到 squad"`
 
-### How @copilot Differs
+### @copilot 有何不同
 
-| | AI Agent | Human Member | @copilot |
+| | AI 智能体 | 人类成员 | @copilot |
 |---|----------|-------------|----------|
-| Badge | ✅ Active | 👤 Human | 🤖 Coding Agent |
-| Charter | ✅ | ❌ | ❌ (uses `copilot-instructions.md`) |
-| Works in session | ✅ | ❌ | ❌ (async via issue assignment) |
-| Creates PRs | Via session | Outside Squad | Autonomously |
+| 徽章 | ✅ Active | 👤 人类 | 🤖 编码智能体 |
+| Charter | ✅ | ❌ | ❌（使用 `copilot-instructions.md`） |
+| 在会话中工作 | ✅ | ❌ | ❌（通过 issue 分配异步） |
+| 创建 PR | 通过会话 | Squad 外部 | 自治 |
 
-### Capability Profile
+### 能力档案
 
-The profile in `team.md` controls what @copilot handles:
+`team.md` 中的档案控制 @copilot 处理什么：
 
-| Tier | Meaning | Examples |
+| 等级 | 含义 | 示例 |
 |------|---------|----------|
-| 🟢 **Good fit** | Route automatically | Bug fixes, test coverage, lint fixes, dependency updates, small features, docs |
-| 🟡 **Needs review** | Route but flag for review | Medium features with specs, refactoring with tests, API additions |
-| 🔴 **Not suitable** | Route to a squad member | Architecture, multi-system design, security-critical, ambiguous requirements |
+| 🟢 **适合** | 自动路由 | Bug 修复、测试覆盖、代码检查修复、依赖更新、小功能、文档 |
+| 🟡 **需要评审** | 路由但标记评审 | 带规范的中等功能、带测试的重构、API 添加 |
+| 🔴 **不适合** | 路由给 squad 成员 | 架构、多系统设计、安全关键、模糊需求 |
 
-### Auto-Assign Flow
+### 自动分配流程
 
-When the `squad:copilot` label is added to an issue:
-1. Workflow posts a routing comment
-2. Workflow assigns `copilot-swe-agent[bot]` to the issue
-3. Coding agent creates a `copilot/*` branch and opens a draft PR
+当 `squad:copilot` 标签添加到 issue 时：
+1. 工作流发布路由评论
+2. 工作流将 `copilot-swe-agent[bot]` 分配给 issue
+3. 编码智能体创建 `copilot/*` 分支并打开草稿 PR
 
-Auto-assign requires a classic PAT stored as `COPILOT_ASSIGN_TOKEN` (fine-grained PATs return 403 for this endpoint).
+自动分配需要存储为 `COPILOT_ASSIGN_TOKEN` 的经典 PAT（细粒度 PAT 对此端点返回 403）。
 
 ---
 
-## Git Worktrees
+## Git Worktree
 
-Squad supports git worktrees with two strategies for teams working across multiple branches simultaneously.
+Squad 支持 git worktree，为同时在多个分支上工作的团队提供两种策略。
 
-### Worktree-Local (Independent State)
+### Worktree-本地（独立状态）
 
-Each worktree gets its own `.squad/` directory. Agents in one worktree don't see state from another.
-
-```
-project/
-├── .squad/                    # Main worktree team
-
-project-feature-a/
-├── .squad/                    # Feature A team (independent)
-
-project-feature-b/
-├── .squad/                    # Feature B team (independent)
-```
-
-**Best for:** multiple features with different teams, experimental branches, different compositions per worktree.
-
-### Main-Checkout (Shared State)
-
-All worktrees share `.squad/` from the main checkout via symlink.
+每个 worktree 获得自己的 `.squad/` 目录。一个 worktree 中的智能体看不到另一个的状态。
 
 ```
 project/
-├── .squad/                    # Shared by all worktrees
+├── .squad/                    # 主 worktree 团队
 
 project-feature-a/
-├── .squad -> ../project/.squad/  # Symlink
+├── .squad/                    # 功能 A 团队（独立）
 
 project-feature-b/
-├── .squad -> ../project/.squad/  # Symlink
+├── .squad/                    # 功能 B 团队（独立）
 ```
 
-**Best for:** same team on multiple branches, coordinated parallel development, solo dev with multiple branches.
+**最适合：** 不同团队的多功能、实验分支、每个 worktree 不同组成。
 
-### Which Strategy?
+### 主检出（共享状态）
 
-| Scenario | Strategy |
+所有 worktree 通过符号链接共享主检出的 `.squad/`。
+
+```
+project/
+├── .squad/                    # 所有 worktree 共享
+
+project-feature-a/
+├── .squad -> ../project/.squad/  # 符号链接
+
+project-feature-b/
+├── .squad -> ../project/.squad/  # 符号链接
+```
+
+**最适合：** 多个分支上的相同团队、协调并行开发、多分支的独立开发者。
+
+### 哪个策略？
+
+| 场景 | 策略 |
 |----------|----------|
-| Parallel features, same team | Main-checkout |
-| Experimental branch, isolated team | Worktree-local |
-| Hotfix + feature branch | Main-checkout |
-| Multiple teams in same repo | Worktree-local |
+| 并行功能，相同团队 | 主检出 |
+| 实验分支，隔离团队 | Worktree-本地 |
+| 热修复 + 功能分支 | 主检出 |
+| 同一仓库中的多个团队 | Worktree-本地 |
 
-Setup is one command: `"Use the main worktree's team"` (creates symlink) or `"Initialize Squad in this worktree"` (creates independent `.squad/`).
+设置是一个命令：`"使用主 worktree 的团队"`（创建符号链接）或 `"在此 worktree 中初始化 Squad"`（创建独立的 `.squad/`）。
 
-Squad uses `merge=union` for append-only log files to avoid conflicts across worktrees.
-
----
-
-## Tips
-
-- Eager parallelism is the default. Only switch to sequential if cost is a real concern.
-- Start conservative with @copilot's capability profile and expand as you see what it handles well.
-- Use `squad:copilot` labels with [issue-driven development](../scenarios/issue-driven-dev.md) for fully autonomous processing.
-- Fallback chains are silent — you won't notice model switches unless you ask `"what model did Kane use?"`.
-- For worktrees, main-checkout is usually the right choice unless you need truly isolated teams.
+Squad 对仅限追加的日志文件使用 `merge=union` 以避免跨 worktree 的冲突。
 
 ---
 
-## Sample Prompts
+## 技巧
+
+- 急切并行是默认。只有当成本是真正问题时才切换到顺序。
+- 从保守的 @copilot 能力档案开始，随着你看到它处理良好的内容而扩展。
+- 将 `squad:copilot` 标签与[问题驱动开发](../scenarios/issue-driven-dev.md)一起使用以进行完全自治处理。
+- 回退链是静默的 —— 除非你问 `"Kane 用了什么模型？"`，否则你不会注意到模型切换。
+- 对于 worktree，主检出通常是正确的选择，除非你真正需要隔离的团队。
+
+---
+
+## 示例提示
 
 ```
-Build the new dashboard feature — everyone work in parallel
+构建新的仪表板功能 —— 所有人并行工作
 ```
 
-Coordinator spawns all relevant agents (Frontend, Backend, Tester, DevRel) simultaneously.
+协调器同时生成所有相关智能体（前端、后端、测试人员、开发者关系）。
 
 ```
-Work on issues #12, #15, and #18 at the same time
+同时处理 issues #12、#15 和 #18
 ```
 
-Spawns 3 agents in parallel, one per issue.
+并行生成 3 个智能体，每个 issue 一个。
 
 ```
-Implement the API first, then write tests — do it sequentially
+先实现 API，然后编写测试 —— 顺序执行
 ```
 
-Forces sync mode: Backend completes, then Tester starts.
+强制同步模式：后端完成，然后测试人员开始。
 
 ```
-Run at most 2 agents at once to save costs
+最多同时运行 2 个智能体以节省成本
 ```
 
-Sets concurrency limit. Coordinator batches work in groups.
+设置并发限制。协调器分组批处理工作。
 
 ```
-Use opus for this architecture work
+为此架构工作使用 opus
 ```
 
-One-off override to premium model for a high-stakes task.
+一次性覆盖到高级模型以完成高风险任务。
 
 ```
-Always use haiku to save costs
+始终使用 haiku 以节省成本
 ```
 
-Session-wide preference for the cheapest model tier.
+会话范围偏好最便宜模型等级。
 
 ```
-Add copilot to the squad with auto-assign enabled
+添加带自动分配功能的 copilot 到 squad
 ```
 
-Adds @copilot to the roster and configures automatic issue assignment.
+将 @copilot 添加到花名册并配置自动 issue 分配。
 
 ```
-Use the main worktree's Squad team
+使用主 worktree 的 Squad 团队
 ```
 
-Creates a symlink so this worktree shares the main checkout's `.squad/` state.
+创建符号链接，以便此 worktree 共享主检出的 `.squad/` 状态。

@@ -1,266 +1,265 @@
-# GitHub Integration
+# GitHub 集成
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-
-Squad plugs directly into your GitHub workflow — issues become branches, branches become PRs, PRs become merged code. No context-switching, no copy-paste, no ticket juggling. Just tell your squad what to build and watch the commits roll in.
-
----
-
-## Try This
-
-```
-Connect to myorg/myrepo and show me the backlog
-```
-
-```
-Work on issue #42
-```
-
-```
-Ralph, go — process the backlog until it's clear
-```
+Squad 直接插入你的 GitHub 工作流 —— issues 变成分支，分支变成 PRs，PRs 变成合并的代码。无需上下文切换，无需复制粘贴，无需工单杂耍。只需告诉你的 squad 要构建什么，看着提交滚滚而来。
 
 ---
 
-## How It Works
-
-The lifecycle is simple: **connect → backlog → work → PR → merge**.
+## 试试这个
 
 ```
-Connect repo  →  Show backlog  →  Assign issues  →  Agent branches + implements
+连接到 myorg/myrepo 并展示积压工作
+```
+
+```
+处理 issue #42
+```
+
+```
+Ralph，开始 —— 处理积压直到清空
+```
+
+---
+
+## 如何工作
+
+生命周期很简单：**连接 → 积压 → 工作 → PR → 合并**。
+
+```
+连接仓库  →  展示积压  →  分配 issues  →  智能体分支 + 实现
                                                             ↓
-                  Merge PR  ←  Review feedback  ←  Agent opens PR
+                  合并 PR  ←  审查反馈  ←  智能体打开 PR
 ```
 
-| You say | What happens |
+| 你说 | 发生什么 |
 |---------|-------------|
-| `"Connect to myorg/myrepo"` | Stores issue source in `team.md` (once per project) |
-| `"Show the backlog"` | Fetches and displays open issues in a table |
-| `"Work on #12"` | Agent creates branch, implements, opens PR |
-| `"Work on #12 and #15"` | Parallel work — each issue gets its own branch and PR |
-| `"There's review feedback on PR #24"` | Author agent reads comments and pushes fixes |
-| `"Merge PR #24"` | Squash-merge, delete branch, close linked issue |
-| `"What's left?"` | Refreshes backlog, shows remaining open issues |
+| `"连接到 myorg/myrepo"` | 在 `team.md` 中存储问题源（每个项目一次） |
+| `"展示积压"` | 获取并以表格形式显示开放 issues |
+| `"处理 #12"` | 智能体创建分支、实现、打开 PR |
+| `"处理 #12 和 #15"` | 并行工作 —— 每个 issue 获得自己的分支和 PR |
+| `"PR #24 有审查反馈"` | 作者智能体阅读评论并推送修复 |
+| `"合并 PR #24"` | 压缩合并、删除分支、关闭链接的问题 |
+| `"还剩什么？"` | 刷新积压，显示剩余开放 issues |
 
-**Prerequisite:** Install and authenticate the `gh` CLI (`gh auth login`). Squad uses it for all GitHub operations.
+**前置条件：** 安装并认证 `gh` CLI（`gh auth login`）。Squad 用它进行所有 GitHub 操作。
 
 ---
 
-## Working with your team
+## 与你的团队一起工作
 
-Squad is built for mixed teams — humans set direction, AI agents execute and report back. The Lead agent bridges between them, routing work and surfacing decisions when a human needs to act.
+Squad 为混合团队构建 —— 人类设定方向，AI 智能体执行并回报。组长智能体在他们之间架桥，路由工作并在人类需要行动时浮出水面决策。
 
-### Humans in the lifecycle
+### 生命周期中的人类
 
-The following is **one example** of how a mixed team might divide responsibilities. Your team decides its own process — use [ceremonies](../features/ceremonies.md) and [directives](../features/human-team-members.md) to shape the workflow that fits.
+以下是**混合团队如何划分职责的一个示例**。你的团队决定自己的流程 —— 使用[仪式](../features/ceremonies.md)和[指令](../features/human-team-members.md)来塑造适合的流程。
 
-| Stage | Who acts | What happens |
+| 阶段 | 谁行动 | 发生什么 |
 |-------|----------|--------------|
-| **Triage** | Human (or Lead) | Applies `go:yes` / `go:no` — decides what's worth building |
-| **Design review** | Human + team | Auto-triggered ceremony before multi-agent work; humans can participate or observe |
-| **Implementation** | AI agents | Branch, build, test, open PRs — no human input required |
-| **PR review** | Human | Reviews and approves (or requests changes); lockout protocol prevents conflicting edits |
-| **Merge** | Human or Ralph | Squash-merge, branch cleanup, issue closed |
+| **分流** | 人类（或组长） | 应用 `go:yes` / `go:no` —— 决定什么值得构建 |
+| **设计评审** | 人类 + 团队 | 多人工作前自动触发的仪式；人类可以参与或观察 |
+| **实现** | AI 智能体 | 分支、构建、测试、打开 PRs —— 无需人工输入 |
+| **PR 评审** | 人类 | 审查并批准（或请求更改）；锁定协议防止冲突编辑 |
+| **合并** | 人类或 Ralph | 压缩合并、分支清理、问题关闭 |
 
-This is a starting point. Define your own checkpoints by configuring [ceremonies](../features/ceremonies.md) and capturing [directives](../features/human-team-members.md).
+这是一个起点。通过配置[仪式](../features/ceremonies.md)和捕获[指令](../features/human-team-members.md)来定义你自己的检查点。
 
-For details on how work routes to humans, see [Human team members](../features/human-team-members.md).
+有关工作如何路由到人类的详情，参见[人类团队成员](../features/human-team-members.md)。
 
-For ceremony details, see [Ceremonies](../features/ceremonies.md).
+有关仪式详情，参见[仪式](../features/ceremonies.md)。
 
-For agent anatomy and how each team member (AI, human, @copilot) is structured, see [your-team.md](your-team.md).
+有关每个团队成员（AI、人类、@copilot）的结构，参见 [your-team.md](your-team.md) 中的智能体解剖。
 
 ---
 
-## Label Taxonomy
+## 标签分类法
 
-Labels aren't just tags — they're Squad's **state machine**. Five namespaces drive workflow automation, routing, and lifecycle tracking.
+标签不仅仅是标签 —— 它们是 Squad 的**状态机**。五个命名空间驱动工作流自动化、路由和生命周期跟踪。
 
-| Namespace | Purpose | Example Values | Mutual Exclusivity |
-|-----------|---------|----------------|-------------------|
-| `go:` | Verdict | `go:yes`, `go:no`, `go:needs-research` | ✅ One per issue |
-| `release:` | Release target | `release:v0.4.0`, `release:backlog` | ✅ One per issue |
-| `type:` | Issue category | `type:feature`, `type:bug`, `type:spike`, `type:docs`, `type:chore`, `type:epic` | ✅ One per issue |
-| `priority:` | Urgency | `priority:p0`, `priority:p1`, `priority:p2` | ✅ One per issue |
-| `squad:{member}` | Agent assignment | `squad:fenster`, `squad:hockney` | ❌ Multiple OK (pair work) |
+| 命名空间 | 目的 | 示例值 | 互斥性 |
+|-----------|---------|----------------|---------------|
+| `go:` | 裁决 | `go:yes`、`go:no`、`go:needs-research` | ✅ 每个 issue 一个 |
+| `release:` | 发布目标 | `release:v0.4.0`、`release:backlog` | ✅ 每个 issue 一个 |
+| `type:` | 问题类别 | `type:feature`、`type:bug`、`type:spike`、`type:docs`、`type:chore`、`type:epic` | ✅ 每个 issue 一个 |
+| `priority:` | 紧急程度 | `priority:p0`、`priority:p1`、`priority:p2` | ✅ 每个 issue 一个 |
+| `squad:{member}` | 智能体分配 | `squad:fenster`、`squad:hockney` | ❌ 多个可以（配对工作） |
 
-Within `go:`, `release:`, `type:`, and `priority:`, applying a second label **auto-removes** the first. The `squad:{member}` namespace allows multiple labels for collaborative work.
+在 `go:`、`release:`、`type:` 和 `priority:` 中，应用第二个标签**自动移除**第一个。`squad:{member}` 命名空间允许多个标签用于协作工作。
 
-### How Labels Drive Automation
+### 标签如何驱动自动化
 
-Labels power four automation layers:
+标签为四个自动化层提供动力：
 
-1. **Enforcement** — `label-enforcement.yml` watches for changes and removes duplicates within a namespace.
-2. **Sync** — Cross-namespace cascading: `go:no` → auto-adds `release:backlog`; `priority:p0` → ensures `go:yes`.
-3. **Triage** — Ralph uses labels to route work: `squad:fenster` → Fenster picks it up; no `squad:*` + `type:bug` → routes based on `routing.md`.
-4. **Heartbeat** — `squad-heartbeat.yml` runs every 30 minutes, auto-triaging unassigned issues and escalating stale research.
+1. **执行** —— `label-enforcement.yml` 监视更改并移除命名空间内的重复项。
+2. **同步** —— 跨命名空间级联：`go:no` → 自动添加 `release:backlog`；`priority:p0` → 确保 `go:yes`。
+3. **分流** —— Ralph 使用标签路由工作：`squad:fenster` → Fenster 获取它；没有 `squad:*` + `type:bug` → 基于 `routing.md` 路由。
+4. **心跳** —— `squad-heartbeat.yml` 每 30 分钟运行一次，自动分流未分配的问题并升级陈旧的研究。
 
-### State Machine Flow
+### 状态机流程
 
 ```mermaid
 graph TD
-    A["New issue"] --> B["squad label"]
-    B --> C["Triage"]
-    C --> D["Lead assigns<br/>go:* + type:* + priority:*"]
-    D --> E["go:yes →<br/>squad:{member} assigned"]
-    E --> F["Agent works"]
-    F --> G["Draft PR"]
-    G --> H["Review"]
-    H --> I{Approved?}
-    I -->|Yes| J["Merge"]
-    I -->|No| H
-    J --> K["Issue closed"]
+    A["新问题"] --> B["squad 标签"]
+    B --> C["分流"]
+    C --> D["组长分配<br/>go:* + type:* + priority:*"]
+    D --> E["go:yes →<br/>squad:{member} 已分配"]
+    E --> F["智能体工作"]
+    F --> G["草稿 PR"]
+    G --> H["评审"]
+    H --> I{已批准？}
+    I -->|是| J["合并"]
+    I -->|否| H
+    J --> K["问题关闭"]
 ```
 
-Labels are created automatically during `init` or `upgrade`. Add custom labels with:
+标签在 `init` 或 `upgrade` 期间自动创建。使用以下命令添加自定义标签：
 
 ```bash
-gh label create "squad:designer" --color "0366d6" --description "Work assigned to Designer"
+gh label create "squad:designer" --color "0366d6" --description "工作分配给设计师"
 ```
 
 ---
 
-## Ralph — Work Monitor
+## Ralph —— 工作监控器
 
-Ralph is a built-in squad member who tracks the work queue, monitors CI status, and keeps the team moving. He's always on the roster — no casting required.
+Ralph 是一个内置的 squad 成员，跟踪工作队列、监控 CI 状态并保持团队前进。他总是在花名册上 —— 无需选角。
 
-### Talking to Ralph
+### 与 Ralph 交谈
 
-| You say | What happens |
+| 你说 | 发生什么 |
 |---------|-------------|
-| `"Ralph, go"` | Activates the self-chaining work loop |
-| `"Ralph, status"` | Single check cycle, reports board state |
-| `"Ralph, idle"` | Stops the loop |
-| `"Ralph, scope: just issues"` | Monitors only issues, skips PRs/CI |
+| `"Ralph，开始"` | 激活自链接工作循环 |
+| `"Ralph，状态"` | 单检查周期，报告面板状态 |
+| `"Ralph，空闲"` | 停止循环 |
+| `"Ralph，范围：仅 issues"` | 仅监控 issues，跳过 PRs/CI |
 
-### What Ralph Monitors
+### Ralph 监控什么
 
-| Signal | Action |
+| 信号 | 行动 |
 |--------|--------|
-| Untriaged issues (no `squad:{member}` label) | Lead triages and assigns |
-| Assigned but unstarted issues | Spawns agent to pick it up |
-| Draft PRs from squad members | Checks if agent is stalled |
-| Review feedback on PRs | Routes to author agent |
-| CI failures | Notifies agent to fix |
-| Approved PRs | Merges and closes issue |
+| 未分流的问题（无 `squad:{member}` 标签） | 组长分流并分配 |
+| 已分配但未开始的问题 | 生成智能体来获取它 |
+| 来自 squad 成员的草稿 PRs | 检查智能体是否停滞 |
+| PRs 上的审查反馈 | 路由给作者智能体 |
+| CI 失败 | 通知智能体修复 |
+| 已批准的 PRs | 合并并关闭问题 |
 
-Ralph **never stops on his own while work remains** — he keeps cycling until the board clears, you say "idle", or the session ends. Every 3–5 rounds he posts a status update and keeps going.
+Ralph **在工作剩余时不会自己停止** —— 他持续循环直到面板清空、你说"空闲"或会话结束。每 3-5 轮他发布状态更新并继续。
 
-### Three Layers of Ralph
+### Ralph 的三层
 
-| Layer | When | How |
+| 层 | 何时 | 如何 |
 |-------|------|-----|
-| **In-session** | You're at the keyboard | `"Ralph, go"` — active loop |
-| **Local watchdog** | You're AFK but machine is on | `squad watch --interval 10` |
-| **Cloud heartbeat** | Fully unattended | `squad-heartbeat.yml` GitHub Actions events |
+| **会话中** | 你在键盘前 | `"Ralph，开始"` —— 活跃循环 |
+| **本地监视器** | 你离开但机器开着 | `squad watch --interval 10` |
+| **云心跳** | 完全无人值守 | `squad-heartbeat.yml` GitHub Actions 事件 |
 
-The heartbeat workflow (`squad-heartbeat.yml`) is installed during `init` or `upgrade`. It runs on issue close, PR merge, and manual dispatch. Edit the workflow in `.github/workflows/squad-heartbeat.yml` to customize triggers. For periodic polling without events, use `squad watch` locally.
+心跳工作流（`squad-heartbeat.yml`）在 `init` 或 `upgrade` 期间安装。它在问题关闭、PR 合并和手动触发时运行。在 `.github/workflows/squad-heartbeat.yml` 中编辑工作流以自定义触发器。对于没有事件的定期轮询，在本地使用 `squad watch`。
 
-**PAT requirement:** Ralph needs `gh` CLI authenticated with a Classic PAT (scopes: `repo` and `project`). The default `GITHUB_TOKEN` doesn't have sufficient scopes.
-
----
-
-## PRD Mode
-
-Got a product spec? Hand it to Squad and the Lead decomposes it into prioritized, dependency-tracked work items.
-
-```
-Read the PRD at docs/product-spec.md and break it into work items
-```
-
-The Lead agent:
-1. Decomposes the spec into discrete work items (WI-1, WI-2, etc.)
-2. Assigns priorities: P0 (must-have), P1 (important), P2 (nice-to-have)
-3. Routes items to agents based on domain expertise
-4. Tracks dependencies — won't start WI-4 if it depends on WI-2
-
-Independent items run in parallel. When requirements change, give Squad the updated PRD — the Lead diffs against existing items and adjusts the backlog without undoing completed work.
+**PAT 要求：** Ralph 需要认证了经典 PAT（范围：`repo` 和 `project`）的 `gh` CLI。默认 `GITHUB_TOKEN` 没有足够的范围。
 
 ---
 
-## Project Boards
+## PRD 模式
 
-Squad integrates with GitHub Projects V2 for visual workflow tracking. **Labels are the source of truth** — boards are one-way projections that visualize the state machine.
+有产品规范？交给 Squad，组长将其分解为优先的、依赖跟踪的工作项。
 
-| Board Column | Label State |
+```
+阅读 docs/product-spec.md 处的 PRD 并将其分解为工作项
+```
+
+组长智能体：
+1. 将规范分解为离散工作项（WI-1、WI-2 等）
+2. 分配优先级：P0（必须有）、P1（重要）、P2（最好有）
+3. 基于领域专长将项目路由给智能体
+4. 跟踪依赖 —— 如果 WI-4 依赖 WI-2，则不会启动 WI-4
+
+独立项目并行运行。当需求变化时，给 Squad 更新的 PRD —— 组长与现有项目对比差异并调整后端而不撤销已完成的工作。
+
+---
+
+## 项目面板
+
+Squad 与 GitHub Projects V2 集成以进行可视化工作流跟踪。**标签是真相来源** —— 面板是单向投影，可视化状态机。
+
+| 面板列 | 标签状态 |
 |--------------|-------------|
-| **Backlog** | `go:no` or `release:backlog` |
-| **Needs Research** | `go:needs-research` |
-| **Ready** | `go:yes`, no `squad:*` |
-| **In Progress** | `go:yes` + `squad:{member}` |
-| **Done** | Issue closed |
+| **积压** | `go:no` 或 `release:backlog` |
+| **需要研究** | `go:needs-research` |
+| **就绪** | `go:yes`，无 `squad:*` |
+| **进行中** | `go:yes` + `squad:{member}` |
+| **完成** | 问题已关闭 |
 
-Board sync runs on label changes, issue close, PR merge, and a 30-minute schedule. Dragging an issue on the board triggers a webhook that applies the corresponding label.
+面板同步在标签更改、问题关闭、PR 合并和 30 分钟计划时运行。在面板上拖动问题会触发应用相应标签的 webhook。
 
-**Status:** Label-based state machine is fully implemented. Automated board sync workflows are in development for v0.4.0. You can use `gh project` commands now — full automation is coming.
-
----
-
-## Notifications
-
-Your squad pings you when they need input, hit an error, or finish work. Squad uses MCP-based notification servers — you bring your own delivery channel.
-
-See the [Notifications Guide](../features/notifications.md) for [platform setup](../features/notifications.md#quick-start-teams-simplest-path) (Teams, Discord, iMessage, webhooks), [trigger configuration](../features/notifications.md#what-triggers-a-notification), and [sample MCP configs](../features/notifications.md#sample-mcp-configs).
+**状态：** 基于标签的状态机已完全实现。自动化面板同步工作流正在为 v0.4.0 开发。你现在可以使用 `gh project` 命令 —— 完整自动化即将推出。
 
 ---
 
-## Tips
+## 通知
 
-- You don't need to assign issues to agents — Squad routes based on domain expertise defined in charters and `routing.md`.
-- If `gh` isn't authenticated, Squad will tell you. Run `gh auth login` first.
-- Use `priority:p0` to fast-track critical items — it auto-sets `go:yes`.
-- Combine PRD mode with GitHub Issues to auto-create issues from work items.
-- Ralph's in-session loop is session-scoped — state resets between sessions. Use `squad watch` or the heartbeat for persistent monitoring.
+你的 squad 在需要输入、遇到错误或完成工作时 ping 你。Squad 使用基于 MCP 的通知服务器 —— 你自带交付渠道。
+
+有关[平台设置](../features/notifications.md#quick-start-teams-simplest-path)（Teams、Discord、iMessage、webhooks）、[触发器配置](../features/notifications.md#what-triggers-a-notification)和[示例 MCP 配置](../features/notifications.md#sample-mcp-configs)，参见[通知指南](../features/notifications.md)。
 
 ---
 
-## Sample Prompts
+## 技巧
+
+- 你不需要将 issues 分配给智能体 —— Squad 基于 charter 和 `routing.md` 中定义的域专长路由。
+- 如果 `gh` 未认证，Squad 会告诉你。先运行 `gh auth login`。
+- 使用 `priority:p0` 快速跟踪关键项目 —— 它自动设置 `go:yes`。
+- 将 PRD 模式与 GitHub Issues 结合使用以从工作项自动创建 issues。
+- Ralph 的会话中循环是会话范围的 —— 状态在会话间重置。使用 `squad watch` 或心跳进行持久监控。
+
+---
+
+## 示例提示
 
 ```
-connect to bradygaster/squad and show me the backlog
+连接到 bradygaster/squad 并展示积压
 ```
 
-Links Squad to a GitHub repo and displays all open issues.
+将 Squad 链接到 GitHub 仓库并显示所有开放 issues。
 
 ```
-work on all issues labeled "bug"
+处理所有标记为 "bug" 的 issues
 ```
 
-Processes multiple bug issues in parallel — each gets its own branch and PR.
+并行处理多个 bug issues —— 每个获得自己的分支和 PR。
 
 ```
-mark issue #42 as approved for v0.4.0
+将 issue #42 标记为批准用于 v0.4.0
 ```
 
-Applies `go:yes` and `release:v0.4.0` labels, removing any conflicting labels.
+应用 `go:yes` 和 `release:v0.4.0` 标签，移除任何冲突标签。
 
 ```
-Ralph, go — start monitoring and process the backlog until it's clear
+Ralph，开始 —— 开始监控并处理积压直到清空
 ```
 
-Activates Ralph's self-chaining loop to continuously triage, assign, and process work.
+激活 Ralph 的自链接循环以持续分流、分配和处理工作。
 
 ```
-read the PRD at docs/product-spec.md and break it into work items
+阅读 docs/product-spec.md 处的 PRD 并将其分解为工作项
 ```
 
-Ingests a product spec and creates a prioritized, dependency-tracked backlog.
+摄取产品规范并创建优先的、依赖跟踪的后端。
 
 ```
-there's review feedback on PR #24
+PR #24 有审查反馈
 ```
 
-The author agent reads review comments and pushes fixes to the existing branch.
+作者智能体阅读审查评论并推送修复到现有分支。
 
 ```
-list all p0 features approved for the next release
+列出所有批准用于下一个发布的 p0 功能
 ```
 
-Queries issues with `priority:p0 + type:feature + go:yes + release:{current milestone}`.
+查询带有 `priority:p0 + type:feature + go:yes + release:{当前里程碑}` 的 issues。
 
 ```
 squad watch --interval 5
 ```
 
-Starts persistent local polling — checks GitHub every 5 minutes for new work and triages automatically.
+启动持久本地轮询 —— 每 5 分钟检查 GitHub 以获取新工作并自动分流。
