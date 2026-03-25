@@ -1,45 +1,45 @@
 ---
-title: KEDA Autoscaling
-description: Autoscale Squad agents based on GitHub issue queue depth using the KEDA external scaler template.
+title: KEDA 自动扩展
+description: 使用 KEDA 外部扩展器模板基于 GitHub issue 队列深度自动扩展 Squad 智能体。
 order: 38
 ---
 
-# KEDA Autoscaling
+# KEDA 自动扩展
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-**Try this to understand your scaling needs:**
+**试试这个了解你的扩展需求：**
 ```
-How many issues are currently queued for Squad agents?
+当前有多少 issues 排队等待 Squad 智能体？
 ```
 
-KEDA (Kubernetes Event-Driven Autoscaling) is an open-source component that scales Kubernetes workloads based on external event sources. Squad ships an external scaler template that scales agent pods up and down based on the depth of your GitHub issue queue.
+KEDA（Kubernetes 事件驱动自动扩展）是一个基于外部事件源扩展 Kubernetes 工作负载的开源组件。Squad 附带一个外部扩展器模板，基于你的 GitHub issue 队列深度上下扩展智能体 pod。
 
 ---
 
-## When to Use This
+## 何时使用此功能
 
-Use KEDA autoscaling when:
+当以下情况时使用 KEDA 自动扩展：
 
-- Squad agents run as Kubernetes pods (not local machines)
-- Issue volume is unpredictable — bursts of work should spawn more agents automatically
-- You want zero-agent idle cost when there is no work
+- Squad 智能体作为 Kubernetes pod 运行（不是本地机器）
+- Issue 量不可预测 —— 工作突发应该自动产生更多智能体
+- 当没有工作时你希望零智能体空闲成本
 
-## Prerequisites
+## 前置条件
 
-- A Kubernetes cluster with KEDA installed ([keda.sh](https://keda.sh))
-- Squad agents packaged as container images and deployed as a `Deployment`
-- A GitHub token with `repo` scope for issue queue polling
+- 安装了 KEDA 的 Kubernetes 集群（[keda.sh](https://keda.sh)）
+- 打包为容器镜像并作为 `Deployment` 部署的 Squad 智能体
+- 带有 `repo` 范围的 GitHub 令牌用于 issue 队列轮询
 
-## Setup
+## 设置
 
-1. Install KEDA on your cluster:
+1. 在你的集群上安装 KEDA：
    ```bash
    helm repo add kedacore https://kedacore.github.io/charts
    helm install keda kedacore/keda --namespace keda --create-namespace
    ```
 
-2. Apply the Squad KEDA `ScaledObject` template from `templates/keda/scaled-object.yaml`:
+2. 从 `templates/keda/scaled-object.yaml` 应用 Squad KEDA `ScaledObject` 模板：
    ```yaml
    apiVersion: keda.sh/v1alpha1
    kind: ScaledObject
@@ -62,22 +62,19 @@ Use KEDA autoscaling when:
            name: github-token-secret
    ```
 
-3. Create the GitHub token secret:
+3. 创建 GitHub 令牌 secret：
    ```bash
    kubectl create secret generic github-token-secret \
      --from-literal=personalAccessToken=<your-token>
    ```
 
-## Configuration Reference
+## 配置参考
 
-| Field | Description |
+| 字段 | 描述 |
 |-------|-------------|
-| `minReplicaCount` | Agents to keep running when idle (use `0` for zero-cost idle) |
-| `maxReplicaCount` | Hard ceiling on agent pods |
-| `targetQueueLength` | Issues per agent pod (tune for task duration) |
-| `labels` | Issue labels to count as "queued work" |
+| `minReplicaCount` | 空闲时保持运行的智能体（使用 `0` 实现零成本空闲） |
+| `maxReplicaCount` | 智能体 pod 的硬上限 |
+| `targetQueueLength` | 每个智能体 pod 的 issues（根据任务持续时间调整） |
+| `labels` | 计为"排队工作"的 issue 标签 |
 
-## See Also
-
-- [Capability Routing](capability-routing.md) — route specific issues to specific agent types
-- [Ralph — Work Monitor](ralph.md) — how Ralph picks up queued issues
+## 另请参阅

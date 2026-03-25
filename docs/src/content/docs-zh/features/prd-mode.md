@@ -1,124 +1,79 @@
-# PRD Mode
+# PRD 模式
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-
-**Try this to generate a requirements document:**
+**试试这个生成需求文档：**
 ```
-Write a PRD for a user authentication system with OAuth support
-```
-
-**Try this to break down product specs into work items:**
-```
-Read the PRD at docs/product-spec.md and break it into work items
+编写一个带 OAuth 支持的用户认证系统的 PRD
 ```
 
-Give Squad a product requirements document and the Lead breaks it into prioritized work items, assigns them to the team, and tracks progress with dependency management.
+**试试这个将产品规范分解为工作项：**
+```
+阅读 docs/product-spec.md 处的 PRD 并将其分解为工作项
+```
+
+给 Squad 一个产品需求文档，组长将其分解为优先的工作项，分配给团队，并用依赖管理跟踪进度。
 
 ---
 
-## How to Use
+## 如何使用
 
-Give Squad a product requirements document. The Lead agent breaks it into work items, assigns them to the team, and tracks progress.
+给 Squad 一个产品需求文档。组长智能体将其分解为工作项，分配给团队，并跟踪进度。
 
 ---
 
-## How to Use
+## 如何使用
 
-Paste a PRD directly into the chat:
+直接将 PRD 粘贴到聊天中：
 
 ```
-> Here's what we're building:
+> 这是我们要构建的：
 >
-> [paste your PRD or spec]
+> [粘贴你的 PRD 或规范]
 ```
 
-Or reference a file:
+或引用文件：
 
 ```
-> Read the PRD at docs/product-spec.md and break it into work items
-```
-
----
-
-## How It Works
-
-1. **Lead decomposes the spec** into discrete work items (WI-1, WI-2, WI-3, etc.)
-2. **Each work item gets a priority**: P0 (must-have), P1 (important), P2 (nice-to-have)
-3. **Work items are assigned** to agents based on domain expertise
-4. **Dependencies are tracked** — Squad won't start WI-4 if it depends on WI-2 finishing first
-5. **Parallel work** happens where possible — independent work items run simultaneously
-
-### Example output
-
-```
-📋 PRD decomposed into 8 work items:
-
-WI-1  [P0]  Set up project structure           → Kane (Backend)
-WI-2  [P0]  Design database schema              → Kane (Backend)
-WI-3  [P0]  Build component library             → Dallas (Frontend)
-WI-4  [P1]  Implement auth endpoints            → Kane (Backend)     [depends: WI-2]
-WI-5  [P1]  Build login/signup UI               → Dallas (Frontend)  [depends: WI-3]
-WI-6  [P1]  Write auth integration tests        → Lambert (Tester)   [depends: WI-4]
-WI-7  [P2]  Add social login                    → Kane (Backend)     [depends: WI-4]
-WI-8  [P2]  Build user profile page             → Dallas (Frontend)  [depends: WI-5]
+> 阅读 docs/product-spec.md 处的 PRD 并将其分解为工作项
 ```
 
 ---
 
-## Mid-Project PRD Updates
+## 如何工作
 
-Requirements change. When they do, give Squad the updated PRD:
+1. **组长分解规范**为离散工作项（WI-1、WI-2、WI-3 等）
+2. **每个工作项获得优先级**：P0（必须有）、P1（重要）、P2（最好有）
+3. **工作项基于领域专长分配给智能体**
+4. **跟踪依赖** —— 如果 WI-4 依赖 WI-2 先完成，Squad 不会启动 WI-4
+5. **并行工作**在可能的地方发生 —— 独立工作项同时运行
+
+### 示例输出
 
 ```
-> The PRD has been updated — re-read docs/product-spec.md
+📋 PRD 分解为 8 个工作项：
+
+WI-1  [P0]  设置项目结构           → Kane（后端）
+WI-2  [P0]  设计数据库模式              → Kane（后端）
+WI-3  [P0]  构建组件库             → Dallas（前端）
+WI-4  [P1]  实现认证端点            → Kane（后端）     [依赖: WI-2]
+WI-5  [P1]  构建登录/注册 UI               → Dallas（前端）  [依赖: WI-3]
+WI-6  [P1]  编写认证集成测试        → Lambert（测试）   [依赖: WI-4]
+WI-7  [P2]  添加社交登录                    → Kane（后端）     [依赖: WI-4]
+WI-8  [P2]  构建用户个人资料页             → Dallas（前端）  [依赖: WI-5]
 ```
-
-The Lead agent:
-
-1. Re-reads the PRD
-2. Diffs against the existing work items
-3. Adjusts the backlog — adds new items, re-prioritizes, or marks items as obsolete
-
-Work already completed isn't undone. Only the remaining backlog changes.
 
 ---
 
-## Tips
+## 项目中期 PRD 更新
 
-- P0 work items are tackled first. Use priority levels to control sequencing.
-- The Lead handles decomposition — you don't need to break down the spec yourself.
-- Dependencies are respected automatically. You won't see an agent start on a dependent task before its prerequisite is done.
-- Combine with [GitHub Issues Mode](github-issues.md) to create GitHub issues from work items.
-
-## Sample Prompts
+需求变化。当它们变化时，给 Squad 更新的 PRD：
 
 ```
-read the PRD at docs/product-spec.md and break it into work items
+> PRD 已更新 —— 重新阅读 docs/product-spec.md
 ```
 
-Ingests a product requirements document and creates a prioritized, dependency-tracked backlog.
+组长智能体：
 
-```
-show me the work items
-```
-
-Displays the current backlog with priorities, assignments, and dependencies.
-
-```
-the PRD has been updated — re-read docs/product-spec.md
-```
-
-Re-ingests the PRD and adjusts the backlog based on changes without undoing completed work.
-
-```
-start working on approved P0 items
-```
-
-Begins parallel execution of all high-priority work items with no blockers.
-
-```
-which work items are blocked right now?
-```
-
-Shows which tasks are waiting on dependencies or other blocking conditions.
+1. 重新阅读 PRD
+2. 与现有工作项对比差异

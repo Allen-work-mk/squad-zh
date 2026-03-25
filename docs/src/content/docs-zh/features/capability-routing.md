@@ -1,76 +1,76 @@
 ---
-title: Capability Routing
-description: Machine capability discovery and needs:* label routing for hardware-specific and OS-specific work.
+title: 能力路由
+description: 机器能力发现和 needs:* 标签路由，用于硬件特定和操作系统特定的工作。
 order: 35
 ---
 
-# Capability Routing
+# 能力路由
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-**Try this to declare machine capabilities:**
+**试试这个声明机器能力：**
 ```
-This machine has a GPU — tag it for GPU-required work
-```
-
-**Try this to route an issue to a capable machine:**
-```
-Label issue #42 with needs:gpu so it goes to the right runner
+这台机器有 GPU —— 标记它用于需要 GPU 的工作
 ```
 
-Squad discovers what each machine can do and routes issues only to machines that meet the requirements. No manual assignment needed for hardware- or OS-specific work.
+**试试这个将 issue 路由到有能力的机器：**
+```
+用 needs:gpu 标记 issue #42，让它去正确的 runner
+```
+
+Squad 发现每台机器能做什么，并只将 issues 路由到满足要求的机器。无需手动分配硬件或操作系统特定的工作。
 
 ---
 
-## What Are Capabilities?
+## 什么是能力？
 
-A capability is a label that describes what a machine can do — hardware, OS, or environment attributes that not every runner has. You declare capabilities in `machine-capabilities.json` at the project root or home directory; Squad reads them when routing issues.
+能力是描述机器能做什么的标签 —— 硬件、操作系统或环境属性，不是每个 runner 都有的。你在项目根目录或主目录的 `machine-capabilities.json` 中声明能力；Squad 在路由 issues 时读取它们。
 
-Examples: `gpu`, `windows`, `macos`, `arm64`, `high-memory`, `docker`.
+示例：`gpu`、`windows`、`macos`、`arm64`、`high-memory`、`docker`。
 
-## Declaring Capabilities
+## 声明能力
 
-Add a `capabilities` array to `machine-capabilities.json` at the project root or home directory on each machine:
+在每台机器的项目根目录或主目录的 `machine-capabilities.json` 中添加 `capabilities` 数组：
 
 ```json
 ["gpu", "cuda", "high-memory"]
 ```
 
-Squad reads this file at startup. The declared capabilities are available to the routing system immediately.
+Squad 在启动时读取此文件。声明的能力立即对路由系统可用。
 
-## The `needs:*` Label Pattern
+## `needs:*` 标签模式
 
-Apply a `needs:*` label to any GitHub issue to require a specific capability:
+对任何 GitHub issue 应用 `needs:*` 标签以要求特定能力：
 
-| Label | Meaning |
+| 标签 | 含义 |
 |-------|---------|
-| `needs:gpu` | Must run on a machine with GPU |
-| `needs:windows` | Must run on Windows |
-| `needs:macos` | Must run on macOS |
-| `needs:arm64` | Must run on ARM64 architecture |
-| `needs:docker` | Must run where Docker is available |
+| `needs:gpu` | 必须在有 GPU 的机器上运行 |
+| `needs:windows` | 必须在 Windows 上运行 |
+| `needs:macos` | 必须在 macOS 上运行 |
+| `needs:arm64` | 必须在 ARM64 架构上运行 |
+| `needs:docker` | 必须在有 Docker 的地方运行 |
 
-You can combine multiple `needs:*` labels — all must match.
+你可以组合多个 `needs:*` 标签 —— 所有都必须匹配。
 
-## How Routing Works
+## 路由如何工作
 
-When Ralph picks up an issue:
+当 Ralph 获取 issue 时：
 
-1. It reads all `needs:*` labels on the issue.
-2. It compares them against the current machine's declared capabilities.
-3. If the machine satisfies all requirements, it proceeds. If not, it skips the issue and leaves it for a capable machine to claim.
+1. 它读取 issue 上的所有 `needs:*` 标签。
+2. 它与当前机器声明的能力进行比较。
+3. 如果机器满足所有要求，它就继续。如果不满足，它就跳过 issue，留给有能力的机器来获取。
 
-No central scheduler needed. Each machine self-selects based on what it can do.
+无需中央调度器。每台机器基于它能做什么自我选择。
 
-## Example Flow
+## 示例流程
 
 ```
-Issue #99  labels: needs:gpu, needs:windows
-Machine A  capabilities: ["gpu", "windows", "cuda"]  ← picks it up
-Machine B  capabilities: ["macos"]                   ← skips it
+Issue #99  标签：needs:gpu, needs:windows
+Machine A  能力：["gpu", "windows", "cuda"]  ← 获取它
+Machine B  能力：["macos"]                   ← 跳过它
 ```
 
-## See Also
+## 另请参阅
 
-- [Work Routing](routing.md) — pattern-based and skill-aware routing
-- [Ralph — Work Monitor](ralph.md) — how Ralph polls and claims issues
+- [工作路由](routing.md) —— 基于模式和基于技能的路由
+- [Ralph —— 工作监控器](ralph.md) —— Ralph 如何轮询和获取 issues

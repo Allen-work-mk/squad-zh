@@ -1,348 +1,79 @@
-# Issue Templates for Squad
+# Squad 的 Issue 模板
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-
-**Try this after setting up templates:**
+**试试这个设置模板后：**
 ```
-Ralph, show me untriaged issues
+Ralph，展示未分流的 issues
 ```
 
-**Then watch Ralph auto-triage based on labels.**
+**然后观看 Ralph 基于标签自动分流。**
 
-When GitHub Issues are your work queue, creating tasks should be frictionless. Issue templates pre-fill labels, structure task descriptions, and work beautifully on mobile — making it possible to add tasks in 10 seconds from anywhere.
+当 GitHub Issues 是你的工作队列时，创建任务应该无摩擦。Issue 模板预填充标签、结构化任务描述，在手机上工作得很好 —— 让从任何地方在 10 秒内添加任务成为可能。
 
 ---
 
-## Why Issue Templates Matter for Squad
+## 为什么 Issue 模板对 Squad 重要
 
-GitHub provides Issue Templates — a platform feature that pre-fills labels, fields, and structure when creating new issues. This guide shows how to configure templates that work smoothly with Squad's label-based routing.
+GitHub 提供 Issue 模板 —— 一个平台功能，在创建新 issues 时预填充标签、字段和结构。本指南展示如何配置与 Squad 基于标签的路由顺畅工作的模板。
 
-Squad operates best when work is captured as GitHub Issues. But creating an issue from scratch takes time: you need to remember the right labels, format the description consistently, and ensure the structure matches what agents expect.
+Squad 在工作被捕获为 GitHub Issues 时运行最佳。但从头创建 issue 需要时间：你需要记住正确的标签、一致地格式化描述，并确保结构匹配智能体的期望。
 
-Issue templates solve this:
+Issue 模板解决这些问题：
 
-- **Pre-filled labels** — `squad` label applied automatically
-- **Structured format** — Task description, acceptance criteria, priority fields
-- **Mobile-friendly** — Works in the GitHub mobile app
-- **Fast task creation** — Add work while walking the dog, waiting for coffee, or during a meeting
+- **预填充标签** —— `squad` 标签自动应用
+- **结构化格式** —— 任务描述、验收标准、优先级字段
+- **移动友好** —— 在 GitHub 移动应用中工作
+- **快速任务创建** —— 在遛狗、等咖啡或开会时添加工作
 
-With templates, creating a Squad task takes 10 seconds instead of 2 minutes.
+使用模板，创建 Squad 任务只需 10 秒而不是 2 分钟。
 
 ---
 
-## Basic Squad Task Template
+## 基础 Squad 任务模板
 
-Create `.github/ISSUE_TEMPLATE/squad-task.yml` in your repository:
+在你的仓库中创建 `.github/ISSUE_TEMPLATE/squad-task.yml`：
 
 ```yaml
-name: Squad Task
-description: Create a task for the Squad team
-title: "[Task]: "
+name: Squad 任务
+description: 为 Squad 团队创建任务
+title: "[任务]: "
 labels: ["squad"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for creating a Squad task! Fill in the details below.
+        感谢创建 Squad 任务！在下面填写详细信息。
         
   - type: textarea
     id: description
     attributes:
-      label: Task Description
-      description: What needs to be done?
+      label: 任务描述
+      description: 需要做什么？
       placeholder: |
-        Add dark mode support to the settings page.
+        为设置页面添加暗色模式支持。
         
-        Current behavior: Settings page uses light theme only.
-        Expected behavior: Theme switcher in settings, respects system preference.
+        当前行为：设置页面只使用浅色主题。
+        期望行为：设置中的主题切换器，尊重系统偏好。
     validations:
       required: true
       
   - type: textarea
     id: acceptance-criteria
     attributes:
-      label: Acceptance Criteria
-      description: How will we know this is complete?
+      label: 验收标准
+      description: 我们如何知道这是完整的？
       placeholder: |
-        - [ ] Theme switcher toggle added to settings
-        - [ ] Dark mode CSS applied when enabled
-        - [ ] Preference saved to localStorage
-        - [ ] System theme preference detected on first load
+        - [ ] 主题切换器开关添加到设置
+        - [ ] 启用时应用暗色模式 CSS
+        - [ ] 偏好保存到 localStorage
+        - [ ] 首次加载时检测系统主题偏好
     validations:
       required: false
       
   - type: dropdown
     id: priority
     attributes:
-      label: Priority
-      description: How urgent is this task?
+      label: 优先级
+      description: 这个任务多紧急？
       options:
-        - Low
-        - Medium
-        - High
-        - Critical
-    validations:
-      required: false
-```
-
-### What This Template Does
-
-- **Applies `squad` label** — Ralph sees it in the untriaged queue
-- **Structured sections** — Description, acceptance criteria, priority
-- **Markdown support** — Use checklists, code blocks, links
-- **Works on mobile** — GitHub app renders forms beautifully
-
----
-
-## Custom Labels for Routing
-
-Ralph uses `.squad/routing.md` to route work to agents. Add `squad:{member}` labels to your template for pre-triaging:
-
-```yaml
-name: Documentation Task
-description: Create a docs task (auto-routed to PAO)
-title: "[Docs]: "
-labels: ["squad", "squad:pao"]
-body:
-  - type: textarea
-    id: description
-    attributes:
-      label: What needs documenting?
-      placeholder: |
-        Add a guide for setting up Ralph in production.
-```
-
-When Ralph scans the board, this issue is already labeled `squad:pao` — no triage needed, work goes straight to PAO.
-
-### Setting up labels for Squad routing
-
-Create labels in your repository for each squad member:
-
-```bash
-# Using gh CLI
-gh label create "squad:pao" --description "DevRel tasks" --color "1d76db"
-gh label create "squad:flight" --description "Architecture and planning" --color "d73a4a"
-gh label create "squad:fido" --description "Testing and quality" --color "0e8a16"
-```
-
-Or use the [label sync workflow](../features/labels.md) to automate label management across repositories.
-
----
-
-## Template Variants
-
-Different work types need different structures:
-
-### Bug Report Template
-
-`.github/ISSUE_TEMPLATE/bug-report.yml`:
-
-```yaml
-name: Bug Report
-description: Report a bug for Squad to fix
-title: "[Bug]: "
-labels: ["squad", "bug"]
-body:
-  - type: textarea
-    id: description
-    attributes:
-      label: Bug Description
-      description: What went wrong?
-    validations:
-      required: true
-      
-  - type: textarea
-    id: repro-steps
-    attributes:
-      label: Steps to Reproduce
-      placeholder: |
-        1. Run `squad init`
-        2. Create a team with 3 agents
-        3. Try to export the configuration
-        4. See error: "Cannot read property 'name' of undefined"
-    validations:
-      required: true
-      
-  - type: textarea
-    id: expected
-    attributes:
-      label: Expected Behavior
-      description: What should have happened?
-    validations:
-      required: false
-      
-  - type: input
-    id: version
-    attributes:
-      label: Squad Version
-      placeholder: "0.8.24"
-    validations:
-      required: false
-```
-
-### Feature Request Template
-
-`.github/ISSUE_TEMPLATE/feature-request.yml`:
-
-```yaml
-name: Feature Request
-description: Suggest a new feature for Squad
-title: "[Feature]: "
-labels: ["squad", "enhancement"]
-body:
-  - type: textarea
-    id: problem
-    attributes:
-      label: Problem Statement
-      description: What problem does this feature solve?
-      placeholder: "As a solo developer, I want to track time spent on tasks so I can invoice clients accurately."
-    validations:
-      required: true
-      
-  - type: textarea
-    id: solution
-    attributes:
-      label: Proposed Solution
-      description: How should this feature work?
-    validations:
-      required: false
-      
-  - type: textarea
-    id: alternatives
-    attributes:
-      label: Alternatives Considered
-      description: What other approaches did you think about?
-    validations:
-      required: false
-```
-
-### Doc Update Template
-
-`.github/ISSUE_TEMPLATE/doc-update.yml`:
-
-```yaml
-name: Documentation Update
-description: Suggest a docs improvement
-title: "[Docs]: "
-labels: ["squad", "squad:pao", "documentation"]
-body:
-  - type: textarea
-    id: what
-    attributes:
-      label: What needs updating?
-      placeholder: "The Ralph deployment guide doesn't mention log rotation."
-    validations:
-      required: true
-      
-  - type: input
-    id: page
-    attributes:
-      label: Page URL or Path
-      placeholder: "docs/scenarios/ralph-operations.md"
-    validations:
-      required: false
-```
-
----
-
-## Mobile Workflow
-
-GitHub Issues + templates work from anywhere:
-
-**On your phone:**
-1. Open GitHub app
-2. Navigate to repository
-3. Tap **Issues** → **New Issue**
-4. Select template
-5. Fill form (voice-to-text works!)
-6. Tap **Submit new issue**
-
-**10 seconds later:**
-- Issue created with `squad` label
-- Ralph sees it in the next scan
-- Agent picks it up autonomously
-
-This workflow enables "capture anywhere, process later" — add tasks while commuting, exercising, or in meetings without context-switching to a laptop.
-
----
-
-## Template Configuration
-
-GitHub supports multiple templates. Create a config file to customize the issue creation experience:
-
-`.github/ISSUE_TEMPLATE/config.yml`:
-
-```yaml
-blank_issues_enabled: false
-contact_links:
-  - name: Squad Community Discussions
-    url: https://github.com/bradygaster/squad/discussions
-    about: Ask questions or share ideas in Discussions
-  - name: Squad Documentation
-    url: https://squad.dev
-    about: Read the full Squad documentation
-```
-
-This disables blank issues (forcing template use) and provides helpful links when users click "New Issue."
-
----
-
-## Template Best Practices
-
-- **Keep templates short** — Long forms reduce completion rates
-- **Make most fields optional** — Only require what's absolutely necessary
-- **Use placeholders** — Show examples of good descriptions
-- **Pre-fill smart defaults** — Priority: Medium, Type: Task
-- **Test on mobile** — Ensure forms render well in the GitHub app
-- **Use dropdown for enums** — Priority, Type, Severity (reduces typos)
-- **Add markdown help** — Link to GitHub markdown guide in template
-
----
-
-## Integration with Ralph
-
-Ralph's heartbeat workflow (`.github/workflows/squad-heartbeat.yml`) scans for untriaged issues:
-
-1. Issue created with `squad` label (from template)
-2. Heartbeat workflow runs (every 30 min or on issue create)
-3. Ralph reads `.squad/routing.md` to determine agent
-4. Ralph adds `squad:{member}` label
-5. Next heartbeat run (or in-session Ralph) assigns agent
-
-If your template pre-fills `squad:{member}`, Ralph skips triage and goes straight to assignment.
-
----
-
-## Sample Prompts
-
-```
-Show me untriaged squad issues
-```
-
-Lists all issues with `squad` label but no `squad:{member}` assignment.
-
-```
-Ralph, triage and assign the backlog
-```
-
-Ralph reads routing rules, applies member labels, and prepares work for agents.
-
----
-
-## Notes
-
-- Templates don't prevent manual issue creation — users can still click "Open a blank issue"
-- Templates are stored in `.github/ISSUE_TEMPLATE/` (note the underscore, not dash)
-- Use `.yml` or `.yaml` extension (both work)
-- Test templates by creating issues yourself before announcing to the team
-- Mobile workflow requires GitHub app (iOS or Android) — works on tablets too
-
----
-
-## See Also
-
-- [GitHub Issues Mode](./github-issues.md) — Issue-driven development workflow
-- [Ralph — Work Monitor](./ralph.md) — Ralph's work monitoring behavior
-- [Labels](./labels.md) — Label management and sync workflow
-- [Routing](./routing.md) — How Ralph triages work to agents

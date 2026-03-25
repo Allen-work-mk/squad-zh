@@ -1,43 +1,42 @@
-# Marketplace Guide
+# 市场指南
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
-
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
 **Issue:** #39 (M5-16)
 
 ---
 
-## Overview
+## 概述
 
-The Squad marketplace lets teams export, import, browse, and install agent configurations. This guide covers the full lifecycle: packaging, publishing, discovery, installation, versioning, caching, and security.
+Squad 市场让团队导出、导入、浏览和安装智能体配置。本指南涵盖完整的生命周期：打包、发布、发现、安装、版本控制、缓存和安全。
 
-## Export / Import
+## 导出 / 导入
 
-Export your Squad configuration as a portable bundle:
+将你的 Squad 配置导出为可移植捆绑包：
 
 ```typescript
 import { exportSquadConfig, importSquadConfig } from '@squad/sdk';
 
-// Export
+// 导出
 const bundle = await exportSquadConfig(config, {
   includeHistory: false,
   anonymize: true,
   format: 'json',
 });
 
-// Import into another project
+// 导入到另一个项目
 const result = await importSquadConfig(bundle, targetDir, {
   merge: true,
   dryRun: false,
 });
-console.log(`Applied ${result.changes.length} changes`);
+console.log(`应用了 ${result.changes.length} 个更改`);
 ```
 
-`ExportBundle` contains config, agents, skills, routing rules, and metadata. `splitHistory()` separates shareable history from private data. `detectConflicts()` identifies merge conflicts; `resolveConflicts()` applies resolution strategies (`keep-existing`, `use-incoming`, `merge`, `manual`).
+`ExportBundle` 包含配置、智能体、技能、路由规则和元数据。`splitHistory()` 将可分享的历史与私有数据分开。`detectConflicts()` 识别合并冲突；`resolveConflicts()` 应用解决策略（`keep-existing`、`use-incoming`、`merge`、`manual`）。
 
-## Agent Repositories
+## 智能体仓库
 
-Pin agents to specific versions for reproducible teams:
+将智能体固定到特定版本以实现可复现的团队：
 
 ```typescript
 import { pinAgentVersion, getAgentVersion, configureAgentRepo } from '@squad/sdk';
@@ -47,54 +46,34 @@ const pin = await getAgentVersion('backend');
 // { agentId: 'backend', sha: 'abc123', timestamp: ..., source: 'github' }
 ```
 
-`configureAgentRepo()` validates GitHub repository config. `AgentRepoOperations` provides push/pull for agent definitions.
+`configureAgentRepo()` 验证 GitHub 仓库配置。`AgentRepoOperations` 提供智能体定义的推送/拉取。
 
-## Versioning & Caching
+## 版本控制和缓存
 
-`AgentCache` provides TTL-based caching for remote agent definitions:
+`AgentCache` 为远程智能体定义提供基于 TTL 的缓存：
 
-- Agent definitions: 1-hour TTL (`DEFAULT_AGENT_TTL`)
-- Skills: 5-minute TTL (`DEFAULT_SKILL_TTL`)
-- `CacheStats` tracks hits, misses, evictions, and size
+- 智能体定义：1小时 TTL（`DEFAULT_AGENT_TTL`）
+- 技能：5分钟 TTL（`DEFAULT_SKILL_TTL`）
+- `CacheStats` 跟踪命中、未命中、驱逐和大小
 
-`parseSemVer()` and `compareSemVer()` handle version comparison. `bumpVersion()` supports major/minor/patch/prerelease increments.
+`parseSemVer()` 和 `compareSemVer()` 处理版本比较。`bumpVersion()` 支持 major/minor/patch/prerelease 增量。
 
-## Security
+## 安全
 
-7 security rules (`SECURITY_RULES`) validate remote agents before installation:
+7 条安全规则（`SECURITY_RULES`）在安装前验证远程智能体：
 
 ```typescript
 import { validateRemoteAgent, generateSecurityReport } from '@squad/sdk';
 
 const report = await validateRemoteAgent(agentDefinition);
 if (report.blocked.length > 0) {
-  console.error('Agent blocked:', report.blocked);
+  console.error('智能体被阻止:', report.blocked);
   const sanitized = quarantineAgent(agentDefinition);
 }
 ```
 
-`SecurityReport` includes pass/fail per rule, warnings, blocked items, and a `riskScore`. `quarantineAgent()` strips injection attempts and caps tool permissions. Rules check for: prompt injection, excessive permissions, suspicious tool patterns, and more.
+`SecurityReport` 包括每条规则的通过/失败、警告、被阻止项目和 `riskScore`。`quarantineAgent()` 剥离注入尝试并限制工具权限。规则检查：提示注入、过度权限、可疑工具模式等。
 
-## Marketplace Browse & Install
+## 市场浏览和安装
 
-`MarketplaceBrowser` provides CLI-based discovery:
-
-```typescript
-import { MarketplaceBrowser } from '@squad/sdk';
-
-const browser = new MarketplaceBrowser(fetcher);
-const results = await browser.search({
-  text: 'backend API',
-  category: 'Development',
-  sort: 'downloads',
-});
-
-// Install an entry
-const installResult = await browser.install(results.entries[0], targetDir);
-```
-
-`formatEntryList()` and `formatEntryDetails()` render entries for terminal output. `MarketplaceBackend` provides the reference API. `packageForMarketplace()` bundles a project for publishing; `validatePackageContents()` checks the package before upload.
-
-## Extensions
-
-`ExtensionAdapter` bridges Squad to the Copilot Extensions API. `toExtensionConfig()` converts Squad config to extension format. `registerExtension()` handles marketplace registration.
+`MarketplaceBrowser` 提供基于 CLI 的发现：
