@@ -1,166 +1,165 @@
-# Memory System
+# 记忆系统
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-
-**Try this to query team decisions:**
+**试试这个查询团队决策：**
 ```
-What decisions has the team made about testing strategy?
-```
-
-**Try this to establish a new rule:**
-```
-Always use single quotes in TypeScript
+团队对测试策略做了什么决策？
 ```
 
-**Try this to check agent knowledge:**
+**试试这个建立新规则：**
 ```
-What does Kane remember about the authentication system?
+始终在 TypeScript 中使用单引号
 ```
 
-Squad remembers everything — decisions, conventions, architecture patterns, and individual agent learnings. Memory grows with every session, making agents smarter over time.
+**试试这个检查智能体知识：**
+```
+Kane 对认证系统记得什么？
+```
+
+Squad 记住一切 —— 决策、约定、架构模式和单个智能体学习。记忆随着每次会话增长，让智能体随时间变得更聪明。
 
 ---
 
-## Memory Layers
+## 记忆层
 
-Squad's memory is layered. Each layer serves a different purpose, and knowledge grows with every session.
-
----
-
-## Personal Memory: `history.md`
-
-Each agent has its own history file at `.squad/agents/{name}/history.md`. After every session, agents append what they learned — architecture decisions, conventions, file paths, user preferences.
-
-**Only that agent reads its own history.** This means each team member builds specialized knowledge about their domain.
-
-After a few sessions, agents stop asking questions they've already answered.
-
-### Progressive summarization
-
-Histories grow over time. When an agent's `history.md` exceeds ~12KB, older entries are archived into a summary section. Recent entries stay detailed; older entries are condensed. This keeps the file within a useful context budget without losing accumulated knowledge.
+Squad 的记忆是分层的。每层服务于不同目的，知识随着每次会话增长。
 
 ---
 
-## Shared Memory: `decisions.md`
+## 个人记忆：history.md
 
-Team-wide decisions live in `.squad/decisions.md`. **Every agent reads this before working.** This is the team's shared brain.
+每个智能体有自己的历史文件在 `.squad/agents/{name}/history.md`。每次会话后，智能体追加他们学到的内容 —— 架构决策、约定、文件路径、用户偏好。
 
-Decisions are captured three ways:
+**只有该智能体读取自己的历史。** 这意味着每个团队成员建立关于其领域的专业知识。
 
-### 1. From agent work
+几次会话后，智能体停止询问已经回答过的问题。
 
-When an agent makes a decision during a task, it writes to the inbox:
+### 渐进式摘要
+
+历史随时间增长。当智能体的 `history.md` 超过 ~12KB 时，旧条目归档到摘要部分。近期条目保持详细；旧条目浓缩。这保持文件在有用上下文预算内而不丢失积累的知识。
+
+---
+
+## 共享记忆：decisions.md
+
+团队范围的决策存在于 `.squad/decisions.md` 中。**每个智能体在工作前阅读这个。** 这是团队的共享大脑。
+
+决策通过三种方式捕获：
+
+### 1. 来自智能体工作
+
+当智能体在任务期间做出决策时，它写入收件箱：
 
 ```
 .squad/decisions/inbox/{agent-name}-{slug}.md
 ```
 
-### 2. From user directives
+### 2. 来自用户指令
 
-When you say "always..." or "never...", it's captured as a directive:
+当你说"始终..."或"绝不..."时，它被捕获为指令：
 
 ```
-> Always use single quotes in TypeScript
-> Never use inline styles
-> Prefer named exports over default exports
+> 始终在 TypeScript 中使用单引号
+> 绝不要使用内联样式
+> 优先使用命名导出而非默认导出
 ```
 
-These go directly into `decisions.md`.
+这些直接进入 `decisions.md`。
 
-### 3. Scribe merges
+### 3. Scribe 合并
 
-The Scribe agent (a silent team member) periodically:
+Scribe 智能体（静默团队成员）定期：
 
-1. Reads all entries from `.squad/decisions/inbox/`
-2. Merges them into the canonical `decisions.md`
-3. Deduplicates overlapping decisions
-4. Propagates updates to affected agents
+1. 从 `.squad/decisions/inbox/` 读取所有条目
+2. 将它们合并到规范的 `decisions.md`
+3. 去重重叠决策
+4. 将更新传播给受影响的智能体
 
-### Decision archiving
+### 决策归档
 
-As your project grows, `decisions.md` accumulates hundreds of blocks. Stale sprint artifacts, completed analysis docs, and one-time planning fragments consume context window space without adding value. When this happens, old decisions are archived to `.squad/decisions-archive.md` — preserved for reference but no longer loaded into agent context.
+随着项目增长，`decisions.md` 积累数百个块。陈旧的冲刺工件、已完成的分析文档和一次性规划片段消耗上下文窗口空间而不增加价值。当这种情况发生时，旧决策归档到 `.squad/decisions-archive.md` —— 保留供参考但不再加载到智能体上下文中。
 
-Active decisions (ongoing policies, user preferences, current architecture) stay in `decisions.md`. Agents always read the lean, current shared brain.
+活跃决策（持续政策、用户偏好、当前架构）保留在 `decisions.md` 中。智能体总是阅读精简的、当前的共享大脑。
 
 ---
 
-## Skills
+## 技能
 
-Reusable knowledge files at `.squad/skills/{skill-name}/SKILL.md`. See [Skills System](skills.md) for details.
+`.squad/skills/{skill-name}/SKILL.md` 处的可复用知识文件。详情参见[技能系统](skills.md)。
 
-Skills differ from decisions — decisions are project policies ("use PostgreSQL"), while skills are transferable techniques ("how to set up CI with GitHub Actions").
+技能与决策不同 —— 决策是项目政策（"使用 PostgreSQL"），而技能是可转移的技术（"如何用 GitHub Actions 设置 CI"）。
 
 ---
 
-## How Memory Compounds
+## 记忆如何复合
 
-| Stage | What agents know |
+| 阶段 | 智能体知道什么 |
 |-------|-----------------|
-| 🌱 First session | Project description, tech stack, your name |
-| 🌿 After a few sessions | Conventions, component patterns, API design, test strategies |
-| 🌳 Mature project | Full architecture, tech debt map, regression patterns, performance conventions |
+| 🌱 首次会话 | 项目描述、技术栈、你的名字 |
+| 🌿 几次会话后 | 约定、组件模式、API 设计、测试策略 |
+| 🌳 成熟项目 | 完整架构、技术债务图、回归模式、性能约定 |
 
 ---
 
-## Memory Architecture
+## 记忆架构
 
 ```
 .squad/
-├── decisions.md                          # Shared — all agents read this
-├── decisions/inbox/                      # Drop-box for parallel writes
+├── decisions.md                          # 共享 —— 所有智能体阅读
+├── decisions/inbox/                      # 并行写入的投递箱
 │   ├── kane-api-versioning.md
 │   └── dallas-component-structure.md
 ├── agents/
 │   ├── kane/
-│   │   └── history.md                    # Kane's personal memory
+│   │   └── history.md                    # Kane 的个人记忆
 │   ├── dallas/
-│   │   └── history.md                    # Dallas's personal memory
+│   │   └── history.md                    # Dallas 的个人记忆
 │   └── lambert/
-│       └── history.md                    # Lambert's personal memory
+│       └── history.md                    # Lambert 的个人记忆
 └── skills/
-    ├── squad-conventions/SKILL.md        # Starter skill
-    └── ci-github-actions/SKILL.md        # Earned skill
+    ├── squad-conventions/SKILL.md        # 入门技能
+    └── ci-github-actions/SKILL.md        # earned 技能
 ```
 
 ---
 
-## Tips
+## 技巧
 
-- **Commit `.squad/`** — anyone who clones the repo gets the team with all their accumulated knowledge.
-- Directives ("always...", "never...") are the fastest way to shape team behavior. Use them liberally.
-- If an agent keeps making the same mistake, check `decisions.md` — the relevant convention might be missing.
-- You can edit `decisions.md` and `history.md` files directly. They're plain Markdown.
-- The first session is always the least capable. Give the team a few sessions to build up context.
+- **提交 `.squad/`** —— 任何克隆仓库的人都会获得团队及其所有积累的知识。
+- 指令（"始终..."、"绝不..."）是塑造团队行为的最快方式。自由使用它们。
+- 如果智能体一直犯同样的错误，检查 `decisions.md` —— 相关约定可能缺失。
+- 你可以直接编辑 `decisions.md` 和 `history.md` 文件。它们是纯 Markdown。
+- 首次会话总是能力最低的。给团队几次会话来建立上下文。
 
-## Sample Prompts
-
-```
-what does Kane remember about the authentication system?
-```
-
-Queries a specific agent's personal history for relevant context.
+## 示例提示
 
 ```
-show me the team decisions about API design
+Kane 对认证系统记得什么？
 ```
 
-Searches the shared decisions.md file for a particular topic.
+查询特定智能体的个人历史以获取相关上下文。
 
 ```
-what happened in the last session?
+展示团队关于 API 设计的决策
 ```
 
-Reviews session history and recent agent learnings.
+搜索共享的 decisions.md 文件以获取特定主题。
 
 ```
-always use single quotes in TypeScript
+上次会话发生了什么？
 ```
 
-Adds a directive to the shared decisions that all agents will follow.
+回顾会话历史和最近的智能体学习。
 
 ```
-search past decisions for database choices
+始终在 TypeScript 中使用单引号
 ```
 
-Finds historical decisions related to a specific topic or keyword.
+向共享决策添加所有智能体都会遵循的指令。
+
+```
+搜索过去关于数据库选择的决策
+```
+
+查找与特定主题或关键词相关的历史决策。

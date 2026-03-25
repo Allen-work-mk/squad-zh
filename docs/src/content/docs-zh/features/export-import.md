@@ -1,126 +1,125 @@
-# Export & Import
+# 导出与导入
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-
-**Try this to make your team portable:**
+**试试这个让你的团队可移植：**
 ```
-Export my team to a file — I want to use them on another project
-```
-
-**Try this to bring a trained team to a new repo:**
-```
-Import the team from squad-export.json
+将我的团队导出到文件 —— 我想在另一个项目上使用他们
 ```
 
-Squad teams are portable. Export your trained agents, casting state, skills, and decisions to a single JSON file. Import them into any repo and they bring all their knowledge with them.
+**试试这个将训练好的团队带到新仓库：**
+```
+从 squad-export.json 导入团队
+```
+
+Squad 团队是可移植的。将你的训练好的智能体、选角状态、技能和决策导出到单个 JSON 文件。将他们导入任何仓库，他们会带来所有知识。
 
 ---
 
-## Export
+## 导出
 
 ```bash
 squad export
 ```
 
-Creates `squad-export.json` in the current directory — a portable snapshot of your entire team: agents, casting state, skills, and decisions.
+在当前目录创建 `squad-export.json` —— 你整个团队的可移植快照：智能体、选角状态、技能和决策。
 
-### Custom output path
+### 自定义输出路径
 
 ```bash
 squad export --out ./backups/my-team.json
 ```
 
-### What's included
+### 包含什么
 
-| Data | Included |
+| 数据 | 包含 |
 |------|----------|
-| Agent charters | ✅ |
-| Agent histories | ✅ (split into portable vs project-specific) |
-| Casting state | ✅ |
-| **Skills** | ✅ **All earned skills export with the team** |
-| Decisions | ✅ |
+| 智能体 charter | ✅ |
+| 智能体历史 | ✅（分为可移植 vs 项目特定） |
+| 选角状态 | ✅ |
+| **技能** | ✅ **所有 earned 技能随团队导出** |
+| 决策 | ✅ |
 
-> **Skills are portable**: When you export a team, all earned skills from `.squad/skills/` are included in the JSON manifest. After importing, skills are immediately available to all agents — no loss of knowledge.
+> **技能是可移植的**：当你导出团队时，`.squad/skills/` 中的所有 earned 技能都包含在 JSON 清单中。导入后，技能立即对所有智能体可用 —— 不丢失知识。
 
 ---
 
-## Import
+## 导入
 
 ```bash
 squad import squad-export.json
 ```
 
-Imports the snapshot into the current repo's `.squad/` directory.
+将快照导入当前仓库的 `.squad/` 目录。
 
-### Collision detection
+### 冲突检测
 
-If `.squad/` already exists, Squad warns you and stops. To archive the existing team and replace it:
+如果 `.squad/` 已存在，Squad 警告你并停止。要归档现有团队并替换它：
 
 ```bash
 squad import squad-export.json --force
 ```
 
-The `--force` flag moves your current team to an archive before importing. Nothing is deleted.
+`--force` 标志在导入前将你的当前团队移动到存档。不会删除任何内容。
 
-### History splitting
+### 历史分割
 
-During import, agent histories are split into two categories:
+导入期间，智能体历史分为两类：
 
-- **Portable knowledge** — general learnings, conventions, and patterns that transfer across projects
-- **Project-specific learnings** — context-tagged entries tied to the original repo
+- **可移植知识** —— 跨项目转移的一般学习、约定和模式
+- **项目特定学习** —— 与原始仓库绑定的上下文标记条目
 
-Imported agents bring their skills and general knowledge without assuming your project works the same way.
+导入的智能体带来他们的技能和一般知识，而不假设你的项目以相同方式工作。
 
 ---
 
-## Use Cases
+## 用例
 
-| Scenario | Command |
+| 场景 | 命令 |
 |----------|---------|
-| Back up before a major refactor | `squad export --out ./backup.json` |
-| Share a trained team with a colleague | Export, send the JSON, they import — **skills included** |
-| Move a team to a different repo | Export from old repo, import into new repo — **skills travel with agents** |
-| Reset and start fresh | Export as backup, delete `.squad/`, re-init |
+| 重大重构前备份 | `squad export --out ./backup.json` |
+| 与同事分享训练好的团队 | 导出，发送 JSON，他们导入 —— **技能包含在内** |
+| 将团队移动到不同仓库 | 从旧仓库导出，导入新仓库 —— **技能随智能体旅行** |
+| 重置并重新开始 | 导出为备份，删除 `.squad/`，重新初始化 |
 
 ---
 
-## Tips
+## 技巧
 
-- Export before running `upgrade` if you want a rollback point.
-- The export file is JSON — you can inspect it to see exactly what your team knows.
-- Imported agents retain their names and universe. They won't be renamed.
-- Commit your `.squad/` directory after importing so the team is available to everyone who clones the repo.
-- **Skills are fully portable** — all earned skills export and import with perfect fidelity. No manual copying needed.
+- 如果你想要回滚点，在运行 `upgrade` 之前导出。
+- 导出文件是 JSON —— 你可以检查它以准确看到你的团队知道什么。
+- 导入的智能体保留他们的名称和宇宙。他们不会被重命名。
+- 导入后提交你的 `.squad/` 目录，以便克隆仓库的每个人都能获得团队。
+- **技能完全可移植** —— 所有 earned 技能以完美的保真度导出和导入。无需手动复制。
 
-## Sample Prompts
-
-```
-export the current team
-```
-
-Creates a `squad-export.json` snapshot of the entire team in the current directory.
+## 示例提示
 
 ```
-import squad-export.json into this repo
+导出当前团队
 ```
 
-Imports a team snapshot into the current project's `.squad/` directory.
+在当前目录创建整个团队的 `squad-export.json` 快照。
 
 ```
-what was included in that export?
+将 squad-export.json 导入此仓库
 ```
 
-Shows a summary of what data was captured in the most recent export file.
+将团队快照导入当前项目的 `.squad/` 目录。
 
 ```
-export just the team state, not the full history
+该导出包含什么？
 ```
 
-Creates a lightweight export with agent charters and skills but minimal history.
+显示最近导出文件中捕获的数据摘要。
 
 ```
-import with --force and archive the current team
+仅导出团队状态，不导出完整历史
 ```
 
-Overwrites the existing `.squad/` directory after archiving it as a backup.
+创建轻量级导出，包含智能体 charter 和技能但最少历史。
+
+```
+使用 --force 导入并归档当前团队
+```
+
+在归档为备份后覆盖现有的 `.squad/` 目录。

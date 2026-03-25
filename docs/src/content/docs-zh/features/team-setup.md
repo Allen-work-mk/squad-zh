@@ -1,139 +1,99 @@
-# Team Setup & Init Mode
+# 团队设置与初始化模式
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-
-**Try this to initialize for a specific stack:**
+**试试这个为特定技术栈初始化：**
 ```
-Set up a team for a React + Node.js API with PostgreSQL
-```
-
-**Try this to expand capabilities:**
-```
-Add a security specialist to the team
+为 React + Node.js API 和 PostgreSQL 设置团队
 ```
 
-**Try this to view the roster:**
+**试试这个扩展能力：**
 ```
-Show me the current team roster
+向团队添加安全专家
 ```
 
-Squad analyzes your project and proposes a team roster with 3-7 members tailored to your stack. You can accept as-is, customize during setup, or modify the team anytime after.
+**试试这个查看花名册：**
+```
+展示当前团队花名册
+```
+
+Squad 分析你的项目并提议一个 3-7 名成员的团队花名册，针对你的技术栈定制。你可以按原样接受、在设置期间自定义，或随时修改团队。
 
 ---
 
-## How Init Works
+## 初始化如何工作
 
-When you first run Squad in a repository, it doesn't impose a team — it proposes one. The init flow analyzes your project, suggests roles and members, waits for your confirmation, then creates the `.squad/` directory structure and installs the crew.
+当你在仓库中首次运行 Squad 时，它不会强加一个团队 —— 它提议一个。初始化流程分析你的项目、建议角色和成员、等待你的确认，然后创建 `.squad/` 目录结构并安装团队。
 
-### Character Casting
+### 角色选角
 
-By default, Squad uses the **CastingEngine** to assign agent names from fictional universes (The Usual Suspects, Ocean's Eleven, etc.). The LLM proposes roles and team composition; the engine allocates curated character names, personalities, and backstories from the selected universe. Use `squad init --roles` to opt into the base role catalog (Lead, Backend, Frontend, Tester) instead of universe casting.
+默认情况下，Squad 使用**选角引擎**从虚构宇宙（非常嫌疑犯、十一罗汉等）分配智能体名称。LLM 提议角色和团队组成；引擎从选定的宇宙分配策划的角色名称、个性和背景故事。使用 `squad init --roles` 选择基础角色目录（组长、后端、前端、测试人员）而非宇宙选角。
 
-## How Init Works
+## 初始化如何工作
 
-1. **Discovery** — Squad scans your repository: language distribution, file structure, test frameworks, dependencies, existing workflows.
-2. **Proposal** — Based on what it finds, Squad proposes a team roster with 3-7 members and their roles.
-3. **Confirmation** — You review the proposal and can accept as-is, add members, remove members, or change roles.
-4. **Creation** — Squad writes `.squad/team.md`, creates agent directories under `.squad/agents/{member}/`, and sets up the coordinator.
+1. **发现** —— Squad 扫描你的仓库：语言分布、文件结构、测试框架、依赖项、现有工作流。
+2. **提议** —— 基于发现的内容，Squad 提议一个 3-7 名成员及其角色的团队花名册。
+3. **确认** —— 你审查提议，可以按原样接受、添加成员、移除成员或更改角色。
+4. **创建** —— Squad 写入 `.squad/team.md`，在 `.squad/agents/{member}/` 下创建智能体目录，并设置协调器。
 
-### File Structure Created
+### 创建的文件结构
 
 ```
 .squad/
-├── team.md                         # Team roster
-├── routing.md                      # Work routing rules
-├── decisions.md                    # Team memory (directives)
-├── decisions/inbox/                # Pending decision writes
+├── team.md                         # 团队花名册
+├── routing.md                      # 工作路由规则
+├── decisions.md                    # 团队记忆（指令）
+├── decisions/inbox/                # 待处理决策写入
 ├── agents/
 │   ├── {member1}/
-│   │   ├── charter.md              # Role, skills, voice
-│   │   └── context.md              # Agent-specific notes
+│   │   ├── charter.md              # 角色、技能、声音
+│   │   └── context.md              # 智能体特定笔记
 │   ├── {member2}/
 │   │   └── charter.md
 │   └── ...
 ├── skills/
-│   ├── {skill1}.md                 # Skill definitions
+│   ├── {skill1}.md                 # 技能定义
 │   └── ...
-├── log/                            # Execution logs
-├── orchestration-log/              # Coordinator state
-└── casting/                        # Universe assignments
+├── log/                            # 执行日志
+├── orchestration-log/              # 协调器状态
+└── casting/                        # 宇宙分配
 ```
 
-## Customizing During Init
+## 初始化期间定制
 
-| What you say | What happens |
+| 你说什么 | 发生什么 |
 |--------------|--------------|
-| "Accept" / "Looks good" | Creates team as proposed |
-| "Add a designer" | Adds a designer role to the roster |
-| "Remove the tester" | Drops tester from the team |
-| "Change backend to Rust specialist" | Adjusts role focus for that member |
-| "Make Fenster the frontend lead" | Assigns specific name to role |
+| "接受" / "看起来不错" | 按提议创建团队 |
+| "添加设计师" | 向花名册添加设计师角色 |
+| "移除测试人员" | 从团队中删除测试人员 |
+| "将后端更改为 Rust 专家" | 调整该成员的角色重点 |
+| "让 Fenster 当前端组长" | 为角色分配特定名称 |
 
-## Customizing After Init
+## 初始化后定制
 
-You can modify `.squad/team.md` directly or ask the coordinator:
+你可以直接修改 `.squad/team.md` 或询问协调器：
 
-> "Add a security specialist to the team"
+> "向团队添加安全专家"
 
-The coordinator will:
-1. Cast a new member from the universe
-2. Create their agent directory and charter
-3. Update `team.md` and `routing.md`
+协调器将：
+1. 从宇宙选角新成员
+2. 创建他们的智能体目录和 charter
+3. 更新 `team.md` 和 `routing.md`
 
-> "Remove McManus from the team"
+> "从团队中移除 McManus"
 
-The coordinator will:
-1. Remove the member from `team.md`
-2. Archive their agent directory (moves to `.squad/agents/.archived/{member}/`)
-3. Update routing rules
+协调器将：
+1. 从 `team.md` 移除成员
+2. 归档他们的智能体目录（移动到 `.squad/agents/.archived/{member}/`）
+3. 更新路由规则
 
-## Default Team Composition
+## 默认团队组成
 
-For most projects, Squad proposes:
+对于大多数项目，Squad 提议：
 
-| Role | When Included |
+| 角色 | 何时包含 |
 |------|--------------|
-| **Lead** | Always — triages, reviews, unblocks |
-| **Core Dev** | Always — main implementation |
-| **Tester** | If tests exist or `package.json`/`pyproject.toml` has test deps |
-| **DevRel** | If README exists or docs/ present |
-| **Frontend** | If React/Vue/Svelte/Angular detected |
-| **Backend** | If API routes, database code, or server framework detected |
-| **Scribe** | Always — decision logger |
-
-## Upgrade vs. Init
-
-| Command | When to Use |
-|---------|------------|
-| `init` | First-time setup in a new repository |
-| `upgrade` | Existing `.squad/` — updates templates, adds new members, migrates config |
-
-Running `init` on an existing Squad repository prompts for upgrade mode automatically.
-
-## Sample Prompts
-
-```
-Start a new Squad team for this project
-```
-Triggers init mode. Squad analyzes the repository and proposes a team.
-
-```
-Add a database specialist to the team
-```
-Adds a new member post-init. Coordinator casts from universe, creates charter, updates routing.
-
-```
-Remove the designer role — we don't need it
-```
-Removes a team member. Archives their directory and updates team.md.
-
-```
-Show me the current team roster
-```
-Displays team.md with all members, roles, and capabilities.
-
-```
-Change the tester to focus on integration tests instead of unit tests
-```
-Updates the tester's charter to adjust their focus area and expertise.
+| **组长** | 始终 —— 分流、评审、解除阻塞 |
+| **核心开发** | 始终 —— 主要实现 |
+| **测试人员** | 如果存在测试或 `package.json`/`pyproject.toml` 有测试依赖 |
+| **开发者关系** | 如果存在 README 或 docs/ |

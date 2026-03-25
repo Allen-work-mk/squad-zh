@@ -1,171 +1,170 @@
-# Work Routing
+# 工作路由
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-
-**Try this to set domain-specific routing:**
+**试试这个设置特定领域路由：**
 ```
-Route all database-related work to Basher
-```
-
-**Try this to direct work explicitly:**
-```
-Fenster, fix the login validation bug
+将所有数据库相关工作路由给 Basher
 ```
 
-**Try this to check routing logic:**
+**试试这个明确指导工作：**
 ```
-Who handles src/api/ changes?
+Fenster，修复登录验证 bug
 ```
 
-The coordinator routes work to the right agent using named routing (explicit), domain routing (pattern matching), and skill-aware routing (capability checking). No manual triage needed.
+**试试这个检查路由逻辑：**
+```
+谁处理 src/api/ 更改？
+```
+
+协调器使用命名路由（显式）、领域路由（模式匹配）和基于技能的路由（能力检查）将工作路由给正确的智能体。无需人工分流。
 
 ---
 
-## Routing Strategies
+## 路由策略
 
-The coordinator decides who handles each piece of work using a three-layer routing system: named routing (explicit assignments), domain routing (pattern matching), and skill-aware routing (capability checking). The goal: get work to the right agent without manual triage overhead.
+协调器使用三层路由系统决定谁处理每份工作：命名路由（显式分配）、领域路由（模式匹配）和基于技能的路由（能力检查）。目标：无需人工分流开销即可将工作交给正确的智能体。
 
-## Routing Strategies
+## 路由策略
 
-### 1. Named Routing
+### 1. 命名路由
 
-You explicitly name who should do the work:
+你明确命名谁应该做这项工作：
 
-> "Fenster, fix the login validation bug"
+> "Fenster，修复登录验证 bug"
 
-Coordinator assigns directly to Fenster. No lookup required.
+协调器直接分配给 Fenster。无需查找。
 
-### 2. Domain Routing
+### 2. 领域路由
 
-The coordinator checks `.squad/routing.md` for pattern matches:
+协调器检查 `.squad/routing.md` 中的模式匹配：
 
 ```markdown
-## Routing Table
+## 路由表
 
-| Pattern | Owner | Reason |
+| 模式 | 负责人 | 原因 |
 |---------|-------|--------|
-| `src/api/**` | Backend | API implementation |
-| `src/components/**/*.tsx` | Frontend | React components |
-| `*.test.ts` | Tester | Test files |
-| `docs/**` | DevRel | Documentation |
-| `package.json`, `tsconfig.json` | Lead | Config changes |
+| `src/api/**` | 后端 | API 实现 |
+| `src/components/**/*.tsx` | 前端 | React 组件 |
+| `*.test.ts` | 测试人员 | 测试文件 |
+| `docs/**` | 开发者关系 | 文档 |
+| `package.json`, `tsconfig.json` | 组长 | 配置更改 |
 ```
 
-When work involves `src/api/auth.ts`, it routes to Backend automatically.
+当工作涉及 `src/api/auth.ts` 时，它自动路由到后端。
 
-### 3. Skill-Aware Routing
+### 3. 基于技能的路由
 
-If no domain match, the coordinator checks `.squad/skills/` for capability fit:
+如果没有领域匹配，协调器检查 `.squad/skills/` 中的能力适配：
 
 ```markdown
 # authentication.md
-Members with authentication expertise:
-- Backend (OAuth, JWT, session management)
-- Lead (security review, architecture)
+具有认证专长的成员：
+- 后端（OAuth、JWT、会话管理）
+- 组长（安全审查、架构）
 ```
 
-Work tagged with authentication routes to Backend or Lead based on task type (implementation vs. review).
+标记为认证的工作基于任务类型（实现 vs 审查）路由到后端或组长。
 
-## The Routing Table
+## 路由表
 
-`.squad/routing.md` is the canonical routing manifest. It's structured as:
+`.squad/routing.md` 是规范的路由清单。其结构为：
 
 ```markdown
-# Work Routing
+# 工作路由
 
-Default assignments for common patterns.
+常见模式的默认分配。
 
-## Routing Table
+## 路由表
 
-| Pattern | Owner | Reason |
+| 模式 | 负责人 | 原因 |
 |---------|-------|--------|
-| `src/frontend/**` | Frontend | UI implementation |
-| `src/backend/**` | Backend | Server logic |
-| `*.test.js` | Tester | Test coverage |
-| `README.md`, `docs/**` | DevRel | User-facing docs |
-| `.github/workflows/**` | Lead | CI/CD config |
+| `src/frontend/**` | 前端 | UI 实现 |
+| `src/backend/**` | 后端 | 服务器逻辑 |
+| `*.test.js` | 测试人员 | 测试覆盖 |
+| `README.md`, `docs/**` | 开发者关系 | 面向用户的文档 |
+| `.github/workflows/**` | 组长 | CI/CD 配置 |
 
-## Fallback
+## 回退
 
-If no match: route to Lead for triage.
+如果没有匹配：路由给组长进行分流。
 ```
 
-## Adding Routing Rules
+## 添加路由规则
 
-Tell the coordinator:
+告诉协调器：
 
-> "From now on, route all database migrations to Backend"
+> "从现在开始，将所有数据库迁移路由给后端"
 
-Coordinator adds to routing.md:
+协调器添加到 routing.md：
 
 ```markdown
-| `migrations/**`, `*.sql` | Backend | Database schema changes |
+| `migrations/**`, `*.sql` | 后端 | 数据库模式更改 |
 ```
 
-Or edit `.squad/routing.md` directly.
+或直接编辑 `.squad/routing.md`。
 
-## Routing Ambiguity
+## 路由歧义
 
-When multiple patterns match:
+当多个模式匹配时：
 
-1. **Most specific wins** — `src/api/auth.ts` matches both `src/api/**` and `src/**`, but `src/api/**` is more specific.
-2. **Named > Domain > Skill** — Explicit assignment always overrides pattern matching.
-3. **Fallback to Lead** — If no clear owner, route to Lead for triage.
+1. **最具体获胜** —— `src/api/auth.ts` 匹配 `src/api/**` 和 `src/**`，但 `src/api/**` 更具体。
+2. **命名 > 领域 > 技能** —— 显式分配始终覆盖模式匹配。
+3. **回退到组长** —— 如果没有明确所有者，路由给组长进行分流。
 
-## Issue Label Routing
+## Issue 标签路由
 
-GitHub issues with `squad:{member}` labels route directly:
+带有 `squad:{member}` 标签的 GitHub issues 直接路由：
 
-- `squad:fenster` → Fenster picks it up
-- `squad:mcmanus` → McManus handles it
-- No `squad:*` label → Coordinator triages and assigns
+- `squad:fenster` → Fenster 获取它
+- `squad:mcmanus` → McManus 处理它
+- 没有 `squad:*` 标签 → 协调器分流并分配
 
-Ralph (the work monitor) uses this to auto-assign based on routing rules.
+Ralph（工作监控器）使用它基于路由规则自动分配。
 
-## Multi-Agent Work
+## 多智能体工作
 
-Some tasks require multiple agents:
+某些任务需要多个智能体：
 
-> "Fenster, implement the API. Hockney, write the tests."
+> "Fenster，实现 API。Hockney，编写测试。"
 
-Coordinator spawns both agents in parallel. They work independently and coordinate via the shared `.squad/` state.
+协调器并行生成两个智能体。他们独立工作并通过共享的 `.squad/` 状态协调。
 
-## Routing Logs
+## 路由日志
 
-The coordinator logs routing decisions to `.squad/orchestration-log/`:
-
-```
-[2024-01-15 14:23:10] ROUTE: Issue #42 → Backend (pattern: src/api/**)
-[2024-01-15 14:24:05] ROUTE: Issue #43 → Lead (no match, fallback)
-[2024-01-15 14:25:30] ROUTE: "Fenster, fix bug" → Fenster (named)
-```
-
-Useful for debugging why work went to a specific agent.
-
-## Sample Prompts
+协调器将路由决策记录到 `.squad/orchestration-log/`：
 
 ```
-Route all CSS files to Frontend
+[2024-01-15 14:23:10] 路由：问题 #42 → 后端（模式：src/api/**）
+[2024-01-15 14:24:05] 路由：问题 #43 → 组长（无匹配，回退）
+[2024-01-15 14:25:30] 路由："Fenster，修复 bug" → Fenster（命名）
 ```
-Adds a routing rule: `*.css` → Frontend.
+
+有助于调试为什么工作去了特定智能体。
+
+## 示例提示
 
 ```
-Who handles authentication work?
+将所有 CSS 文件路由给前端
 ```
-Coordinator checks routing.md and skills/authentication.md, reports the responsible agent(s).
+添加路由规则：`*.css` → 前端。
 
 ```
-From now on, McManus reviews all user-facing documentation before merge
+谁处理认证工作？
 ```
-Creates a routing rule + directive: docs/** routes to McManus for review.
+协调器检查 routing.md 和 skills/authentication.md，报告负责的智能体。
 
 ```
-Why did issue #42 go to Backend?
+从现在开始，McManus 在合并前评审所有面向用户的文档
 ```
-Coordinator explains the routing decision based on pattern match or skill fit.
+创建路由规则 + 指令：docs/** 路由给 McManus 进行审查。
 
 ```
-Fenster, implement the new search API. Hockney, write integration tests for it.
+为什么问题 #42 去了后端？
 ```
-Named routing to two agents. Both spawn in parallel.
+协调器基于模式匹配或技能适配解释路由决策。
+
+```
+Fenster，实现新的搜索 API。Hockney，为其编写集成测试。
+```
+命名路由到两个智能体。两者都并行生成。

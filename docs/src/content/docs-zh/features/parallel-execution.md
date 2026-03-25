@@ -1,177 +1,100 @@
-# Parallel Execution
+# 并行执行
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-
-**Try this to launch concurrent work streams:**
+**试试这个启动并发工作流：**
 ```
-Have three agents work on this in parallel: UI mockups, API spec, and database schema
-```
-
-**Try this to work multiple issues simultaneously:**
-```
-Work on issues #12, #15, and #18 at the same time
+让三个智能体并行处理这个：UI 模型、API 规范、数据库模式
 ```
 
-**Try this to control concurrency for cost savings:**
+**试试这个同时处理多个 issues：**
 ```
-Run at most 2 agents at once to save costs
+同时处理 issues #12、#15 和 #18
 ```
 
-Squad launches independent work in parallel by default — multiple agents work simultaneously, no waiting. You control concurrency limits and can force sequential execution when needed.
+**试试这个控制并发以节省成本：**
+```
+最多同时运行 2 个智能体以节省成本
+```
+
+Squad 默认并行启动独立工作 —— 多个智能体同时工作，无需等待。你控制并发限制，可以在需要时强制顺序执行。
 
 ---
 
-## How Parallel Execution Works
+## 并行执行如何工作
 
-Squad runs agents in parallel whenever possible. The fan-out pattern launches all independent agents simultaneously, waits for results, then proceeds — no sequential bottlenecks unless data dependencies or reviewer gates require them.
+Squad 尽可能并行运行智能体。展开模式同时启动所有独立智能体，等待结果，然后继续 —— 除非数据依赖或评审者门禁需要，否则没有顺序瓶颈。
 
-## How Parallel Execution Works
+## 并行执行如何工作
 
-When the coordinator receives work:
+当协调器收到工作时：
 
-1. **Dependency Analysis** — Check if tasks have data dependencies (A needs output from B).
-2. **Fan-Out** — Launch all independent agents in parallel using `mode: "background"`.
-3. **Wait** — Coordinator polls agent status until all complete.
-4. **Collect** — Aggregate results, check for errors, route to next step.
+1. **依赖分析** —— 检查任务是否有数据依赖（A 需要 B 的输出）。
+2. **展开** —— 使用 `mode: "background"` 并行启动所有独立智能体。
+3. **等待** —— 协调器轮询智能体状态直到全部完成。
+4. **收集** —— 聚合结果，检查错误，路由到下一步。
 
-### Example: Feature Implementation
+### 示例：功能实现
 
-> "Implement user authentication: API endpoints, frontend form, tests, and documentation"
+> "实现用户认证：API 端点、前端表单、测试和文档"
 
-Coordinator spawns **4 agents in parallel**:
-- Backend → API endpoints
-- Frontend → Login/signup form
-- Tester → Integration tests
-- DevRel → Auth documentation
+协调器**并行生成 4 个智能体**：
+- 后端 → API 端点
+- 前端 → 登录/注册表单
+- 测试人员 → 集成测试
+- 开发者关系 → 认证文档
 
-All work simultaneously. No agent waits for another unless there's a code dependency.
+所有同时工作。除非有代码依赖，否则没有智能体等待另一个。
 
-## Background vs Sync Mode
+## 后台 vs 同步模式
 
-| Mode | When to Use | Behavior |
+| 模式 | 何时使用 | 行为 |
 |------|-------------|----------|
-| `background` | Independent work, no data dependencies | Agent runs in parallel, coordinator polls for completion |
-| `sync` | Data dependency (one agent needs output from another) | Agent runs sequentially, coordinator waits |
-| `sync` | Reviewer gate (Lead must approve before continuing) | Agent runs, coordinator waits for review decision |
+| `background` | 独立工作，无数据依赖 | 智能体并行运行，协调器轮询完成 |
+| `sync` | 数据依赖（一个智能体需要另一个的输出） | 智能体顺序运行，协调器等待 |
+| `sync` | 评审者门禁（组长必须先批准才能继续） | 智能体运行，协调器等待评审决策 |
 
-### Background Mode
+### 后台模式
 
-Used for **fan-out parallelism**:
+用于**展开并行**：
 
 ```
-Coordinator → [Agent1, Agent2, Agent3] (background)
+协调器 → [智能体1, 智能体2, 智能体3]（后台）
                 ↓        ↓        ↓
-              Result1  Result2  Result3
+              结果1  结果2  结果3
                 ↓        ↓        ↓
-            Coordinator collects all
+            协调器收集全部
 ```
 
-Agents don't see each other's output until the coordinator collects and synthesizes.
+智能体在协调器收集和综合之前看不到彼此的输出。
 
-### Sync Mode
+### 同步模式
 
-Used for **dependencies and gates**:
+用于**依赖和门禁**：
 
 ```
-Coordinator → Agent1 (sync) → Result1
+协调器 → 智能体1（同步）→ 结果1
                 ↓
-      Coordinator → Agent2 (sync, uses Result1) → Result2
+      协调器 → 智能体2（同步，使用结果1）→ 结果2
                 ↓
-      Coordinator → Reviewer (sync, gates next step)
+      协调器 → 评审者（同步，门禁下一步）
 ```
 
-Each step blocks until the previous completes.
+每一步阻塞直到前一步完成。
 
-## Eager Execution Philosophy
+## 急切执行哲学
 
-Squad's default is **eager parallelism** — launch everything that can run, let the coordinator handle synchronization. Benefits:
+Squad 的默认是**急切并行** —— 启动一切可以运行的，让协调器处理同步。好处：
 
-- **Faster throughput** — No artificial sequencing.
-- **Better resource utilization** — Multiple agents saturate available compute.
-- **Resilient to blocking** — If one agent stalls, others keep working.
+- **更快吞吐** —— 无人工排序。
+- **更好资源利用** —— 多个智能体饱和可用计算。
+- **抗阻塞** —— 如果一个智能体停滞，其他继续工作。
 
-Trade-off: Increased API cost (multiple agents running simultaneously). If cost is a concern, tell the coordinator:
+权衡：增加 API 成本（多个智能体同时运行）。如果成本是问题，告诉协调器：
 
-> "Work sequentially to save costs"
+> "顺序工作以节省成本"
 
-Coordinator switches to sync mode for all agents.
+协调器为所有智能体切换到同步模式。
 
-## Deadlock Avoidance
+## 死锁避免
 
-When agents have circular dependencies:
-
-- **Agent A** needs output from **Agent B**
-- **Agent B** needs output from **Agent A**
-
-The coordinator detects the cycle during dependency analysis and prompts:
-
-```
-⚠️ Circular dependency detected: A ↔ B
-Choose resolution:
-1. Run A first, then B
-2. Run B first, then A
-3. Redesign to remove dependency
-```
-
-## Reviewer Gates
-
-Some tasks require **sequential review**:
-
-1. Agent writes code → Draft PR
-2. Lead reviews → Approves or rejects
-3. If approved → Merge and close
-4. If rejected → Reassign or escalate (agent is **locked out**)
-
-This is a **sync gate** — the next step cannot proceed until the reviewer completes.
-
-## Parallel Execution Logs
-
-The coordinator logs parallel execution in `.squad/orchestration-log/`:
-
-```
-[2024-01-15 14:30:00] FAN-OUT: Spawning 4 agents (Backend, Frontend, Tester, DevRel)
-[2024-01-15 14:30:15] AGENT: Backend started (background)
-[2024-01-15 14:30:16] AGENT: Frontend started (background)
-[2024-01-15 14:30:17] AGENT: Tester started (background)
-[2024-01-15 14:30:18] AGENT: DevRel started (background)
-[2024-01-15 14:35:42] COLLECT: Backend completed (success)
-[2024-01-15 14:36:10] COLLECT: Frontend completed (success)
-[2024-01-15 14:36:55] COLLECT: DevRel completed (success)
-[2024-01-15 14:38:20] COLLECT: Tester completed (success)
-[2024-01-15 14:38:21] FAN-IN: All agents complete
-```
-
-## Parallel Limits
-
-The coordinator respects concurrency limits to avoid rate limits or resource exhaustion:
-
-- **Default:** 5 agents in parallel
-- **Adjustable:** `"Run at most 3 agents at once"` → Coordinator batches work in groups of 3
-
-## Sample Prompts
-
-```
-Build the new dashboard feature — everyone work in parallel
-```
-Coordinator spawns all relevant agents (Frontend, Backend, Tester, DevRel) simultaneously.
-
-```
-Implement the API first, then write tests — do it sequentially
-```
-Forces sync mode: Backend runs, completes, then Tester starts.
-
-```
-Work on issues #12, #15, and #18 at the same time
-```
-Spawns 3 agents in parallel, one per issue. Assumes no dependencies between issues.
-
-```
-Run at most 2 agents at once to save costs
-```
-Sets concurrency limit. Coordinator batches work: runs 2, waits for completion, runs next 2.
-
-```
-Why is Tester waiting? Show me the dependency graph.
-```
-Coordinator explains why Tester is blocked (e.g., waiting for Backend to finish implementation).

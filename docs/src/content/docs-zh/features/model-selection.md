@@ -1,68 +1,61 @@
----
-title: Per-Agent Model Selection
-description: Route each agent to the right model based on task type, with persistent overrides and economy mode.
-order: 34
----
+# 每个智能体的模型选择
 
-# Per-Agent Model Selection
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
-
-
-**Try this to set a persistent preference (survives across sessions):**
+**试试这个设置持久偏好（跨会话保留）：**
 ```
-Always use Opus
+始终使用 Opus
 ```
 
-**Try this to prioritize quality for the session only:**
+**试试这个仅会话优先质量：**
 ```
-Have all agents use Opus for the rest of this session
-```
-
-**Try this to optimize costs:**
-```
-Switch to Haiku — I'm trying to save costs
+让剩余会话的所有智能体使用 Opus
 ```
 
-**Try this to balance quality and budget:**
+**试试这个优化成本：**
 ```
-Use Sonnet for code, Haiku for everything else
-```
-
-**Try this to go back to automatic selection:**
-```
-Switch back to automatic model selection
+切换到 Haiku —— 我在尝试节省成本
 ```
 
-Squad adjusts model selection based on your directive. Agents writing code get quality models (Sonnet/Opus), agents doing docs/logs get cost-optimized models (Haiku). You can override anytime — and persistent overrides survive across sessions.
+**试试这个平衡质量和预算：**
+```
+代码用 Sonnet，其他用 Haiku
+```
+
+**试试这个返回自动选择：**
+```
+切换回自动模型选择
+```
+
+Squad 根据你的指令调整模型选择。编写代码的智能体获得质量模型（Sonnet/Opus），做文档/日志的智能体获得成本优化模型（Haiku）。你可以随时覆盖 —— 持久覆盖跨会话保留。
 
 ---
 
-## How It Works
+## 如何工作
 
-Squad routes each agent to the right model based on what they're doing — not a one-size-fits-all default. The governing principle: **cost first, unless code is being written** — but your preferences always take priority.
+Squad 根据每个智能体在做什么将他们路由到正确的模型 —— 不是一刀切默认。指导原则：**成本优先，除非在编写代码** —— 但你的偏好始终优先。
 
-## 5-Layer Model Resolution
+## 5层模型解析
 
-Model selection uses a layered system. First match wins:
+模型选择使用分层系统。第一个匹配获胜：
 
-1. **Persistent Config** (`.squad/config.json`) — You said "always use opus"? It's saved to disk. Every session, every agent, until you change it. Per-agent overrides (`agentModelOverrides`) take priority over the global `defaultModel`.
-2. **Session Directive** — You said "use opus for this session"? Done. Applies until the session ends.
-3. **Charter Preference** — The agent's charter specifies a `## Model` section with a preferred model.
-4. **Task-Aware Auto-Selection** — The coordinator checks what the agent is actually doing:
+1. **持久配置**（`.squad/config.json`）—— 你说"始终使用 opus"？它保存到磁盘。每个会话，每个智能体，直到你更改。每个智能体的覆盖（`agentModelOverrides`）优先于全局 `defaultModel`。
+2. **会话指令** —— 你说"此会话使用 opus"？完成。应用到会话结束。
+3. **Charter 偏好** —— 智能体的 charter 指定了 `## 模型` 部分，带有首选模型。
+4. **任务感知自动选择** —— 协调器检查智能体实际在做什么：
 
-| Task Output | Model | Tier |
+| 任务输出 | 模型 | 等级 |
 |-------------|-------|------|
-| Writing code (implementation, refactoring, tests, bug fixes) | `claude-sonnet-4.6` | Standard |
-| Writing prompts or agent designs | `claude-sonnet-4.6` | Standard |
-| Non-code work (docs, planning, triage, changelogs) | `claude-haiku-4.5` | Fast |
-| Visual/design work requiring image analysis | `claude-opus-4.6` | Premium |
+| 编写代码（实现、重构、测试、bug 修复） | `claude-sonnet-4.6` | 标准 |
+| 编写提示或智能体设计 | `claude-sonnet-4.6` | 标准 |
+| 非代码工作（文档、规划、分流、变更日志） | `claude-haiku-4.5` | 快速 |
+| 需要图像分析的视觉/设计工作 | `claude-opus-4.6` | 高级 |
 
-5. **Default** — If nothing matched, `claude-haiku-4.5`. Cost wins when in doubt.
+5. **默认** —— 如果没有匹配，`claude-haiku-4.5`。有疑义时成本获胜。
 
-## Persistent Model Preferences
+## 持久模型偏好
 
-Squad stores your model preferences in `.squad/config.json`:
+Squad 将模型偏好存储在 `.squad/config.json`：
 
 ```json
 {
@@ -75,115 +68,26 @@ Squad stores your model preferences in `.squad/config.json`:
 }
 ```
 
-- **`defaultModel`** — applies to ALL agents unless overridden. Set with "always use X".
-- **`agentModelOverrides`** — per-agent overrides. Set with "use X for {agent}".
-- **Clear with** "switch back to automatic" — removes `defaultModel`, returns to auto-selection.
+- **`defaultModel`** —— 应用于所有智能体，除非被覆盖。用"始终使用 X"设置。
+- **`agentModelOverrides`** —— 每个智能体的覆盖。用"为 {agent} 使用 X"设置。
+- **用** "切换回自动"清除 —— 移除 `defaultModel`，返回自动选择。
 
-## Role-to-Model Mapping
+## 角色到模型映射
 
-| Role | Default Model | Why |
+| 角色 | 默认模型 | 原因 |
 |------|--------------|-----|
-| Core Dev / Backend / Frontend | `claude-sonnet-4.6` | Writes code — quality first |
-| Tester / QA | `claude-sonnet-4.6` | Writes test code |
-| Lead / Architect | auto (per-task) | Mixed: code review vs. planning |
-| Prompt Engineer | auto (per-task) | Prompt design is like code |
-| DevRel / Writer | `claude-haiku-4.5` | Docs — not code |
-| Scribe / Logger | `claude-haiku-4.5` | Mechanical file ops |
-| Git / Release | `claude-haiku-4.5` | Changelogs, tags, version bumps |
-| Designer / Visual | `claude-opus-4.6` | Vision capability required |
+| 核心开发 / 后端 / 前端 | `claude-sonnet-4.6` | 编写代码 —— 质量优先 |
+| 测试人员 / QA | `claude-sonnet-4.6` | 编写测试代码 |
+| 组长 / 架构师 | 自动（按任务） | 混合：代码审查 vs 规划 |
+| 提示工程师 | 自动（按任务） | 提示设计就像代码 |
+| 开发者关系 / 编写者 | `claude-haiku-4.5` | 文档 —— 不是代码 |
+| 书记员 / 记录器 | `claude-haiku-4.5` | 机械文件操作 |
+| Git / 发布 | `claude-haiku-4.5` | 变更日志、标签、版本提升 |
+| 设计师 / 视觉 | `claude-opus-4.6` | 需要视觉能力 |
 
-## 18-Model Catalog
+## 18模型目录
 
-Squad supports 18 models across three tiers:
+Squad 支持三个等级的 18 个模型：
 
-- **Premium:** claude-opus-4.6, claude-opus-4.6-fast, claude-opus-4.5
-- **Standard:** claude-sonnet-4.6, gpt-5.4, gpt-5.3-codex, gpt-5.2-codex, claude-sonnet-4, gpt-5.2, gpt-5.1-codex, gpt-5.1, gpt-5, gemini-3-pro-preview
-- **Fast/Cheap:** claude-haiku-4.5, gpt-5.1-codex-mini, gpt-4.1, gpt-5-mini
-
-## Fallback Chains
-
-If a model is unavailable (plan restriction, rate limit, deprecation), Squad silently retries with the next in chain:
-
-```
-Premium:  claude-opus-4.6 → claude-opus-4.6-fast → claude-opus-4.5 → claude-sonnet-4.6
-Standard: claude-sonnet-4.6 → gpt-5.3-codex → gpt-5.4 → claude-sonnet-4 → gpt-5.2
-Fast:     claude-haiku-4.5 → gpt-5.1-codex-mini → gpt-4.1 → gpt-5-mini
-```
-
-Never falls back UP in tier — a fast task won't land on a premium model.
-
-## User Overrides
-
-Tell the coordinator what you want:
-
-- `"use opus for this"` — one-off premium for current task
-- `"always use opus"` — **persistent** preference saved to `.squad/config.json` (survives sessions)
-- `"use gpt-5.2-codex for Fenster"` — **persistent** per-agent override
-- `"switch back to automatic"` — clears persistent preference
-
-## Economy Mode
-
-Economy mode automatically falls back to cheaper models when rate limits are approaching or when you want to cap spend. It is opt-in — enable it per session or persistently.
-
-**Enable economy mode:**
-```
-Switch to economy mode
-```
-
-**Disable economy mode:**
-```
-Turn off economy mode
-```
-
-When economy mode is active, Squad remaps models using the `ECONOMY_MODEL_MAP`:
-
-| Normal Tier | Economy Model |
-|-------------|--------------|
-| Standard (Sonnet) | `gpt-4.1` |
-| Fast (Haiku) | `gpt-4.1` |
-
-**Fallback chains in economy mode** run the same logic as normal fallback chains, but start one tier lower. A code task that would normally use `claude-sonnet-4.6` uses `claude-haiku-4.5` instead.
-
-**Cost tradeoffs:** Economy mode trades output quality for lower cost and reduced rate limit pressure. Use it for bulk triage, log analysis, or changelog generation — not for architecture work or complex refactors where quality matters.
-
-**Persistent economy mode** saves to `.squad/config.json`:
-```json
-{
-  "version": 1,
-  "economyMode": true
-}
-```
-
-Economy mode is also triggered automatically by the [rate limiting](rate-limiting.md) system when headroom drops to Amber state — you do not have to enable it manually for rate limit protection.
-
-## Sample Prompts
-
-```
-use opus for this architecture work
-```
-
-Override to premium model for a single high-stakes task.
-
-```
-always use haiku to save costs
-```
-
-Set session-wide preference for the cheapest model tier.
-
-```
-what model did Kane use for that last task?
-```
-
-Check which model was actually used for a completed task.
-
-```
-use gpt-5.2-codex for all backend work
-```
-
-Set a specific model for tasks in a particular domain.
-
-```
-switch back to automatic model selection
-```
-
-Clear any session-wide overrides and return to task-aware auto-selection.
+- **高级：** claude-opus-4.6、claude-opus-4.6-fast、claude-opus-4.5
+- **标准：** claude-sonnet-4.6、gpt-5.4、gpt-5.3-codex、gpt-5.2-codex、claude-sonnet-4、gpt-5.2、gpt-5.1-codex、gpt-5.1、gpt-5、gemini-3-pro-preview

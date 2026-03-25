@@ -1,221 +1,99 @@
-# Copilot Coding Agent (@copilot)
+# Copilot 编码智能体 (@copilot)
 
-> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+> ⚠️ **实验性** — Squad 是 alpha 软件。API、命令和行为可能在版本间发生变化。
 
-
-Add the GitHub Copilot coding agent to your Squad as an autonomous team member. It picks up issues, creates branches, and opens PRs — all without a Copilot chat session.
-
----
-
-## Prerequisites
-
-Before enabling @copilot on your Squad, ensure:
-
-1. **Copilot coding agent is enabled** on the repository (Settings → Copilot → Coding agent)
-2. **`copilot-setup-steps.yml`** exists in `.github/` (defines the agent's environment)
-3. **GitHub Actions** are enabled on the repository
+将 GitHub Copilot 编码智能体作为自治团队成员添加到你的 Squad。它获取问题、创建分支、打开 PR —— 所有这些都无需 Copilot 聊天会话。
 
 ---
 
-## Quick Start
+## 前置条件
+
+在 Squad 上启用 @copilot 之前，确保：
+
+1. 仓库上启用了 **Copilot 编码智能体**（Settings → Copilot → Coding agent）
+2. `.github/` 中存在 **`copilot-setup-steps.yml`**（定义智能体的环境）
+3. 仓库上启用了 **GitHub Actions**
+
+---
+
+## 快速开始
 
 ```bash
-# 1. Add @copilot to your squad with auto-assign
+# 1. 将 @copilot 添加到你的 squad，带自动分配
 squad copilot --auto-assign
 
-# 2. Create a classic PAT for auto-assignment (see below)
-#    https://github.com/settings/tokens/new → check "repo" scope
+# 2. 为自动分配创建经典 PAT（见下文）
+#    https://github.com/settings/tokens/new → 勾选 "repo" 范围
 
-# 3. Add the PAT as a repo secret
+# 3. 作为仓库 secret 添加 PAT
 gh secret set COPILOT_ASSIGN_TOKEN
 
-# 4. Commit and push
-git add .github/ .squad/ && git commit -m "feat: add copilot to squad" && git push
+# 4. 提交并推送
+git add .github/ .squad/ && git commit -m "feat: 添加 copilot 到 squad" && git push
 
-# 5. Test — label any issue with squad:copilot
+# 5. 测试 —— 用 squad:copilot 标记任何 issue
 gh issue edit <number> --add-label "squad:copilot"
 ```
 
-> **Why can't I use `gh issue edit --add-assignee "@copilot"`?** Bot accounts cannot be assigned via the GitHub CLI the same way as human users. Use label-based assignment instead. See [FAQ: Why doesn't gh issue edit --add-assignee "@copilot" work?](../guide/faq.md#why-doesnt-gh-issue-edit---add-assignee-copilot-work) for details.
+> **为什么我不能使用 `gh issue edit --add-assignee "@copilot"`？** 机器人账户不能像人类用户那样通过 GitHub CLI 分配。改用基于标签的分配。详情参见 [FAQ：为什么 gh issue edit --add-assignee "@copilot" 不起作用？](../guide/faq.md#why-doesnt-gh-issue-edit---add-assignee-copilot-work)。
 
 ---
 
-## Enabling @copilot
+## 启用 @copilot
 
-### In conversation (recommended)
+### 在对话中（推荐）
 
-Say something like:
-- **"I want to add copilot to the squad"**
-- **"hire copilot to the squad"**
-- **"add team member copilot"**
+说类似：
+- **"我想将 copilot 添加到 squad"**
+- **"雇佣 copilot 到 squad"**
+- **"添加团队成员 copilot"**
 
-The coordinator will add @copilot to the roster and ask about auto-assign.
+协调器会将 @copilot 添加到花名册并询问自动分配。
 
-> **Note:** If your project has features named "copilot" (e.g., a Copilot extension), the coordinator may misinterpret the phrase as project work. Use the CLI fallback in that case.
+> **注意：** 如果你的项目有名为 "copilot" 的功能（例如 Copilot 扩展），协调器可能将短语误解为项目工作。在这种情况下使用 CLI 回退。
 
-### During team setup (new projects)
+### 在团队设置期间（新项目）
 
-Squad asks if you want to include the coding agent during `init`. Say **yes** and it's added to the roster with a default capability profile.
+Squad 在 `init` 期间询问是否要在团队中包含编码智能体。说 **是**，它就被添加到花名册，带有默认能力档案。
 
-### Via CLI (fallback)
+### 通过 CLI（回退）
 
 ```bash
-# Add @copilot to the team
+# 将 @copilot 添加到团队
 squad copilot
 
-# Add with auto-assign enabled
+# 添加并启用自动分配
 squad copilot --auto-assign
 
-# Remove from the team
+# 从团队移除
 squad copilot --off
 ```
 
 ---
 
-## COPILOT_ASSIGN_TOKEN (required for auto-assign)
+## COPILOT_ASSIGN_TOKEN（自动分配所需）
 
-The `squad-issue-assign` workflow needs a **classic Personal Access Token** to assign `copilot-swe-agent[bot]` to issues. The default `GITHUB_TOKEN` cannot do this.
+`squad-issue-assign` 工作流需要**经典个人访问令牌**来将 `copilot-swe-agent[bot]` 分配给 issues。默认 `GITHUB_TOKEN` 无法做到这一点。
 
-### Create the token
+### 创建令牌
 
-1. Go to https://github.com/settings/tokens/new
-2. **Note:** `squad-copilot-assign`
-3. **Expiration:** 90 days (or your preference)
-4. **Scopes:** check **`repo`** (full control of private repositories)
-5. Click **Generate token**
+1. 前往 https://github.com/settings/tokens/new
+2. **Note：** `squad-copilot-assign`
+3. **Expiration：** 90 天（或你的偏好）
+4. **Scopes：** 勾选 **`repo`**（完全控制私有仓库）
+5. 点击 **Generate token**
 
-### Add as repo secret
+### 作为仓库 secret 添加
 
 ```bash
 gh secret set COPILOT_ASSIGN_TOKEN --repo owner/repo
 ```
 
-> **Why a classic PAT?** Fine-grained PATs return `403 Resource not accessible` for this endpoint. The REST API for assigning `copilot-swe-agent[bot]` requires a classic PAT with `repo` scope. The `GITHUB_TOKEN` silently ignores the assignment.
+> **为什么用经典 PAT？** 细粒度 PAT 对此端点返回 `403 Resource not accessible`。为 `copilot-swe-agent[bot]` 分配的 REST API 需要带有 `repo` 范围的经典 PAT。`GITHUB_TOKEN` 静默忽略分配。
 
 ---
 
-## How @copilot Differs from Other Members
+## @copilot 与其他成员有何不同
 
-| | AI Agent | Human Member | @copilot |
+| | AI 智能体 | 人类成员 | @copilot |
 |---|----------|-------------|----------|
-| Badge | ✅ Active | 👤 Human | 🤖 Coding Agent |
-| Name | Cast from universe | Real name | Always "@copilot" |
-| Charter | ✅ | ❌ | ❌ (uses `copilot-instructions.md`) |
-| Works in session | ✅ | ❌ | ❌ (asynchronous via issue assignment) |
-| Spawned by coordinator | ✅ | ❌ | ❌ |
-| Creates PRs | Via session commands | Outside Squad | Autonomously |
-
----
-
-## Capability Profile
-
-The capability profile in `team.md` defines what @copilot should and shouldn't handle:
-
-| Tier | Meaning | Examples |
-|------|---------|----------|
-| 🟢 **Good fit** | Route automatically | Bug fixes, test coverage, lint fixes, dependency updates, small features, docs |
-| 🟡 **Needs review** | Route to @copilot but flag for PR review | Medium features with specs, refactoring with tests, API additions |
-| 🔴 **Not suitable** | Route to a squad member instead | Architecture, multi-system design, security-critical, ambiguous requirements |
-
-The profile is editable. The Lead can suggest updates based on experience:
-
-```
-> @copilot nailed that refactoring — bump refactoring to good fit
-> That API change needed too much context — keep multi-endpoint work at not suitable
-```
-
----
-
-## Auto-Assign Flow
-
-When the `squad:copilot` label is added to an issue:
-
-1. **Step 1** — Workflow posts a routing comment (uses `GITHUB_TOKEN`)
-2. **Step 2** — Workflow assigns `copilot-swe-agent[bot]` to the issue (uses `COPILOT_ASSIGN_TOKEN`)
-3. **Step 3** — Coding agent picks up the issue, creates a `copilot/*` branch, and opens a draft PR
-
-The workflow automatically detects the repo's default branch (`main`, `master`, etc.).
-
----
-
-## Lead Triage
-
-The Lead evaluates every issue against @copilot's capability profile during triage:
-
-1. **Good fit?** → Routes to @copilot with reasoning
-2. **Needs review?** → Routes to @copilot, flags for squad member PR review
-3. **Not suitable?** → Routes to the right squad member, explains why not @copilot
-
-The Lead can also suggest reassignment in either direction:
-
-```
-> This test coverage task could go to @copilot — want me to reassign?
-> @copilot might struggle with this — suggesting we reassign to Ripley.
-```
-
----
-
-## Labels
-
-When @copilot is on the team, the `sync-squad-labels` workflow creates:
-
-| Label | Color | Purpose |
-|-------|-------|---------|
-| `squad:copilot` | 🟢 Green | Assigned to @copilot for autonomous work |
-
-This works alongside the existing `squad` (triage) and `squad:{member}` labels.
-
----
-
-## copilot-instructions.md
-
-The `.github/copilot-instructions.md` file gives the coding agent context about your Squad when it works autonomously. It tells @copilot to:
-
-- Read `team.md` for roster and capability profile
-- Read `routing.md` for work routing rules
-- Check its capability profile before starting (and request reassignment if the issue doesn't match)
-- Follow the `squad/{issue}-{slug}` branch naming convention
-- Write decisions to the inbox for the Scribe to merge
-
-This file is **upgraded automatically** when you run `squad upgrade` and `@copilot` is on your team — even if Squad is already up to date. If @copilot is not enabled, the file is left untouched.
-
----
-
-## Tips
-
-- Start conservative with the capability profile and expand as you see what @copilot handles well.
-- Use auto-assign for repos where you want fully autonomous issue processing.
-- The coding agent works great alongside [issue-driven development](../scenarios/issue-driven-dev.md) — label issues `squad` and the Lead + @copilot handle the rest.
-- @copilot's PRs go through normal review — treat them like any team member's work.
-
-## Sample Prompts
-
-```
-add copilot to the squad with auto-assign enabled
-```
-
-Adds @copilot to the roster and configures automatic issue assignment.
-
-```
-what's copilot's capability profile?
-```
-
-Shows which task types are marked as good fit, needs review, or not suitable for @copilot.
-
-```
-reassign issue #42 from copilot to Kane
-```
-
-Routes an issue away from @copilot to a different squad member.
-
-```
-bump refactoring to good fit for copilot
-```
-
-Updates the capability profile to mark refactoring tasks as automatically routable to @copilot.
-
-```
-review copilot's PR on #56
-```
-
-Spawns the appropriate squad member to review @copilot's pull request.
