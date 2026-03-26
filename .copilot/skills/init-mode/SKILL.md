@@ -1,102 +1,102 @@
 ---
 name: "init-mode"
-description: "Team initialization flow (Phase 1 proposal + Phase 2 creation)"
+description: "团队初始化流程（第1阶段提议 + 第2阶段创建）"
 domain: "orchestration"
 confidence: "high"
 source: "extracted"
 tools:
   - name: "ask_user"
-    description: "Confirm team roster with selectable menu"
-    when: "Phase 1 proposal — requires explicit user confirmation"
+    description: "使用可选菜单确认团队花名册"
+    when: "第1阶段提议 —— 需要显式用户确认"
 ---
 
-## Context
+## 上下文
 
-Init Mode activates when `.squad/team.md` does not exist, or exists but has zero roster entries under `## Members`. The coordinator proposes a team (Phase 1), waits for user confirmation, then creates the team structure (Phase 2).
+当初始化模式在以下情况激活：`.squad/team.md` 不存在，或存在但 `## Members` 下没有花名册条目。协调器提议一个团队（第1阶段），等待用户确认，然后创建团队结构（第2阶段）。
 
-## Patterns
+## 模式
 
-### Phase 1: Propose the Team
+### 第1阶段：提议团队
 
-No team exists yet. Propose one — but **DO NOT create any files until the user confirms.**
+尚无团队存在。提议一个 —— 但**在用户确认之前不要创建任何文件。**
 
-1. **Identify the user.** Run `git config user.name` to learn who you're working with. Use their name in conversation (e.g., *"Hey Brady, what are you building?"*). Store their name (NOT email) in `team.md` under Project Context. **Never read or store `git config user.email` — email addresses are PII and must not be written to committed files.**
-2. Ask: *"What are you building? (language, stack, what it does)"*
-3. **Cast the team.** Before proposing names, run the Casting & Persistent Naming algorithm (see that section):
-   - Determine team size (typically 4–5 + Scribe).
-   - Determine assignment shape from the user's project description.
-   - Derive resonance signals from the session and repo context.
-   - Select a universe. If the universe is custom, allocate character names from that universe based on the related list found in the `.squad/templates/casting/` directory. Prefer custom universes when available.
-   - Scribe is always "Scribe" — exempt from casting.
-   - Ralph is always "Ralph" — exempt from casting.
-4. Propose the team with their cast names. Example (names will vary per cast):
+1. **识别用户。** 运行 `git config user.name` 了解你在与谁合作。在对话中使用他们的名字（例如 *"嘿 Brady，你在构建什么？"*）。将他们的名字（不是电子邮件）存储在 `team.md` 的项目上下文中。**永远不要读取或存储 `git config user.email` —— 电子邮件地址是 PII，不得写入提交的文件。**
+2. 询问：*"你在构建什么？（语言、技术栈、用途）"*
+3. **选角团队。** 在提议名字之前，运行选角与持久命名算法（见该部分）：
+   - 确定团队规模（通常 4–5 人 + Scribe）。
+   - 从用户的项目描述确定分配形状。
+   - 从会话和仓库上下文推导共鸣信号。
+   - 选择一个宇宙。如果是自定义宇宙，从 `.squad/templates/casting/` 目录中找到的相关列表中分配该宇宙的角色名字。如果有可用时优先使用自定义宇宙。
+   - Scribe 始终是 "Scribe" —— 免选角。
+   - Ralph 始终是 "Ralph" —— 免选角。
+4. 用他们的选角名字提议团队。示例（名字会因选角而异）：
 
 ```
-🏗️  {CastName1}  — Lead          Scope, decisions, code review
-⚛️  {CastName2}  — Frontend Dev  React, UI, components
-🔧  {CastName3}  — Backend Dev   APIs, database, services
-🧪  {CastName4}  — Tester        Tests, quality, edge cases
-📋  Scribe       — (silent)      Memory, decisions, session logs
-🔄  Ralph        — (monitor)     Work queue, backlog, keep-alive
+🏗️  {CastName1}  —— 组长          范围、决策、代码审查
+⚛️  {CastName2}  —— 前端开发      React、UI、组件
+🔧  {CastName3}  —— 后端开发      API、数据库、服务
+🧪  {CastName4}  —— 测试人员        测试、质量、边界情况
+📋  Scribe       ——（静默）       记忆、决策、会话日志
+🔄  Ralph        ——（监控器）     工作队列、积压、保活
 ```
 
-5. Use the `ask_user` tool to confirm the roster. Provide choices so the user sees a selectable menu:
-   - **question:** *"Look right?"*
-   - **choices:** `["Yes, hire this team", "Add someone", "Change a role"]`
+5. 使用 `ask_user` 工具确认花名册。提供选择让用户看到可选菜单：
+   - **question:** *"看起来对吗？"*
+   - **choices:** `["是的，雇佣这个团队", "添加某人", "更改角色"]`
 
-**⚠️ STOP. Your response ENDS here. Do NOT proceed to Phase 2. Do NOT create any files or directories. Wait for the user's reply.**
+**⚠️ 停止。你的响应到此结束。不要进入第2阶段。不要创建任何文件或目录。等待用户回复。**
 
-### Phase 2: Create the Team
+### 第2阶段：创建团队
 
-**Trigger:** The user replied to Phase 1 with confirmation ("yes", "looks good", or similar affirmative), OR the user's reply to Phase 1 is a task (treat as implicit "yes").
+**触发：** 用户回复第1阶段并确认（"是"、"看起来不错"或类似的肯定），或者用户对第1阶段的回复是任务（视为隐式"是"）。
 
-> If the user said "add someone" or "change a role," go back to Phase 1 step 3 and re-propose. Do NOT enter Phase 2 until the user confirms.
+> 如果用户说"添加某人"或"更改角色"，返回第1阶段第3步并重新提议。直到用户确认前不要进入第2阶段。
 
-6. Create the `.squad/` directory structure (see `.squad/templates/` for format guides or use the standard structure: team.md, routing.md, ceremonies.md, decisions.md, decisions/inbox/, casting/, agents/, orchestration-log/, skills/, log/).
+6. 创建 `.squad/` 目录结构（格式指南参见 `.squad/templates/` 或使用标准结构：team.md、routing.md、ceremonies.md、decisions.md、decisions/inbox/、casting/、agents/、orchestration-log/、skills/、log/）。
 
-**Casting state initialization:** Copy `.squad/templates/casting-policy.json` to `.squad/casting/policy.json` (or create from defaults). Create `registry.json` (entries: persistent_name, universe, created_at, legacy_named: false, status: "active") and `history.json` (first assignment snapshot with unique assignment_id).
+**选角状态初始化：** 将 `.squad/templates/casting-policy.json` 复制到 `.squad/casting/policy.json`（或从默认值创建）。创建 `registry.json`（条目：persistent_name、universe、created_at、legacy_named: false、status: "active"）和 `history.json`（带有 unique assignment_id 的首次分配快照）。
 
-**Seeding:** Each agent's `history.md` starts with the project description, tech stack, and the user's name so they have day-1 context. Agent folder names are the cast name in lowercase (e.g., `.squad/agents/ripley/`). The Scribe's charter includes maintaining `decisions.md` and cross-agent context sharing.
+**植入：** 每个智能体的 `history.md` 以项目描述、技术栈和用户名开始，以便他们拥有第1天的上下文。智能体文件夹名称是小写的选角名字（例如 `.squad/agents/ripley/`）。Scribe 的 charter 包括维护 `decisions.md` 和跨智能体上下文共享。
 
-**Team.md structure:** `team.md` MUST contain a section titled exactly `## Members` (not "## Team Roster" or other variations) containing the roster table. This header is hard-coded in GitHub workflows (`squad-heartbeat.yml`, `squad-issue-assign.yml`, `squad-triage.yml`, `sync-squad-labels.yml`) for label automation. If the header is missing or titled differently, label routing breaks.
+**Team.md 结构：** `team.md` 必须包含一个标题完全为 `## Members` 的部分（不是"## Team Roster"或其他变体）包含花名册表格。此标题在 GitHub 工作流（`squad-heartbeat.yml`、`squad-issue-assign.yml`、`squad-triage.yml`、`sync-squad-labels.yml`）中是硬编码的，用于标签自动化。如果标题缺失或标题不同，标签路由会中断。
 
-**Merge driver for append-only files:** Create or update `.gitattributes` at the repo root to enable conflict-free merging of `.squad/` state across branches:
+**仅限追加文件的合并驱动器：** 在仓库根目录创建或更新 `.gitattributes` 以启用跨分支的 `.squad/` 状态无冲突合并：
 ```
 .squad/decisions.md merge=union
 .squad/agents/*/history.md merge=union
 .squad/log/** merge=union
 .squad/orchestration-log/** merge=union
 ```
-The `union` merge driver keeps all lines from both sides, which is correct for append-only files. This makes worktree-local strategy work seamlessly when branches merge — decisions, memories, and logs from all branches combine automatically.
+`union` 合并驱动器保留两边的所有行，这对仅限追加的文件是正确的。这使得 worktree-本地策略在分支合并时无缝工作 —— 来自所有分支的决策、记忆和日志自动组合。
 
-7. Say: *"✅ Team hired. Try: '{FirstCastName}, set up the project structure'"*
+7. 说：*"✅ 团队已雇佣。试试：'{FirstCastName}, 设置项目结构'"*
 
-8. **Post-setup input sources** (optional — ask after team is created, not during casting):
-   - PRD/spec: *"Do you have a PRD or spec document? (file path, paste it, or skip)"* → If provided, follow PRD Mode flow
-   - GitHub issues: *"Is there a GitHub repo with issues I should pull from? (owner/repo, or skip)"* → If provided, follow GitHub Issues Mode flow
-   - Human members: *"Are any humans joining the team? (names and roles, or just AI for now)"* → If provided, add per Human Team Members section
-   - Copilot agent: *"Want to include @copilot? It can pick up issues autonomously. (yes/no)"* → If yes, follow Copilot Coding Agent Member section and ask about auto-assignment
-   - These are additive. Don't block — if the user skips or gives a task instead, proceed immediately.
+8. **设置后输入源**（可选 —— 在团队创建后询问，不是在选角期间）：
+   - PRD/规范：*"你有 PRD 或规范文档吗？（文件路径、粘贴，或跳过）"* → 如果提供，遵循 PRD 模式流程
+   - GitHub issues：*"有我应该从中拉取的 GitHub 仓库吗？（owner/repo，或跳过）"* → 如果提供，遵循 GitHub Issues 模式流程
+   - 人类成员：*"有任何人类加入团队吗？（姓名和角色，或暂时只有 AI）"* → 如果提供，按人类团队成员部分添加
+   - Copilot 智能体：*"想要包含 @copilot 吗？它可以自主获取问题。（是/否）"* → 如果是，遵循 Copilot 编码智能体成员部分并询问自动分配
+   - 这些是附加的。不要阻塞 —— 如果用户跳过或给出任务，立即继续。
 
-## Examples
+## 示例
 
-**Example flow:**
-1. Coordinator detects no team.md → Init Mode
-2. Runs `git config user.name` → "Brady"
-3. Asks: *"Hey Brady, what are you building?"*
-4. User: *"TypeScript CLI tool with GitHub API integration"*
-5. Coordinator runs casting algorithm → selects "The Usual Suspects" universe
-6. Proposes: Keaton (Lead), Verbal (Prompt), Fenster (Backend), Hockney (Tester), Scribe, Ralph
-7. Uses `ask_user` with choices → user selects "Yes, hire this team"
-8. Coordinator creates `.squad/` structure, initializes casting state, seeds agents
-9. Says: *"✅ Team hired. Try: 'Keaton, set up the project structure'"*
+**示例流程：**
+1. 协调器检测没有 team.md → 初始化模式
+2. 运行 `git config user.name` → "Brady"
+3. 询问：*"嘿 Brady，你在构建什么？"*
+4. 用户：*"带 GitHub API 集成的 TypeScript CLI 工具"*
+5. 协调器运行选角算法 → 选择 "The Usual Suspects" 宇宙
+6. 提议：Keaton（组长）、Verbal（提示）、Fenster（后端）、Hockney（测试人员）、Scribe、Ralph
+7. 使用 `ask_user` 和选择 → 用户选择 "是的，雇佣这个团队"
+8. 协调器创建 `.squad/` 结构，初始化选角状态，植入智能体
+9. 说：*"✅ 团队已雇佣。试试：'Keaton, 设置项目结构'"*
 
-## Anti-Patterns
+## 反模式
 
-- ❌ Creating files before user confirms Phase 1
-- ❌ Mixing agents from different universes in the same cast
-- ❌ Skipping the `ask_user` tool and assuming confirmation
-- ❌ Proceeding to Phase 2 when user said "add someone" or "change a role"
-- ❌ Using `## Team Roster` instead of `## Members` as the header (breaks GitHub workflows)
-- ❌ Forgetting to initialize `.squad/casting/` state files
-- ❌ Reading or storing `git config user.email` (PII violation)
+- ❌ 在用户确认第1阶段之前创建文件
+- ❌ 在同一选角中混合来自不同宇宙的智体
+- ❌ 跳过 `ask_user` 工具并假设确认
+- ❌ 当用户说"添加某人"或"更改角色"时进入第2阶段
+- ❌ 使用 `## Team Roster` 而不是 `## Members` 作为标题（会破坏 GitHub 工作流）
+- ❌ 忘记初始化 `.squad/casting/` 状态文件
+- ❌ 读取或存储 `git config user.email`（PII 违规）

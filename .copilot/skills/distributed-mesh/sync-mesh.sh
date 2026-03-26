@@ -1,74 +1,74 @@
 #!/bin/bash
-# sync-mesh.sh — Materialize remote squad state locally
+# sync-mesh.sh —— 将远程 squad 状态具体化到本地
 #
-# Reads mesh.json, fetches remote squads into local directories.
-# Run before agent reads. No daemon. No service. ~40 lines.
+# 读取 mesh.json，将远程 squads 获取到本地目录。
+# 在智能体读取前运行。无守护进程。无服务。约 40 行。
 #
-# Usage: ./sync-mesh.sh [path-to-mesh.json]
-#        ./sync-mesh.sh --init [path-to-mesh.json]
-# Requires: jq (https://github.com/jqlang/jq), git, curl
+# 用法: ./sync-mesh.sh [mesh.json 路径]
+#        ./sync-mesh.sh --init [mesh.json 路径]
+# 需要: jq (https://github.com/jqlang/jq), git, curl
 
 set -euo pipefail
 
-# Handle --init mode
+# 处理 --init 模式
 if [ "${1:-}" = "--init" ]; then
   MESH_JSON="${2:-mesh.json}"
   
   if [ ! -f "$MESH_JSON" ]; then
-    echo "❌ $MESH_JSON not found"
+    echo "❌ 找不到 $MESH_JSON"
     exit 1
   fi
   
-  echo "🚀 Initializing mesh state repository..."
+  echo "🚀 正在初始化网格状态仓库..."
   squads=$(jq -r '.squads | keys[]' "$MESH_JSON")
   
-  # Create squad directories with placeholder SUMMARY.md
+  # 创建 squad 目录并放置占位符 SUMMARY.md
   for squad in $squads; do
     if [ ! -d "$squad" ]; then
       mkdir -p "$squad"
-      echo "  ✓ Created $squad/"
+      echo "  ✓ 已创建 $squad/"
     else
-      echo "  • $squad/ exists (skipped)"
+      echo "  • $squad/ 已存在（跳过）"
     fi
     
     if [ ! -f "$squad/SUMMARY.md" ]; then
-      echo -e "# $squad\n\n_No state published yet._" > "$squad/SUMMARY.md"
-      echo "  ✓ Created $squad/SUMMARY.md"
+      echo -e "# $squad\n\n_尚未发布状态。_" > "$squad/SUMMARY.md"
+      echo "  ✓ 已创建 $squad/SUMMARY.md"
     else
-      echo "  • $squad/SUMMARY.md exists (skipped)"
+      echo "  • $squad/SUMMARY.md 已存在（跳过）"
     fi
   done
   
-  # Generate root README.md
+  # 生成根目录 README.md
   if [ ! -f "README.md" ]; then
     {
-      echo "# Squad Mesh State Repository"
+      echo "# Squad 网格状态仓库"
       echo ""
-      echo "This repository tracks published state from participating squads."
+      echo "此仓库跟踪来自参与 squads 的已发布状态。"
       echo ""
-      echo "## Participating Squads"
+      echo "## 参与的 Squads"
       echo ""
       for squad in $squads; do
         zone=$(jq -r ".squads.\"$squad\".zone" "$MESH_JSON")
-        echo "- **$squad** (Zone: $zone)"
+        echo "- **$squad** (区域: $zone)"
       done
       echo ""
-      echo "Each squad directory contains a \`SUMMARY.md\` with their latest published state."
-      echo "State is synchronized using \`sync-mesh.sh\` or \`sync-mesh.ps1\`."
+      echo "每个 squad 目录包含一个 \`SUMMARY.md\`，其中包含其最新发布的状态。"
+      echo "状态使用 \`sync-mesh.sh\` 或 \`sync-mesh.ps1\` 进行同步。"
     } > README.md
-    echo "  ✓ Created README.md"
+    echo "  ✓ 已创建 README.md"
   else
-    echo "  • README.md exists (skipped)"
+    echo "  • README.md 已存在（跳过）"
   fi
   
   echo ""
-  echo "✅ Mesh state repository initialized"
+  echo "✅ 网格状态仓库已初始化"
   exit 0
 fi
 
 MESH_JSON="${1:-mesh.json}"
 
-# Zone 2: Remote-trusted — git clone/pull
+# 区域 2：远程-信任 —— git clone/pull
 for squad in $(jq -r '.squads | to_entries[] | select(.value.zone == "remote-trusted") | .key' "$MESH_JSON"); do
   source=$(jq -r ".squads.\"$squad\".source" "$MESH_JSON")
   ref=$(jq -r ".squads.\"$squad\".ref // \"main\"" "$MESH_JSON")
@@ -76,15 +76,15 @@ for squad in $(jq -r '.squads | to_entries[] | select(.value.zone == "remote-tru
 
   if [ -d "$target/.git" ]; then
     git -C "$target" pull --rebase --quiet 2>/dev/null \
-      || echo "⚠ $squad: pull failed (using stale)"
+      || echo "⚠ $squad: pull 失败（使用旧的）"
   else
     mkdir -p "$(dirname "$target")"
     git clone --quiet --depth 1 --branch "$ref" "$source" "$target" 2>/dev/null \
-      || echo "⚠ $squad: clone failed (unavailable)"
+      || echo "⚠ $squad: clone 失败（不可用）"
   fi
 done
 
-# Zone 3: Remote-opaque — fetch published contracts
+# 区域 3：远程-不透明 —— 获取已发布的契约
 for squad in $(jq -r '.squads | to_entries[] | select(.value.zone == "remote-opaque") | .key' "$MESH_JSON"); do
   source=$(jq -r ".squads.\"$squad\".source" "$MESH_JSON")
   target=$(jq -r ".squads.\"$squad\".sync_to" "$MESH_JSON")
@@ -98,7 +98,7 @@ for squad in $(jq -r '.squads | to_entries[] | select(.value.zone == "remote-opa
   fi
 
   eval curl --silent --fail $auth_flag "$source" -o "$target/SUMMARY.md" 2>/dev/null \
-    || echo "# ${squad} — unavailable ($(date))" > "$target/SUMMARY.md"
+    || echo "# ${squad} —— 不可用 ($(date))" > "$target/SUMMARY.md"
 done
 
-echo "✓ Mesh sync complete"
+echo "✓ 网格同步完成"

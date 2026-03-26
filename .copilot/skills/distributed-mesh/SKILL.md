@@ -1,71 +1,71 @@
 ---
 name: "distributed-mesh"
-description: "How to coordinate with squads on different machines using git as transport"
+description: "如何使用 git 作为传输与不同机器上的 squads 协调"
 domain: "distributed-coordination"
 confidence: "high"
 source: "multi-model-consensus (Opus 4.6, Sonnet 4.5, GPT-5.4)"
 ---
 
-## SCOPE
+## 范围
 
-**✅ THIS SKILL PRODUCES (exactly these, nothing more):**
+**✅ 此技能产生（恰好这些，仅此而已）：**
 
-1. **`mesh.json`** — Generated from user answers about zones and squads (which squads participate, what zone each is in, paths/URLs for each), using `mesh.json.example` in this skill's directory as the schema template
-2. **`sync-mesh.sh` and `sync-mesh.ps1`** — Copied from this skill's directory into the project root (these are bundled resources, NOT generated code)
-3. **Zone 2 state repo initialization** (if applicable) — If the user specified a Zone 2 shared state repo, run `sync-mesh.sh --init` to scaffold the state repo structure
-4. **A decision entry** in `.squad/decisions/inbox/` documenting the mesh configuration for team awareness
+1. **`mesh.json`** —— 从用户关于区域和 squads 的答案生成（哪些 squads 参与，每个在哪个区域，每个的路径/URL），使用此技能目录中的 `mesh.json.example` 作为模式模板
+2. **`sync-mesh.sh` 和 `sync-mesh.ps1`** —— 从此技能目录复制到项目根目录（这些是捆绑资源，不是生成的代码）
+3. **区域 2 状态仓库初始化**（如果适用）—— 如果用户指定了区域 2 共享状态仓库，运行 `sync-mesh.sh --init` 来搭建状态仓库结构
+4. **`.squad/decisions/inbox/` 中的决策条目** 记录网格配置以供团队感知
 
-**❌ THIS SKILL DOES NOT PRODUCE:**
+**❌ 此技能不产生：**
 
-- **No application code** — No validators, libraries, or modules of any kind
-- **No test files** — No test suites, test cases, or test scaffolding
-- **No GENERATING sync scripts** — They are bundled with this skill as pre-built resources. COPY them, don't generate them.
-- **No daemons or services** — No background processes, servers, or persistent runtimes
-- **No modifications to existing squad files** beyond the decision entry (no changes to team.md, routing.md, agent charters, etc.)
+- **无应用代码** —— 无验证器、库或任何类型的模块
+- **无测试文件** —— 无测试套件、测试用例或测试脚手架
+- **无生成同步脚本** —— 它们作为预构建资源与此技能捆绑。复制它们，不要生成它们。
+- **无守护进程或服务** —— 无后台进程、服务器或持久运行时
+- **对现有 squad 文件无修改**，除了决策条目（不更改 team.md、routing.md、智能体 charter 等）
 
-**Your role:** Configure the mesh topology and install the bundled sync scripts. Nothing more.
+**你的角色：** 配置网格拓扑并安装捆绑的同步脚本。仅此而已。
 
-## Context
+## 上下文
 
-When squads are on different machines (developer laptops, CI runners, cloud VMs, partner orgs), the local file-reading convention still works — but remote files need to arrive on your disk first. This skill teaches the pattern for distributed squad communication.
+当 squads 在不同机器上（开发者笔记本电脑、CI runner、云 VM、合作伙伴组织）时，本地文件读取约定仍然有效 —— 但远程文件需要先到达你的磁盘。此技能教授分布式 squad 通信的模式。
 
-**When this applies:**
-- Squads span multiple machines, VMs, or CI runners
-- Squads span organizations or companies
-- An agent needs context from a squad whose files aren't on the local filesystem
+**何时适用：**
+- Squads 跨越多个机器、VM 或 CI runner
+- Squads 跨越组织或公司
+- 智能体需要来自文件不在本地文件系统上的 squad 的上下文
 
-**When this does NOT apply:**
-- All squads are on the same machine (just read the files directly)
+**何时不适用：**
+- 所有 squads 在同一台机器上（直接读取文件）
 
-## Patterns
+## 模式
 
-### The Core Principle
+### 核心原则
 
-> "The filesystem is the mesh, and git is how the mesh crosses machine boundaries."
+> "文件系统是网格，git 是网格跨越机器边界的方式。"
 
-The agent interface never changes. Agents always read local files. The distributed layer's only job is to make remote files appear locally before the agent reads them.
+智能体接口永不改变。智能体始终读取本地文件。分布式层的唯一工作是在智能体读取它们之前使远程文件在本地出现。
 
-### Three Zones of Communication
+### 三个通信区域
 
-**Zone 1 — Local:** Same filesystem. Read files directly. Zero transport.
+**区域 1 —— 本地：** 同一文件系统。直接读取文件。零传输。
 
-**Zone 2 — Remote-Trusted:** Different host, same org, shared git auth. Transport: `git pull` from a shared repo. This collapses Zone 2 into Zone 1 — files materialize on disk, agent reads them normally.
+**区域 2 —— 远程-信任：** 不同主机，同一组织，共享 git 认证。传输：从共享仓库 `git pull`。这将区域 2 折叠为区域 1 —— 文件在磁盘上具体化，智能体正常读取它们。
 
-**Zone 3 — Remote-Opaque:** Different org, no shared auth. Transport: `curl` to fetch published contracts (SUMMARY.md). One-way visibility — you see only what they publish.
+**区域 3 —— 远程-不透明：** 不同组织，无共享认证。传输：`curl` 获取发布的契约（SUMMARY.md）。单向可见性 —— 你只能看到他们发布的内容。
 
-### Agent Lifecycle (Distributed)
+### 智能体生命周期（分布式）
 
 ```
-1. SYNC:    git pull (Zone 2) + curl (Zone 3) — materialize remote state
-2. READ:    cat .mesh/**/state.md — all files are local now
-3. WORK:    do their assigned work (the agent's normal task, NOT mesh-building)
-4. WRITE:   update own billboard, log, drops
-5. PUBLISH: git add + commit + push — share state with remote peers
+1. 同步：    git pull（区域 2）+ curl（区域 3）—— 具体化远程状态
+2. 读取：    cat .mesh/**/state.md —— 所有文件现在都是本地的
+3. 工作：    执行分配的工作（智能体的正常任务，不是网格构建）
+4. 写入：   更新自己的公告板、日志、drops
+5. 发布： git add + commit + push —— 与远程对等方共享状态
 ```
 
-Steps 2–4 are identical to local-only. Steps 1 and 5 are the entire distributed extension. **Note:** "WORK" means the agent performs its normal squad duties — it does NOT mean "build mesh infrastructure."
+步骤 2–4 与仅本地相同。步骤 1 和 5 是整个分布式扩展。**注意：**"工作" 意味着智能体执行其正常的 squad 职责 —— 它不意味着"构建网格基础设施"。
 
-### The mesh.json Config
+### mesh.json 配置
 
 ```json
 {
@@ -87,79 +87,79 @@ Steps 2–4 are identical to local-only. Steps 1 and 5 are the entire distribute
 }
 ```
 
-Three zone types, one file. Local squads need only a path. Remote-trusted need a git URL. Remote-opaque need an HTTP URL.
+三种区域类型，一个文件。本地 squads 只需要路径。远程-信任需要 git URL。远程-不透明需要 HTTP URL。
 
-### Write Partitioning
+### 写入分区
 
-Each squad writes only to its own directory (`boards/{self}.md`, `squads/{self}/*`, `drops/{date}-{self}-*.md`). No two squads write to the same file. Git push/pull never conflicts. If push fails ("branch is behind"), the fix is always `git pull --rebase && git push`.
+每个 squad 只写入自己的目录（`boards/{self}.md`、`squads/{self}/*`、`drops/{date}-{self}-*.md`）。没有两个 squads 写入同一文件。Git push/pull 永不冲突。如果 push 失败（"branch is behind"），修复总是 `git pull --rebase && git push`。
 
-### Trust Boundaries
+### 信任边界
 
-Trust maps to git permissions:
-- **Same repo access** = full mesh visibility
-- **Read-only access** = can observe, can't write
-- **No access** = invisible (correct behavior)
+信任映射到 git 权限：
+- **同一仓库访问** = 完整网格可见性
+- **只读访问** = 可以观察，不能写入
+- **无访问** = 不可见（正确行为）
 
-For selective visibility, use separate repos per audience (internal, partner, public). Git permissions ARE the trust negotiation.
+对于选择性可见性，为每个受众（内部、合作伙伴、公共）使用单独的仓库。Git 权限就是信任协商。
 
-### Phased Rollout
+### 分阶段推出
 
-- **Phase 0:** Convention only — document zones, agree on mesh.json fields, manually run `git pull`/`git push`. Zero new code.
-- **Phase 1:** Sync script (~30 lines bash or PowerShell) when manual sync gets tedious.
-- **Phase 2:** Published contracts + curl fetch when a Zone 3 partner appears.
-- **Phase 3:** Never. No MCP federation, A2A, service discovery, message queues.
+- **第 0 阶段：** 仅约定 —— 记录区域，同意 mesh.json 字段，手动运行 `git pull`/`git push`。零新代码。
+- **第 1 阶段：** 同步脚本（~30 行 bash 或 PowerShell）当手动同步变得繁琐时。
+- **第 2 阶段：** 发布的契约 + curl 获取，当区域 3 合作伙伴出现时。
+- **第 3 阶段：** 永不。无 MCP 联邦、A2A、服务发现、消息队列。
 
-**Important:** Phases are NOT auto-advanced. These are project-level decisions — you start at Phase 0 (manual sync) and only move forward when the team decides complexity is justified.
+**重要：** 阶段不是自动推进的。这些是项目级决策 —— 你从第 0 阶段（手动同步）开始，只有当团队决定复杂性是合理的时才向前移动。
 
-### Mesh State Repo
+### 网格状态仓库
 
-The shared mesh state repo is a plain git repository — NOT a Squad project. It holds:
-- One directory per participating squad
-- Each directory contains at minimum a SUMMARY.md with the squad's current state
-- A root README explaining what the repo is and who participates
+共享网格状态仓库是一个普通的 git 仓库 —— 不是 Squad 项目。它包含：
+- 每个参与 squad 的一个目录
+- 每个目录至少包含一个带有 squad 当前状态的 SUMMARY.md
+- 一个根 README 解释仓库是什么以及谁参与
 
-No `.squad/` folder, no agents, no automation. Write partitioning means each squad only pushes to its own directory. The repo is a rendezvous point, not an intelligent system.
+没有 `.squad/` 文件夹，没有智能体，没有自动化。写入分区意味着每个 squad 只 push 到自己的目录。仓库是一个会合点，不是智能系统。
 
-If you want a squad that *observes* mesh health, that's a separate Squad project that lists the state repo as a Zone 2 remote in its `mesh.json` — it does NOT live inside the state repo.
+如果你想要一个*观察*网格健康的 squad，那是一个单独的 Squad 项目，在其 `mesh.json` 中将状态仓库列为区域 2 远程 —— 它不生活在状态仓库内。
 
-## Examples
+## 示例
 
-### Developer Laptop + CI Squad (Zone 2)
+### 开发者笔记本电脑 + CI Squad（区域 2）
 
-Auth-squad agent wakes up. `git pull` brings ci-squad's latest results. Agent reads: "3 test failures in auth module." Adjusts work. Pushes results when done. **Overhead: one `git pull`, one `git push`.**
+Auth-squad 智能体唤醒。`git pull` 带来 ci-squad 的最新结果。智能体读取："auth 模块中有 3 个测试失败。"调整工作。完成后推送结果。**开销：一次 `git pull`，一次 `git push`。**
 
-### Two Orgs Collaborating (Zone 3)
+### 两个组织协作（区域 3）
 
-Payment-squad fetches partner's published SUMMARY.md via curl. Reads: "Risk scoring v3 API deprecated April 15. New field `device_fingerprint` required." The consuming agent (in payment-squad's team) reads this information and uses it to inform its work — for example, updating payment integration code to include the new field. Partner can't see payment-squad's internals.
+Payment-squad 通过 curl 获取合作伙伴发布的 SUMMARY.md。读取："风险评分 v3 API 于 4 月 15 日弃用。需要新字段 `device_fingerprint`。"消费智能体（在 payment-squad 的团队中）读取此信息并使用它来通知其工作 —— 例如，更新支付集成代码以包含新字段。合作伙伴看不到 payment-squad 的内部。
 
-### Same Org, Shared Mesh Repo (Zone 2)
+### 同一组织，共享网格仓库（区域 2）
 
-Three squads on different machines. One shared git repo holds the mesh. Each squad: `git pull` before work, `git push` after. Write partitioning ensures zero merge conflicts.
+不同机器上的三个 squads。一个共享的 git 仓库保存网格。每个 squad：工作前 `git pull`，工作后 `git push`。写入分区确保零合并冲突。
 
-## AGENT WORKFLOW (Deterministic Setup)
+## 智能体工作流（确定性设置）
 
-When a user invokes this skill to set up a distributed mesh, follow these steps **exactly, in order:**
+当用户调用此技能设置分布式网格时，**完全按顺序**遵循这些步骤：
 
-### Step 1: ASK the user for mesh topology
+### 第 1 步：询问用户网格拓扑
 
-Ask these questions (adapt phrasing naturally, but get these answers):
+问这些问题（自然地调整措辞，但获取这些答案）：
 
-1. **Which squads are participating?** (List of squad names)
-2. **For each squad, which zone is it in?**
-   - `local` — same filesystem (just need a path)
-   - `remote-trusted` — different machine, same org, shared git access (need git URL + ref)
-   - `remote-opaque` — different org, no shared auth (need HTTPS URL to published contract)
-3. **For each squad, what's the connection info?**
-   - Local: relative or absolute path to their `.mesh/` directory
-   - Remote-trusted: git URL (SSH or HTTPS), ref (branch/tag), and where to sync it to locally
-   - Remote-opaque: HTTPS URL to their SUMMARY.md, where to sync it, and auth type (none/bearer)
-4. **Where should the shared state live?** (For Zone 2 squads: git repo URL for the mesh state, or confirm each squad syncs independently)
+1. **哪些 squads 正在参与？**（squad 名称列表）
+2. **对于每个 squad，它在哪个区域？**
+   - `local` —— 同一文件系统（只需要路径）
+   - `remote-trusted` —— 不同机器，同一组织，共享 git 访问（需要 git URL + ref）
+   - `remote-opaque` —— 不同组织，无共享认证（需要 HTTPS URL 到发布的契约）
+3. **对于每个 squad，连接信息是什么？**
+   - 本地：他们 `.mesh/` 目录的相对或绝对路径
+   - 远程-信任：git URL（SSH 或 HTTPS）、ref（分支/标签），以及本地同步到哪里
+   - 远程-不透明：他们 SUMMARY.md 的 HTTPS URL、同步到哪里，以及认证类型（none/bearer）
+4. **共享状态应该在哪里？**（对于区域 2 squads：网格状态的 git 仓库 URL，或确认每个 squad 独立同步）
 
-### Step 2: GENERATE `mesh.json`
+### 第 2 步：生成 `mesh.json`
 
-Using the answers from Step 1, create a `mesh.json` file at the project root. Use `mesh.json.example` from THIS skill's directory (`.copilot/skills/distributed-mesh/mesh.json.example`) as the schema template.
+使用第 1 步的答案，在项目根目录创建 `mesh.json` 文件。使用此技能目录（`.copilot/skills/distributed-mesh/mesh.json.example`）中的 `mesh.json.example` 作为模式模板。
 
-Structure:
+结构：
 
 ```json
 {
@@ -181,54 +181,54 @@ Structure:
 }
 ```
 
-Write this file to the project root. Do NOT write any other code.
+将此文件写入项目根目录。不要写任何其他代码。
 
-### Step 3: COPY sync scripts
+### 第 3 步：复制同步脚本
 
-Copy the bundled sync scripts from THIS skill's directory into the project root:
+从此技能目录复制捆绑的同步脚本到项目根目录：
 
-- **Source:** `.copilot/skills/distributed-mesh/sync-mesh.sh`
-- **Destination:** `sync-mesh.sh` (project root)
+- **源：** `.copilot/skills/distributed-mesh/sync-mesh.sh`
+- **目标：** `sync-mesh.sh`（项目根目录）
 
-- **Source:** `.copilot/skills/distributed-mesh/sync-mesh.ps1`
-- **Destination:** `sync-mesh.ps1` (project root)
+- **源：** `.copilot/skills/distributed-mesh/sync-mesh.ps1`
+- **目标：** `sync-mesh.ps1`（项目根目录）
 
-These are bundled resources. Do NOT generate them — COPY them directly.
+这些是捆绑资源。不要生成它们 —— 直接复制它们。
 
-### Step 4: RUN `--init` (if Zone 2 state repo exists)
+### 第 4 步：运行 `--init`（如果区域 2 状态仓库存在）
 
-If the user specified a Zone 2 shared state repo in Step 1, run the initialization:
+如果用户在第 1 步中指定了区域 2 共享状态仓库，运行初始化：
 
-**On Unix/Linux/macOS:**
+**在 Unix/Linux/macOS：**
 ```bash
 bash sync-mesh.sh --init
 ```
 
-**On Windows:**
+**在 Windows：**
 ```powershell
 .\sync-mesh.ps1 -Init
 ```
 
-This scaffolds the state repo structure (squad directories, placeholder SUMMARY.md files, root README).
+这会搭建状态仓库结构（squad 目录、占位 SUMMARY.md 文件、根 README）。
 
-**Skip this step if:**
-- No Zone 2 squads are configured (local/opaque only)
-- The state repo already exists and is initialized
+**如果以下情况跳过此步骤：**
+- 没有配置区域 2 squads（仅本地/不透明）
+- 状态仓库已存在并已初始化
 
-### Step 5: WRITE a decision entry
+### 第 5 步：写入决策条目
 
-Create a decision file at `.squad/decisions/inbox/<your-agent-name>-mesh-setup.md` with this content:
+在 `.squad/decisions/inbox/<your-agent-name>-mesh-setup.md` 创建决策文件，内容如下：
 
 ```markdown
-### <YYYY-MM-DD>: Mesh configuration
+### <YYYY-MM-DD>: 网格配置
 
-**By:** <your-agent-name> (via distributed-mesh skill)
+**By:** <your-agent-name>（通过 distributed-mesh 技能）
 
-**What:** Configured distributed mesh with <N> squads across zones <list-zones-used>
+**What:** 配置了跨区域 <list-zones-used> 的 <N> 个 squads 的分布式网格
 
 **Squads:**
-- `<squad-name>` — Zone <X> — <brief-connection-info>
-- `<squad-name>` — Zone <X> — <brief-connection-info>
+- `<squad-name>` —— 区域 <X> —— <brief-connection-info>
+- `<squad-name>` —— 区域 <X> —— <brief-connection-info>
 - ...
 
 **State repo:** <git-url-if-zone-2-used, or "N/A (local/opaque only)">
@@ -236,52 +236,52 @@ Create a decision file at `.squad/decisions/inbox/<your-agent-name>-mesh-setup.m
 **Why:** <user's stated reason for setting up the mesh, or "Enable cross-machine squad coordination">
 ```
 
-Write this file. The Scribe will merge it into the main decisions file later.
+写入此文件。书记员稍后会将其合并到主决策文件中。
 
-### Step 6: STOP
+### 第 6 步：停止
 
-**You are done.** Do not:
-- Generate sync scripts (they're bundled with this skill — COPY them)
-- Write validator code
-- Write test files
-- Create any other modules, libraries, or application code
-- Modify existing squad files (team.md, routing.md, charters)
-- Auto-advance to Phase 2 or Phase 3
+**你完成了。** 不要：
+- 生成同步脚本（它们与此技能捆绑 —— 复制它们）
+- 编写验证器代码
+- 编写测试文件
+- 创建任何其他模块、库或应用代码
+- 修改现有 squad 文件（team.md、routing.md、charters）
+- 自动推进到第 2 阶段或第 3 阶段
 
-Output a simple completion message:
+输出简单的完成消息：
 
 ```
-✅ Mesh configured. Created:
+✅ 网格已配置。已创建：
 - mesh.json (<N> squads)
-- sync-mesh.sh and sync-mesh.ps1 (copied from skill bundle)
-- Decision entry: .squad/decisions/inbox/<filename>
+- sync-mesh.sh 和 sync-mesh.ps1（从技能包复制）
+- 决策条目：.squad/decisions/inbox/<filename>
 
-Run `bash sync-mesh.sh` (or `.\sync-mesh.ps1` on Windows) before agents start to materialize remote state.
+在智能体启动前运行 `bash sync-mesh.sh`（或在 Windows 上运行 `.\sync-mesh.ps1`）以具体化远程状态。
 ```
 
 ---
 
-## Anti-Patterns
+## 反模式
 
-**❌ Code generation anti-patterns:**
-- Writing `mesh-config-validator.js` or any validator module
-- Writing test files for mesh configuration
-- Generating sync scripts instead of copying the bundled ones from this skill's directory
-- Creating library modules or utilities
-- Building any code that "runs the mesh" — the mesh is read by agents, not executed
+**❌ 代码生成反模式：**
+- 编写 `mesh-config-validator.js` 或任何验证器模块
+- 编写网格配置的测试文件
+- 生成同步脚本而不是从此技能目录复制捆绑的脚本
+- 创建库模块或工具
+- 构建任何"运行网格"的代码 —— 网格由智能体读取，不是执行
 
-**❌ Architectural anti-patterns:**
-- Building a federation protocol — Git push/pull IS federation
-- Running a sync daemon or server — Agents are not persistent. Sync at startup, publish at shutdown
-- Real-time notifications — Agents don't need real-time. They need "recent enough." `git pull` is recent enough
-- Schema validation for markdown — The LLM reads markdown. If the format changes, it adapts
-- Service discovery protocol — mesh.json is a file with 10 entries. Not a "discovery problem"
-- Auth framework — Git SSH keys and HTTPS tokens. Not a framework. Already configured
-- Message queues / event buses — Agents wake, read, work, write, sleep. Nobody's home to receive events
-- Any component requiring a running process — That's the line. Don't cross it
+**❌ 架构反模式：**
+- 构建联邦协议 —— Git push/pull 就是联邦
+- 运行同步守护进程或服务器 —— 智能体不是持久的。在启动时同步，在关闭时发布
+- 实时通知 —— 智能体不需要实时。他们需要"足够新。"`git pull` 足够新
+- markdown 的模式验证 —— LLM 读取 markdown。如果格式改变，它会适应
+- 服务发现协议 —— mesh.json 是一个有 10 个条目的文件。不是"发现问题"
+- 认证框架 —— Git SSH 密钥和 HTTPS 令牌。不是框架。已配置
+- 消息队列 / 事件总线 —— 智能体唤醒、读取、工作、写入、休眠。没有人在家接收事件
+- 任何需要运行进程的组件 —— 那是界限。不要跨越它
 
-**❌ Scope creep anti-patterns:**
-- Auto-advancing phases without user decision
-- Modifying agent charters or routing rules
-- Setting up CI/CD pipelines for mesh sync
-- Creating dashboards or monitoring tools
+**❌ 范围蔓延反模式：**
+- 没有用户决策自动推进阶段
+- 修改智能体 charter 或路由规则
+- 为网格同步设置 CI/CD 管道
+- 创建仪表板或监控工具

@@ -1,41 +1,41 @@
 ---
 name: github-multi-account
-description: Detect and set up account-locked gh aliases for multi-account GitHub. The AI reads this skill, detects accounts, asks the user which is personal/work, and runs the setup automatically.
+description: 检测并设置多账户 GitHub 的账户锁定 gh 别名。AI 读取此技能，检测账户，询问用户哪个是个人/工作，并自动运行设置。
 confidence: high
 source: https://github.com/tamirdresher/squad-skills/tree/main/plugins/github-multi-account
 author: tamirdresher
 ---
 
-# GitHub Multi-Account — AI-Driven Setup
+# GitHub 多账户 —— AI 驱动设置
 
-## When to Activate
-When the user has multiple GitHub accounts (check with `gh auth status`). If you see 2+ accounts listed, this skill applies.
+## 何时激活
+当用户有多个 GitHub 账户时（用 `gh auth status` 检查）。如果你看到列出 2+ 个账户，此技能适用。
 
-## What to Do (as the AI agent)
+## 做什么（作为 AI 智能体）
 
-### Step 1: Detect accounts
-Run: `gh auth status`
-Look for multiple accounts. Note which usernames are listed.
+### 第 1 步：检测账户
+运行：`gh auth status`
+查找多个账户。记下列出的用户名。
 
-### Step 2: Ask the user
-Ask: "I see you have multiple GitHub accounts: {list them}. Which one is your personal account and which is your work/EMU account?"
+### 第 2 步：询问用户
+询问："我看到你有多个 GitHub 账户：{列出它们}。哪个是你的个人账户，哪个是你的工作/EMU 账户？"
 
-### Step 3: Run the setup automatically
-Once the user confirms, do ALL of this for them:
+### 第 3 步：自动运行设置
+一旦用户确认，为他们做所有这些：
 
 ```powershell
-# 1. Define the functions
+# 1. 定义函数
 $personal = "THEIR_PERSONAL_USERNAME"
 $work = "THEIR_WORK_USERNAME"
 
-# 2. Add to PowerShell profile
+# 2. 添加到 PowerShell 配置文件
 $profilePath = $PROFILE.CurrentUserAllHosts
 if (!(Test-Path $profilePath)) { New-Item -Path $profilePath -Force | Out-Null }
 $existing = Get-Content $profilePath -Raw -ErrorAction SilentlyContinue
 if ($existing -notmatch "gh-personal") {
     $block = @"
 
-# === GitHub Multi-Account Aliases ===
+# === GitHub 多账户别名 ===
 function gh-personal { gh auth switch --user $personal 2>`$null | Out-Null; gh @args }
 function gh-work { gh auth switch --user $work 2>`$null | Out-Null; gh @args }
 Set-Alias ghp gh-personal
@@ -44,51 +44,51 @@ Set-Alias ghw gh-work
     Add-Content -Path $profilePath -Value $block
 }
 
-# 3. Create CMD wrappers
+# 3. 创建 CMD 包装器
 $binDir = Join-Path $env:USERPROFILE ".squad\bin"
 if (!(Test-Path $binDir)) { New-Item -ItemType Directory -Path $binDir -Force | Out-Null }
 "@echo off`ngh auth switch --user $personal >nul 2>&1`ngh %*" | Out-File "$binDir\ghp.cmd" -Encoding ascii
 "@echo off`ngh auth switch --user $work >nul 2>&1`ngh %*" | Out-File "$binDir\ghw.cmd" -Encoding ascii
 
-# 4. Add to PATH
+# 4. 添加到 PATH
 $userPath = [Environment]::GetEnvironmentVariable("PATH", "User")
 if ($userPath -notmatch [regex]::Escape($binDir)) {
     [Environment]::SetEnvironmentVariable("PATH", "$binDir;$userPath", "User")
     $env:PATH = "$binDir;$env:PATH"
 }
 
-# 5. Load in current session
+# 5. 在当前会话中加载
 function gh-personal { gh auth switch --user $personal 2>$null | Out-Null; gh @args }
 function gh-work { gh auth switch --user $work 2>$null | Out-Null; gh @args }
 Set-Alias ghp gh-personal
 Set-Alias ghw gh-work
 ```
 
-### Step 4: Verify for the user
-Run these and show the results:
+### 第 4 步：为用户验证
+运行这些并显示结果：
 ```powershell
-ghp api user --jq '.login'   # should show personal username
-ghw api user --jq '.login'   # should show work username
+ghp api user --jq '.login'   # 应该显示个人账户名
+ghw api user --jq '.login'   # 应该显示工作账户名
 ```
 
-### Step 5: Tell the user
-"All set! From now on use `ghp` for personal repos and `ghw` for work repos. I'll use them too."
+### 第 5 步：告诉用户
+"全部设置好了！从现在开始，个人仓库使用 `ghp`，工作仓库使用 `ghw`。我也会使用它们。"
 
-## After Setup — Usage Rules
+## 设置后 —— 使用规则
 
-1. **NEVER** use bare `gh` for repo operations — always `ghp` or `ghw`
-2. **NEVER** manually `gh auth switch` — the aliases handle it
-3. Determine alias by repo owner:
-   - Personal account repos → `ghp` / `gh-personal`
-   - Work/EMU account repos → `ghw` / `gh-work`
+1. **永远不要**使用裸 `gh` 进行仓库操作 —— 总是使用 `ghp` 或 `ghw`
+2. **永远不要**手动 `gh auth switch` —— 别名处理它
+3. 通过仓库所有者确定别名：
+   - 个人账户仓库 → `ghp` / `gh-personal`
+   - 工作/EMU 账户仓库 → `ghw` / `gh-work`
 
-## Repo-Specific Account Binding
+## 仓库特定账户绑定
 
-This repo (`bradygaster/squad`) is bound to the **bradygaster** (personal) account.
-All `gh` operations in this repo MUST use `ghp` / `gh-personal`.
+此仓库（`bradygaster/squad`）绑定到 **bradygaster**（个人）账户。
+此仓库中的所有 `gh` 操作必须使用 `ghp` / `gh-personal`。
 
-## For Squad Agents
-At the TOP of any script touching GitHub, define:
+## 对于 Squad 智能体
+在任何触及 GitHub 的脚本顶部，定义：
 ```powershell
 function gh-personal { gh auth switch --user bradygaster 2>$null | Out-Null; gh @args }
 function gh-work { gh auth switch --user bradyg_microsoft 2>$null | Out-Null; gh @args }

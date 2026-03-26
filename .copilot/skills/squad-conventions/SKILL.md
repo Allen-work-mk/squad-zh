@@ -1,69 +1,69 @@
 ---
 name: "squad-conventions"
-description: "Core conventions and patterns used in the Squad codebase"
+description: "Squad 代码库中使用的核心约定和模式"
 domain: "project-conventions"
 confidence: "high"
 source: "manual"
 ---
 
-## Context
-These conventions apply to all work on the Squad CLI tool (`create-squad`). Squad is a zero-dependency Node.js package that adds AI agent teams to any project. Understanding these patterns is essential before modifying any Squad source code.
+## 上下文
+这些约定适用于 Squad CLI 工具（`create-squad`）上的所有工作。Squad 是一个零依赖的 Node.js 包，为任何项目添加 AI 智能体团队。在修改任何 Squad 源代码之前，理解这些模式是必不可少的。
 
-## Patterns
+## 模式
 
-### Zero Dependencies
-Squad has zero runtime dependencies. Everything uses Node.js built-ins (`fs`, `path`, `os`, `child_process`). Do not add packages to `dependencies` in `package.json`. This is a hard constraint, not a preference.
+### 零依赖
+Squad 有零运行时依赖。一切都使用 Node.js 内置模块（`fs`、`path`、`os`、`child_process`）。不要在 `package.json` 的 `dependencies` 中添加包。这是一个硬性约束，不是偏好。
 
-### Node.js Built-in Test Runner
-Tests use `node:test` and `node:assert/strict` — no test frameworks. Run with `npm test`. Test files live in `test/`. The test command is `node --test test/`.
+### Node.js 内置测试运行器
+测试使用 `node:test` 和 `node:assert/strict` —— 没有测试框架。使用 `npm test` 运行。测试文件位于 `test/`。测试命令是 `node --test test/`。
 
-### Error Handling — `fatal()` Pattern
-All user-facing errors use the `fatal(msg)` function which prints a red `✗` prefix and exits with code 1. Never throw unhandled exceptions or print raw stack traces. The global `uncaughtException` handler calls `fatal()` as a safety net.
+### 错误处理 —— `fatal()` 模式
+所有面向用户的错误使用 `fatal(msg)` 函数，它打印红色的 `✗` 前缀并以代码 1 退出。永远不要抛出未处理的异常或打印原始堆栈跟踪。全局 `uncaughtException` 处理程序作为安全网调用 `fatal()`。
 
-### ANSI Color Constants
-Colors are defined as constants at the top of `index.js`: `GREEN`, `RED`, `DIM`, `BOLD`, `RESET`. Use these constants — do not inline ANSI escape codes.
+### ANSI 颜色常量
+颜色在 `index.js` 顶部定义为常量：`GREEN`、`RED`、`DIM`、`BOLD`、`RESET`。使用这些常量 —— 不要内联 ANSI 转义码。
 
-### File Structure
-- `.squad/` — Team state (user-owned, never overwritten by upgrades)
-- `.squad/templates/` — Template files copied from `templates/` (Squad-owned, overwritten on upgrade)
-- `.github/agents/squad.agent.md` — Coordinator prompt (Squad-owned, overwritten on upgrade)
-- `templates/` — Source templates shipped with the npm package
-- `.copilot/skills/` — Team skills in SKILL.md format (user-owned)
-- `.squad/decisions/inbox/` — Drop-box for parallel decision writes
+### 文件结构
+- `.squad/` —— 团队状态（用户拥有，升级时永不覆盖）
+- `.squad/templates/` —— 从 `templates/` 复制的模板文件（Squad 拥有，升级时覆盖）
+- `.github/agents/squad.agent.md` —— 协调器提示（Squad 拥有，升级时覆盖）
+- `templates/` —— 随 npm 包发布的源模板
+- `.copilot/skills/` —— SKILL.md 格式的团队技能（用户拥有）
+- `.squad/decisions/inbox/` —— 并行决策写入的投递箱
 
-### Windows Compatibility
-Always use `path.join()` for file paths — never hardcode `/` or `\` separators. Squad must work on Windows, macOS, and Linux. All tests must pass on all platforms.
+### Windows 兼容性
+总是使用 `path.join()` 作为文件路径 —— 永远不要硬编码 `/` 或 `\` 分隔符。Squad 必须在 Windows、macOS 和 Linux 上工作。所有测试必须通过所有平台。
 
-### Init Idempotency
-The init flow uses a skip-if-exists pattern: if a file or directory already exists, skip it and report "already exists." Never overwrite user state during init. The upgrade flow overwrites only Squad-owned files.
+### 初始化幂等性
+初始化流程使用存在则跳过模式：如果文件或目录已存在，跳过它并报告"已存在"。初始化期间永远不要覆盖用户状态。升级流程仅覆盖 Squad 拥有的文件。
 
-### Copy Pattern
-`copyRecursive(src, target)` handles both files and directories. It creates parent directories with `{ recursive: true }` and uses `fs.copyFileSync` for files.
+### 复制模式
+`copyRecursive(src, target)` 处理文件和目录。它用 `{ recursive: true }` 创建父目录，用 `fs.copyFileSync` 复制文件。
 
-## Examples
+## 示例
 
 ```javascript
-// Error handling
+// 错误处理
 function fatal(msg) {
   console.error(`${RED}✗${RESET} ${msg}`);
   process.exit(1);
 }
 
-// File path construction (Windows-safe)
+// 文件路径构造（Windows 安全）
 const agentDest = path.join(dest, '.github', 'agents', 'squad.agent.md');
 
-// Skip-if-exists pattern
+// 存在则跳过模式
 if (!fs.existsSync(ceremoniesDest)) {
   fs.copyFileSync(ceremoniesSrc, ceremoniesDest);
   console.log(`${GREEN}✓${RESET} .squad/ceremonies.md`);
 } else {
-  console.log(`${DIM}ceremonies.md already exists — skipping${RESET}`);
+  console.log(`${DIM}ceremonies.md 已存在 —— 跳过${RESET}`);
 }
 ```
 
-## Anti-Patterns
-- **Adding npm dependencies** — Squad is zero-dep. Use Node.js built-ins only.
-- **Hardcoded path separators** — Never use `/` or `\` directly. Always `path.join()`.
-- **Overwriting user state on init** — Init skips existing files. Only upgrade overwrites Squad-owned files.
-- **Raw stack traces** — All errors go through `fatal()`. Users see clean messages, not stack traces.
-- **Inline ANSI codes** — Use the color constants (`GREEN`, `RED`, `DIM`, `BOLD`, `RESET`).
+## 反模式
+- **添加 npm 依赖** —— Squad 是零依赖的。仅使用 Node.js 内置模块。
+- **硬编码路径分隔符** —— 永远不要直接使用 `/` 或 `\`。总是使用 `path.join()`。
+- **在初始化时覆盖用户状态** —— 初始化跳过现有文件。只有升级覆盖 Squad 拥有的文件。
+- **原始堆栈跟踪** —— 所有错误通过 `fatal()`。用户看到干净的消息，不是堆栈跟踪。
+- **内联 ANSI 代码** —— 使用颜色常量（`GREEN`、`RED`、`DIM`、`BOLD`、`RESET`）。

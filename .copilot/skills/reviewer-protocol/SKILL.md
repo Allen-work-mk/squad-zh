@@ -1,79 +1,79 @@
 ---
 name: "reviewer-protocol"
-description: "Reviewer rejection workflow and strict lockout semantics"
+description: "审查者拒绝工作流和严格的锁定语义"
 domain: "orchestration"
 confidence: "high"
 source: "extracted"
 ---
 
-## Context
+## 上下文
 
-When a team member has a **Reviewer** role (e.g., Tester, Code Reviewer, Lead), they may approve or reject work from other agents. On rejection, the coordinator enforces strict lockout rules to ensure the original author does NOT self-revise. This prevents defensive feedback loops and ensures independent review.
+当团队成员具有**审查者**角色（例如，测试人员、代码审查者、负责人）时，他们可以批准或拒绝其他智能体的工作。在拒绝时，协调器强制执行严格的锁定规则，以确保原作者**不**自我修改。这防止了防御性反馈循环并确保独立审查。
 
-## Patterns
+## 模式
 
-### Reviewer Rejection Protocol
+### 审查者拒绝协议
 
-When a team member has a **Reviewer** role:
+当团队成员具有**审查者**角色时：
 
-- Reviewers may **approve** or **reject** work from other agents.
-- On **rejection**, the Reviewer may choose ONE of:
-  1. **Reassign:** Require a *different* agent to do the revision (not the original author).
-  2. **Escalate:** Require a *new* agent be spawned with specific expertise.
-- The Coordinator MUST enforce this. If the Reviewer says "someone else should fix this," the original agent does NOT get to self-revise.
-- If the Reviewer approves, work proceeds normally.
+- 审查者可以**批准**或**拒绝**其他智能体的工作。
+- 在**拒绝**时，审查者可以选择以下之一：
+  1. **重新分配：** 要求*不同*的智能体进行修改（不是原作者）。
+  2. **升级：** 要求生成具有特定专业知识的*新*智能体。
+- 协调器**必须**强制执行此操作。如果审查者说"其他人应该修复这个"，原作者**不**能自我修改。
+- 如果审查者批准，工作正常进行。
 
-### Strict Lockout Semantics
+### 严格锁定语义
 
-When an artifact is **rejected** by a Reviewer:
+当工件被审查者**拒绝**时：
 
-1. **The original author is locked out.** They may NOT produce the next version of that artifact. No exceptions.
-2. **A different agent MUST own the revision.** The Coordinator selects the revision author based on the Reviewer's recommendation (reassign or escalate).
-3. **The Coordinator enforces this mechanically.** Before spawning a revision agent, the Coordinator MUST verify that the selected agent is NOT the original author. If the Reviewer names the original author as the fix agent, the Coordinator MUST refuse and ask the Reviewer to name a different agent.
-4. **The locked-out author may NOT contribute to the revision** in any form — not as a co-author, advisor, or pair. The revision must be independently produced.
-5. **Lockout scope:** The lockout applies to the specific artifact that was rejected. The original author may still work on other unrelated artifacts.
-6. **Lockout duration:** The lockout persists for that revision cycle. If the revision is also rejected, the same rule applies again — the revision author is now also locked out, and a third agent must revise.
-7. **Deadlock handling:** If all eligible agents have been locked out of an artifact, the Coordinator MUST escalate to the user rather than re-admitting a locked-out author.
+1. **原作者被锁定。** 他们**不得**生成该工件的下一个版本。没有例外。
+2. **不同智能体必须拥有修改权。** 协调器根据审查者的建议（重新分配或升级）选择修改作者。
+3. **协调器机械地强制执行此操作。** 在生成修改智能体之前，协调器**必须**验证所选智能体**不是**原作者。如果审查者将原作者命名为修复智能体，协调器**必须**拒绝并要求审查者命名不同的智能体。
+4. **被锁定的作者不得以任何形式为修改做出贡献** —— 不能作为合著者、顾问或配对。修改必须独立产生。
+5. **锁定范围：** 锁定适用于被拒绝的特定工件。原作者仍然可以在其他不相关的工件上工作。
+6. **锁定持续时间：** 锁定持续该修改周期。如果修改也被拒绝，同样的规则再次适用 —— 修改作者现在也被锁定，第三个智能体必须修改。
+7. **死锁处理：** 如果所有合格的智能体都被锁定在某个工件之外，协调器**必须**升级给用户而不是重新接纳被锁定的作者。
 
-## Examples
+## 示例
 
-**Example 1: Reassign after rejection**
-1. Fenster writes authentication module
-2. Hockney (Tester) reviews → rejects: "Error handling is missing. Verbal should fix this."
-3. Coordinator: Fenster is now locked out of this artifact
-4. Coordinator spawns Verbal to revise the authentication module
-5. Verbal produces v2
-6. Hockney reviews v2 → approves
-7. Lockout clears for next artifact
+**示例 1：拒绝后重新分配**
+1. Fenster 编写认证模块
+2. Hockney（测试人员）审查 → 拒绝："缺少错误处理。Verbal 应该修复这个。"
+3. 协调器：Fenster 现在被锁定在此工件之外
+4. 协调器生成 Verbal 来修改认证模块
+5. Verbal 生成 v2
+6. Hockney 审查 v2 → 批准
+7. 锁定为下一个工件清除
 
-**Example 2: Escalate for expertise**
-1. Edie writes TypeScript config
-2. Keaton (Lead) reviews → rejects: "Need someone with deeper TS knowledge. Escalate."
-3. Coordinator: Edie is now locked out
-4. Coordinator spawns new agent (or existing TS expert) to revise
-5. New agent produces v2
-6. Keaton reviews v2
+**示例 2：为专业知识升级**
+1. Edie 编写 TypeScript 配置
+2. Keaton（负责人）审查 → 拒绝："需要更深层次的 TS 知识。升级。"
+3. 协调器：Edie 现在被锁定
+4. 协调器生成新智能体（或现有 TS 专家）来修改
+5. 新智能体生成 v2
+6. Keaton 审查 v2
 
-**Example 3: Deadlock handling**
-1. Fenster writes module → rejected
-2. Verbal revises → rejected
-3. Hockney revises → rejected
-4. All 3 eligible agents are now locked out
-5. Coordinator: "All eligible agents have been locked out. Escalating to user: [artifact details]"
+**示例 3：死锁处理**
+1. Fenster 编写模块 → 被拒绝
+2. Verbal 修改 → 被拒绝
+3. Hockney 修改 → 被拒绝
+4. 所有 3 个合格智能体现在都被锁定
+5. 协调器："所有合格智能体都已被锁定。升级给用户：[工件详情]"
 
-**Example 4: Reviewer accidentally names original author**
-1. Fenster writes module → rejected
-2. Hockney says: "Fenster should fix the error handling"
-3. Coordinator: "Fenster is locked out as the original author. Please name a different agent."
-4. Hockney: "Verbal, then"
-5. Coordinator spawns Verbal
+**示例 4：审查者不小心命名原作者**
+1. Fenster 编写模块 → 被拒绝
+2. Hockney 说："Fenster 应该修复错误处理"
+3. 协调器："Fenster 作为原作者被锁定。请命名不同的智能体。"
+4. Hockney："那就 Verbal"
+5. 协调器生成 Verbal
 
-## Anti-Patterns
+## 反模式
 
-- ❌ Allowing the original author to self-revise after rejection
-- ❌ Treating the locked-out author as an "advisor" or "co-author" on the revision
-- ❌ Re-admitting a locked-out author when deadlock occurs (must escalate to user)
-- ❌ Applying lockout across unrelated artifacts (scope is per-artifact)
-- ❌ Accepting the Reviewer's assignment when they name the original author (must refuse and ask for a different agent)
-- ❌ Clearing lockout before the revision is approved (lockout persists through revision cycle)
-- ❌ Skipping verification that the revision agent is not the original author
+- ❌ 允许原作者在拒绝后自我修改
+- ❌ 将被锁定的作者视为修改上的"顾问"或"合著者"
+- ❌ 当死锁发生时重新接纳被锁定的作者（必须升级给用户）
+- ❌ 将锁定应用于不相关的工件（范围是按工件的）
+- ❌ 当审查者命名原作者时接受审查者的分配（必须拒绝并要求不同的智能体）
+- ❌ 在修改被批准之前清除锁定（锁定持续整个修改周期）
+- ❌ 跳过验证修改智能体不是原作者

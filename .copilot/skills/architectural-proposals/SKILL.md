@@ -1,151 +1,151 @@
 ---
 name: "architectural-proposals"
-description: "How to write comprehensive architectural proposals that drive alignment before code is written"
+description: "如何编写在编写代码之前推动对齐的全面架构提案"
 domain: "architecture, product-direction"
 confidence: "high"
-source: "earned (2026-02-21 interactive shell proposal)"
+source: "earned (2026-02-21 交互式 shell 提案)"
 tools:
   - name: "view"
-    description: "Read existing codebase, prior decisions, and team context before proposing changes"
-    when: "Always read .squad/decisions.md, relevant PRDs, and current architecture docs before writing proposal"
+    description: "在提议更改之前读取现有代码库、先前决策和团队上下文"
+    when: "在编写提案之前始终读取 .squad/decisions.md、相关 PRD 和当前架构文档"
   - name: "create"
-    description: "Create proposal in docs/proposals/ with structured format"
-    when: "After gathering context, before any implementation work begins"
+    description: "在 docs/proposals/ 中以结构化格式创建提案"
+    when: "在收集上下文之后、任何实现工作开始之前"
 ---
 
-## Context
+## 上下文
 
-Proposals create alignment before code is written. Cheaper to change a doc than refactor code. Use this pattern when:
-- Architecture shifts invalidate existing assumptions
-- Product direction changes require new foundation
-- Multiple waves/milestones will be affected by a decision
-- External dependencies (Copilot CLI, SDK APIs) change
+提案在编写代码之前创建对齐。更改文档比重构代码更便宜。在以下情况使用此模式：
+- 架构转变使现有假设失效
+- 产品方向更改需要新基础
+- 多个 wave/里程碑将受决策影响
+- 外部依赖（Copilot CLI、SDK API）更改
 
-## Patterns
+## 模式
 
-### Proposal Structure (docs/proposals/)
+### 提案结构（docs/proposals/）
 
-**Required sections:**
-1. **Problem Statement** — Why current state is broken (specific, measurable evidence)
-2. **Proposed Architecture** — Solution with technical specifics (not hand-waving)
-3. **What Changes** — Impact on existing work (waves, milestones, modules)
-4. **What Stays the Same** — Preserve existing functionality (no regression)
-5. **Key Decisions Needed** — Explicit choices with recommendations
-6. **Risks and Mitigations** — Likelihood + impact + mitigation strategy
-7. **Scope** — What's in v1, what's deferred (timeline clarity)
+**必需部分：**
+1. **问题陈述** —— 为什么当前状态已损坏（具体、可测量的证据）
+2. **提议架构** —— 具有技术细节的解决方案（不是含糊其辞）
+3. **什么改变** —— 对现有工作的影响（waves、里程碑、模块）
+4. **什么保持不变** —— 保留现有功能（无回归）
+5. **关键决策** —— 带有建议的显式选择
+6. **风险和缓解** —— 可能性 + 影响 + 缓解策略
+7. **范围** —— v1 中有什么，什么被推迟（时间线清晰）
 
-**Optional sections:**
-- Implementation Plan (high-level milestones)
-- Success Criteria (measurable outcomes)
-- Open Questions (unresolved items)
-- Appendix (prior art, alternatives considered)
+**可选部分：**
+- 实现计划（高级里程碑）
+- 成功标准（可测量结果）
+- 开放问题（未解决项目）
+- 附录（先前艺术、考虑的替代方案）
 
-### Tone Ceiling Enforcement
+### 语调上限执行
 
-**Always:**
-- Cite specific evidence (user reports, performance data, failure modes)
-- Justify recommendations with technical rationale
-- Acknowledge trade-offs (no perfect solutions)
-- Be specific about APIs, libraries, file paths
+**总是：**
+- 引用具体证据（用户报告、性能数据、故障模式）
+- 用技术原理证明建议的合理性
+- 承认权衡（没有完美的解决方案）
+- 对 API、库、文件路径具体
 
-**Never:**
-- Hype ("revolutionary", "game-changing")
-- Hand-waving ("we'll figure it out later")
-- Unsubstantiated claims ("users will love this")
-- Vague timelines ("soon", "eventually")
+**永不：**
+- 炒作（"革命性的"、"改变游戏规则的"）
+- 含糊其辞（"我们稍后会弄清楚"）
+- 未经证实的主张（"用户会喜欢它"）
+- 模糊的时间线（"很快"、"最终"）
 
-### Wave Restructuring Pattern
+### Wave 重组模式
 
-When a proposal invalidates existing wave structure:
-1. **Acknowledge the shift:** "This becomes Wave 0 (Foundation)"
-2. **Cascade impacts:** Adjust downstream waves (Wave 1, Wave 2, Wave 3)
-3. **Preserve non-blocking work:** Identify what can proceed in parallel
-4. **Update dependencies:** Document new blocking relationships
+当提案使现有 wave 结构失效时：
+1. **承认转变：**"这成为 Wave 0（基础）"
+2. **级联影响：** 调整下游 waves（Wave 1、Wave 2、Wave 3）
+3. **保留非阻塞工作：** 识别可以并行进行的内容
+4. **更新依赖：** 记录新的阻塞关系
 
-**Example (Interactive Shell):**
-- Wave 0 (NEW): Interactive Shell — blocks all other waves
-- Wave 1 (ADJUSTED): npm Distribution — shell bundled in cli.js
-- Wave 2 (DEFERRED): SquadUI — waits for shell foundation
-- Wave 3 (ADJUSTED): Public Docs — now documents shell as primary interface
+**示例（交互式 Shell）：**
+- Wave 0（新）：交互式 Shell —— 阻塞所有其他 waves
+- Wave 1（调整）：npm 分发 —— shell 捆绑在 cli.js 中
+- Wave 2（推迟）：SquadUI —— 等待 shell 基础
+- Wave 3（调整）：公共文档 —— 现在将 shell 记录为主要界面
 
-### Decision Framing
+### 决策框架
 
-**Format:** "Recommendation: X (recommended) or alternatives?"
+**格式：**"建议：X（推荐）或替代方案？"
 
-**Components:**
-- Recommendation (pick one, justify)
-- Alternatives (what else was considered)
-- Decision rationale (why recommended option wins)
-- Needs sign-off from (which agents/roles must approve)
+**组件：**
+- 建议（选择一个，证明合理性）
+- 替代方案（还考虑了什么）
+- 决策原理（为什么推荐选项获胜）
+- 需要批准（哪些智能体/角色必须批准）
 
-**Example:**
+**示例：**
 ```
-### 1. Terminal UI Library: `ink` (recommended) or alternatives?
+### 1. 终端 UI 库：`ink`（推荐）或替代方案？
 
-**Recommendation:** `ink`  
-**Alternatives:** `blessed`, raw readline  
-**Decision rationale:** Component model enables testable UI. Battle-tested ecosystem.
+**建议：** `ink`  
+**替代方案：** `blessed`、原始 readline  
+**决策原理：** 组件模型启用可测试的 UI。经过实战检验的生态系统。
 
-**Needs sign-off from:** Brady (product direction), Fortier (runtime performance)
-```
-
-### Risk Documentation
-
-**Format per risk:**
-- **Risk:** Specific failure mode
-- **Likelihood:** Low / Medium / High (not percentages)
-- **Impact:** Low / Medium / High
-- **Mitigation:** Concrete actions (measurable)
-
-**Example:**
-```
-### Risk 2: SDK Streaming Reliability
-
-**Risk:** SDK streaming events might drop messages or arrive out of order.  
-**Likelihood:** Low (SDK is production-grade).  
-**Impact:** High — broken streaming makes shell unusable.
-
-**Mitigation:**
-- Add integration test: Send 1000-message stream, verify all deltas arrive in order
-- Implement fallback: If streaming fails, fall back to polling session state
-- Log all SDK events to `.squad/orchestration-log/sdk-events.jsonl` for debugging
+**需要批准：** Brady（产品方向）、Fortier（运行时性能）
 ```
 
-## Examples
+### 风险文档
 
-**File references from interactive shell proposal:**
-- Full proposal: `docs/proposals/squad-interactive-shell.md`
-- User directive: `.squad/decisions/inbox/copilot-directive-2026-02-21T202535Z.md`
-- Team decisions: `.squad/decisions.md`
-- Current architecture: `docs/architecture/module-map.md`, `docs/prd-23-release-readiness.md`
+**每个风险的格式：**
+- **风险：** 具体故障模式
+- **可能性：** 低 / 中 / 高（不是百分比）
+- **影响：** 低 / 中 / 高
+- **缓解：** 具体行动（可测量）
 
-**Key patterns demonstrated:**
-1. Read user directive first (understand the "why")
-2. Survey current architecture (module map, existing waves)
-3. Research SDK APIs (exploration task to validate feasibility)
-4. Document problem with specific evidence (unreliable handoffs, zero visibility, UX mismatch)
-5. Propose solution with technical specifics (ink components, SDK session management, spawn.ts module)
-6. Restructure waves when foundation shifts (Wave 0 becomes blocker)
-7. Preserve backward compatibility (squad.agent.md still works, VS Code mode unchanged)
-8. Frame decisions explicitly (5 key decisions with recommendations)
-9. Document risks with mitigations (5 risks, each with concrete actions)
-10. Define scope (what's in v1 vs. deferred)
+**示例：**
+```
+### 风险 2：SDK 流可靠性
 
-## Anti-Patterns
+**风险：** SDK 流事件可能丢弃消息或乱序到达。  
+**可能性：** 低（SDK 是生产级的）。  
+**影响：** 高 —— 损坏的流使 shell 无法使用。
 
-**Avoid:**
-- ❌ Proposals without problem statements (solution-first thinking)
-- ❌ Vague architecture ("we'll use a shell") — be specific (ink components, session registry, spawn.ts)
-- ❌ Ignoring existing work — always document impact on waves/milestones
-- ❌ No risk analysis — every architecture has risks, document them
-- ❌ Unbounded scope — draw the v1 line explicitly
-- ❌ Missing decision ownership — always say "needs sign-off from X"
-- ❌ No backward compatibility plan — users don't care about your replatform
-- ❌ Hand-waving timelines ("a few weeks") — be specific (2-3 weeks, 1 engineer full-time)
+**缓解：**
+- 添加集成测试：发送 1000 条消息流，验证所有增量按顺序到达
+- 实现回退：如果流失败，回退到轮询会话状态
+- 将所有 SDK 事件记录到 `.squad/orchestration-log/sdk-events.jsonl` 用于调试
+```
 
-**Red flags in proposal reviews:**
-- "Users will love this" (citation needed)
-- "We'll figure out X later" (scope creep incoming)
-- "This is revolutionary" (tone ceiling violation)
-- No section on "What Stays the Same" (regression risk)
-- No risks documented (wishful thinking)
+## 示例
+
+**来自交互式 shell 提案的文件引用：**
+- 完整提案：`docs/proposals/squad-interactive-shell.md`
+- 用户指令：`.squad/decisions/inbox/copilot-directive-2026-02-21T202535Z.md`
+- 团队决策：`.squad/decisions.md`
+- 当前架构：`docs/architecture/module-map.md`、`docs/prd-23-release-readiness.md`
+
+**演示的关键模式：**
+1. 首先读取用户指令（理解"为什么"）
+2. 调查当前架构（模块映射、现有 waves）
+3. 研究 SDK API（探索任务以验证可行性）
+4. 用具体证据记录问题（不可靠的交接、零可见性、UX 不匹配）
+5. 用技术细节提出解决方案（ink 组件、SDK 会话管理、spawn.ts 模块）
+6. 当基础转变时重组 waves（Wave 0 成为阻塞器）
+7. 保留向后兼容性（squad.agent.md 仍然工作，VS Code 模式不变）
+8. 显式框架决策（5 个关键决策带有建议）
+9. 用缓解记录风险（5 个风险，每个都有具体行动）
+10. 定义范围（v1 中有什么 vs 推迟的）
+
+## 反模式
+
+**避免：**
+- ❌ 没有问题陈述的提案（先思考解决方案）
+- ❌ 模糊架构（"我们会使用 shell"）—— 要具体（ink 组件、会话注册表、spawn.ts）
+- ❌ 忽略现有工作 —— 始终记录对 waves/里程碑的影响
+- ❌ 无风险分析 —— 每个架构都有风险，记录它们
+- ❌ 无界范围 —— 显式绘制 v1 线
+- ❌ 缺失决策所有权 —— 总是说"需要 X 批准"
+- ❌ 没有向后兼容性计划 —— 用户不关心你的重新平台化
+- ❌ 含糊其辞时间线（"几周"）—— 要具体（2-3 周，1 名工程师全职）
+
+**提案审查中的红旗：**
+- "用户会喜欢它"（需要引用）
+- "我们稍后会弄清楚 X"（范围蔓延即将到来）
+- "这是革命性的"（语调上限违规）
+- 没有"什么保持不变"部分（回归风险）
+- 没有记录的风险（一厢情愿）

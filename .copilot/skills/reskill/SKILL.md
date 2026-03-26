@@ -1,92 +1,92 @@
 ---
 name: "reskill"
-description: "Team-wide charter and history optimization through skill extraction"
+description: "通过技能提取进行团队范围的 charter 和历史优化"
 domain: "team-optimization"
 confidence: "high"
-source: "manual — Brady directive to reduce per-agent context overhead"
+source: "manual —— Brady 减少每个智能体上下文开销的指令"
 ---
 
-## Context
+## 上下文
 
-When the coordinator hears "team, reskill" (or similar: "optimize context", "slim down charters"), trigger a team-wide optimization pass. The goal: reduce per-agent context consumption by extracting shared patterns from charters and histories into reusable skills.
+当协调器听到"团队，重新技能"（或类似："优化上下文"、"精简 charter"）时，触发团队范围的优化通道。目标：通过将 charter 和历史中的共享模式提取到可复用技能来减少每个智能体的上下文消耗。
 
-This is a periodic maintenance activity. Run whenever charter/history bloat is suspected.
+这是定期维护活动。在怀疑 charter/历史膨胀时运行。
 
-## Process
+## 流程
 
-### Step 1: Audit
-Read all agent charters and histories. Measure byte sizes. Identify:
+### 第1步：审计
+阅读所有智能体 charter 和历史。测量字节大小。识别：
 
-- **Boilerplate** — sections repeated across ≥3 charters with <10% variation (collaboration, model, boundaries template)
-- **Shared knowledge** — domain knowledge duplicated in 2+ charters (incident postmortems, technical patterns)
-- **Mature learnings** — history entries appearing 3+ times across agents that should be promoted to skills
+- **样板** —— 在 ≥3 个 charter 中重复的部分，变异 <10%（协作、模型、边界模板）
+- **共享知识** —— 在 2+ 个 charter 中重复的域知识（事件事后分析、技术模式）
+- **成熟学习** —— 在智能体中出现 3+ 次应该提升为技能的历史条目
 
-### Step 2: Extract
-For each identified pattern:
-1. Create or update a skill at `.copilot/skills/{skill-name}/SKILL.md`
-2. Follow the skill template format (frontmatter + Context + Patterns + Examples + Anti-Patterns)
-3. Set confidence: low (first observation), medium (2+ agents), high (team-wide)
+### 第2步：提取
+对于每个识别的模式：
+1. 在 `.copilot/skills/{skill-name}/SKILL.md` 创建或更新技能
+2. 遵循技能模板格式（frontmatter + 上下文 + 模式 + 示例 + 反模式）
+3. 设置信心：低（首次观察）、中（2+ 智能体）、高（团队范围）
 
-### Step 3: Trim
-**Charters** — target ≤1.5KB per agent:
-- Remove Collaboration section entirely (spawn prompt + agent-collaboration skill covers it)
-- Remove Voice section (tagline blockquote at top of charter already captures it)
-- Trim Model section to single line: `Preferred: {model}`
-- Remove "When I'm unsure" boilerplate from Boundaries
-- Remove domain knowledge now covered by a skill — add skill reference comment if helpful
-- Keep: Identity, What I Own, unique How I Work patterns, Boundaries (domain list only)
+### 第3步：修剪
+**Charters** —— 目标每个智能体 ≤1.5KB：
+- 完全移除协作部分（生成提示 + agent-collaboration 技能覆盖它）
+- 移除声音部分（charter 顶部的标语块引用已捕获它）
+- 将模型部分修剪为单行：`Preferred: {model}`
+- 从边界中移除"当我不确定时"样板
+- 移除现在由技能覆盖的域知识 —— 如果有帮助添加技能引用注释
+- 保留：身份、我拥有的、独特的我如何工作模式、边界（仅域列表）
 
-**Histories** — target ≤8KB per agent:
-- Apply history-hygiene skill to any history >12KB
-- Promote recurring patterns (3+ occurrences across agents) to skills
-- Summarize old entries into `## Core Context` section
-- Remove session-specific metadata (dates, branch names, requester names)
+**Histories** —— 目标每个智能体 ≤8KB：
+- 对任何 >12KB 的历史应用 history-hygiene 技能
+- 将重复模式（智能体间 3+ 次出现）提升为技能
+- 将旧条目总结为 `## Core Context` 部分
+- 移除会话特定元数据（日期、分支名称、请求者名称）
 
-### Step 4: Report
-Output a savings table:
+### 第4步：报告
+输出节省表：
 
-| Agent | Charter Before | Charter After | History Before | History After | Saved |
+| 智能体 | Charter 之前 | Charter 之后 | History 之前 | History 之后 | 节省 |
 |-------|---------------|---------------|----------------|---------------|-------|
 
-Include totals and percentage reduction.
+包括总计和百分比减少。
 
-## Patterns
+## 模式
 
-### Minimal Charter Template (target format after reskill)
+### 最小 Charter 模板（重新技能后的目标格式）
 
 ```
-# {Name} — {Role}
+# {Name} —— {Role}
 
-> {Tagline — one sentence capturing voice and philosophy}
+> {标语 —— 一句话捕捉声音和哲学}
 
-## Identity
-- **Name:** {Name}
-- **Role:** {Role}
-- **Expertise:** {comma-separated list}
+## 身份
+- **名称：** {Name}
+- **角色：** {Role}
+- **专长：** {逗号分隔列表}
 
-## What I Own
-- {bullet list of owned artifacts/domains}
+## 我拥有的
+- {拥有的工件/域的项目符号列表}
 
-## How I Work
-- {unique patterns and principles — NOT boilerplate}
+## 我如何工作
+- {独特模式和原则 —— 不是样板}
 
-## Boundaries
-**I handle:** {domain list}
-**I don't handle:** {explicit exclusions}
+## 边界
+**我处理：** {域列表}
+**我不处理：** {显式排除}
 
-## Model
+## 模型
 Preferred: {model}
 ```
 
-### Skill Extraction Threshold
-- **1 charter** → leave in charter (unique to that agent)
-- **2 charters** → consider extracting if >500 bytes of overlap
-- **3+ charters** → always extract to a shared skill
+### 技能提取阈值
+- **1 个 charter** → 留在 charter 中（该智能体独有）
+- **2 个 charters** → 如果重叠 >500 字节则考虑提取
+- **3+ 个 charters** → 总是提取到共享技能
 
-## Anti-Patterns
-- Don't delete unique per-agent identity or domain-specific knowledge
-- Don't create skills for content only one agent uses
-- Don't merge unrelated patterns into a single mega-skill
-- Don't remove Model preference line (coordinator needs it for model selection)
-- Don't touch `.squad/decisions.md` during reskill
-- Don't remove the tagline blockquote — it's the charter's soul in one line
+## 反模式
+- 不要删除每个智能体独有的身份或域特定知识
+- 不要为只有一个智能体使用的内容创建技能
+- 不要将不相关的模式合并到单个超级技能
+- 不要移除模型偏好行（协调器需要它进行模型选择）
+- 不要在重新技能期间触摸 `.squad/decisions.md`
+- 不要移除标语块引用 —— 它是 charter 的灵魂，一句话

@@ -1,423 +1,423 @@
 ---
 name: "release-process"
-description: "Step-by-step release checklist for Squad — prevents v0.8.22-style disasters"
+description: "Squad 的逐步发布检查清单 —— 防止 v0.8.22 式灾难"
 domain: "release-management"
 confidence: "high"
 source: "team-decision"
 ---
 
-## Context
+## 上下文
 
-This is the **definitive release runbook** for Squad. Born from the v0.8.22 release disaster (4-part semver mangled by npm, draft release never triggered publish, wrong NPM_TOKEN type, 6+ hours of broken `latest` dist-tag).
+这是 Squad 的**权威发布运行手册**。诞生于 v0.8.22 发布灾难（4 部分 semver 被 npm 损坏、草稿发布从未触发发布、错误的 NPM_TOKEN 类型、6+ 小时的损坏 `latest` dist-tag）。
 
-**Rule:** No agent releases Squad without following this checklist. No exceptions. No improvisation.
+**规则：** 没有智能体在遵循此检查清单的情况下发布 Squad。没有例外。没有即兴发挥。
 
 ---
 
-## Pre-Release Validation
+## 发布前验证
 
-Before starting ANY release work, validate the following:
+在开始任何发布工作之前，验证以下内容：
 
-### 1. Version Number Validation
+### 1. 版本号验证
 
-**Rule:** Only 3-part semver (major.minor.patch) or prerelease (major.minor.patch-tag.N) are valid. 4-part versions (0.8.21.4) are NOT valid semver and npm will mangle them.
+**规则：** 只有 3 部分 semver（major.minor.patch）或预发布（major.minor.patch-tag.N）是有效的。4 部分版本（0.8.21.4）不是有效的 semver，npm 会损坏它们。
 
 ```bash
-# Check version is valid semver
+# 检查版本是否为有效 semver
 node -p "require('semver').valid('0.8.22')"
-# Output: '0.8.22' = valid
-# Output: null = INVALID, STOP
+# 输出：'0.8.22' = 有效
+# 输出：null = 无效，停止
 
-# For prerelease versions
+# 对于预发布版本
 node -p "require('semver').valid('0.8.23-preview.1')"
-# Output: '0.8.23-preview.1' = valid
+# 输出：'0.8.23-preview.1' = 有效
 ```
 
-**If `semver.valid()` returns `null`:** STOP. Fix the version. Do NOT proceed.
+**如果 `semver.valid()` 返回 `null`：** 停止。修复版本。不要继续。
 
-### 2. NPM_TOKEN Verification
+### 2. NPM_TOKEN 验证
 
-**Rule:** NPM_TOKEN must be an **Automation token** (no 2FA required). User tokens with 2FA will fail in CI with EOTP errors.
+**规则：** NPM_TOKEN 必须是 **Automation 令牌**（不需要 2FA）。带 2FA 的 User 令牌将在 CI 中失败并出现 EOTP 错误。
 
 ```bash
-# Check token type (requires npm CLI authenticated)
+# 检查令牌类型（需要 npm CLI 认证）
 npm token list
 ```
 
-Look for:
-- ✅ `read-write` tokens with NO 2FA requirement = Automation token (correct)
-- ❌ Tokens requiring OTP = User token (WRONG, will fail in CI)
+查找：
+- ✅ 不需要 2FA 的 `read-write` 令牌 = Automation 令牌（正确）
+- ❌ 需要 OTP 的令牌 = User 令牌（错误，将在 CI 中失败）
 
-**How to create an Automation token:**
-1. Go to npmjs.com → Settings → Access Tokens
-2. Click "Generate New Token"
-3. Select **"Automation"** (NOT "Publish")
-4. Copy token and save as GitHub secret: `NPM_TOKEN`
+**如何创建 Automation 令牌：**
+1. 前往 npmjs.com → Settings → Access Tokens
+2. 点击 "Generate New Token"
+3. 选择 **"Automation"**（不是 "Publish"）
+4. 复制令牌并保存为 GitHub 密钥：`NPM_TOKEN`
 
-**If using a User token:** STOP. Create an Automation token first.
+**如果使用 User 令牌：** 停止。首先创建 Automation 令牌。
 
-### 3. Branch and Tag State
+### 3. 分支和标签状态
 
-**Rule:** Release from `main` branch. Ensure clean state, no uncommitted changes, latest from origin.
+**规则：** 从 `main` 分支发布。确保干净状态，无未提交更改，来自 origin 的最新代码。
 
 ```bash
-# Ensure on main and clean
+# 确保在 main 上且干净
 git checkout main
 git pull origin main
-git status  # Should show: "nothing to commit, working tree clean"
+git status  # 应该显示："nothing to commit, working tree clean"
 
-# Check tag doesn't already exist
+# 检查标签是否已存在
 git tag -l "v0.8.22"
-# Output should be EMPTY. If tag exists, release already done or collision.
+# 输出应该为空。如果标签存在，发布已完成或存在冲突。
 ```
 
-**If tag exists:** STOP. Either release was already done, or there's a collision. Investigate before proceeding.
+**如果标签存在：** 停止。要么发布已完成，要么存在冲突。在继续之前调查。
 
-### 4. Disable bump-build.mjs
+### 4. 禁用 bump-build.mjs
 
-**Rule:** `bump-build.mjs` is for dev builds ONLY. It must NOT run during release builds (it increments build numbers, creating 4-part versions).
+**规则：** `bump-build.mjs` 仅用于开发构建。在发布构建期间不得运行（它递增构建号，创建 4 部分版本）。
 
 ```bash
-# Set env var to skip bump-build.mjs
+# 设置环境变量以跳过 bump-build.mjs
 export SKIP_BUILD_BUMP=1
 
-# Verify it's set
+# 验证已设置
 echo $SKIP_BUILD_BUMP
-# Output: 1
+# 输出：1
 ```
 
-**For Windows PowerShell:**
+**对于 Windows PowerShell：**
 ```powershell
 $env:SKIP_BUILD_BUMP = "1"
 ```
 
-**If not set:** `bump-build.mjs` will run and mutate versions. This causes disasters (see v0.8.22).
+**如果未设置：** `bump-build.mjs` 将运行并变异版本。这会导致灾难（参见 v0.8.22）。
 
 ---
 
-## Release Workflow
+## 发布工作流
 
-### Step 1: Version Bump
+### 第 1 步：版本升级
 
-Update version in all 3 package.json files (root + both workspaces) in lockstep.
+以锁定步骤更新所有 3 个 package.json 文件中的版本（根目录 + 两个工作区）。
 
 ```bash
-# Set target version (no 'v' prefix)
+# 设置目标版本（无 'v' 前缀）
 VERSION="0.8.22"
 
-# Validate it's valid semver BEFORE proceeding
+# 在继续之前验证它是有效 semver
 node -p "require('semver').valid('$VERSION')"
-# Must output the version string, NOT null
+# 必须输出版本字符串，不是 null
 
-# Update all 3 package.json files
+# 更新所有 3 个 package.json 文件
 npm version $VERSION --workspaces --include-workspace-root --no-git-tag-version
 
-# Verify all 3 match
+# 验证所有 3 个匹配
 grep '"version"' package.json packages/squad-sdk/package.json packages/squad-cli/package.json
-# All 3 should show: "version": "0.8.22"
+# 所有 3 个都应该显示："version": "0.8.22"
 ```
 
-**Checkpoint:** All 3 package.json files have identical versions. Run `semver.valid()` one more time to be sure.
+**检查点：** 所有 3 个 package.json 文件具有相同版本。再次运行 `semver.valid()` 以确保。
 
-### Step 2: Commit and Tag
+### 第 2 步：提交和打标签
 
 ```bash
-# Commit version bump
+# 提交版本升级
 git add package.json packages/squad-sdk/package.json packages/squad-cli/package.json
 git commit -m "chore: bump version to $VERSION
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 
-# Create tag (with 'v' prefix)
+# 创建标签（带 'v' 前缀）
 git tag -a "v$VERSION" -m "Release v$VERSION"
 
-# Push commit and tag
+# 推送提交和标签
 git push origin main
 git push origin "v$VERSION"
 ```
 
-**Checkpoint:** Tag created and pushed. Verify with `git tag -l "v$VERSION"`.
+**检查点：** 标签已创建并推送。用 `git tag -l "v$VERSION"` 验证。
 
-### Step 3: Create GitHub Release
+### 第 3 步：创建 GitHub 发布
 
-**CRITICAL:** Release must be **published**, NOT draft. Draft releases don't trigger `publish.yml` workflow.
+**关键：** 发布必须是 **已发布**，不是草稿。草稿发布不会触发 `publish.yml` 工作流。
 
 ```bash
-# Create GitHub Release (NOT draft)
+# 创建 GitHub 发布（不是草稿）
 gh release create "v$VERSION" \
   --title "v$VERSION" \
   --notes "Release notes go here" \
   --latest
 
-# Verify release is PUBLISHED (not draft)
+# 验证发布是已发布（不是草稿）
 gh release view "v$VERSION"
-# Output should NOT contain "(draft)"
+# 输出不应包含 "(draft)"
 ```
 
-**If output contains `(draft)`:** STOP. Delete the release and recreate without `--draft` flag.
+**如果输出包含 `(draft)`：** 停止。删除发布并在没有 `--draft` 标志的情况下重新创建。
 
 ```bash
-# If you accidentally created a draft, fix it:
+# 如果你不小心创建了草稿，修复它：
 gh release edit "v$VERSION" --draft=false
 ```
 
-**Checkpoint:** Release is published (NOT draft). The `release: published` event fired and triggered `publish.yml`.
+**检查点：** 发布已发布（不是草稿）。`release: published` 事件已触发并启动了 `publish.yml`。
 
-### Step 4: Monitor Workflow
+### 第 4 步：监控工作流
 
-The `publish.yml` workflow should start automatically within 10 seconds of release creation.
+`publish.yml` 工作流应在发布创建后 10 秒内自动启动。
 
 ```bash
-# Watch workflow runs
+# 监视工作流运行
 gh run list --workflow=publish.yml --limit 1
 
-# Get detailed status
+# 获取详细状态
 gh run view --log
 ```
 
-**Expected flow:**
-1. `publish-sdk` job runs → publishes `@bradygaster/squad-sdk`
-2. Verify step runs with retry loop (up to 5 attempts, 15s interval) to confirm SDK on npm registry
-3. `publish-cli` job runs → publishes `@bradygaster/squad-cli`
-4. Verify step runs with retry loop to confirm CLI on npm registry
+**预期流程：**
+1. `publish-sdk` 作业运行 → 发布 `@bradygaster/squad-sdk`
+2. 验证步骤使用重试循环运行（最多 5 次尝试，15 秒间隔）以确认 SDK 在 npm 注册表上
+3. `publish-cli` 作业运行 → 发布 `@bradygaster/squad-cli`
+4. 验证步骤使用重试循环运行以确认 CLI 在 npm 注册表上
 
-**If workflow fails:** Check the logs. Common issues:
-- EOTP error = wrong NPM_TOKEN type (use Automation token)
-- Verify step timeout = npm propagation delay (retry loop should handle this, but propagation can take up to 2 minutes in rare cases)
-- Version mismatch = package.json version doesn't match tag
+**如果工作流失败：** 检查日志。常见问题：
+- EOTP 错误 = 错误的 NPM_TOKEN 类型（使用 Automation 令牌）
+- 验证步骤超时 = npm 传播延迟（重试循环应处理此问题，但传播在罕见情况下可能需要长达 2 分钟）
+- 版本不匹配 = package.json 版本与标签不匹配
 
-**Checkpoint:** Both jobs succeeded. Workflow shows green checkmarks.
+**检查点：** 两个作业都成功。工作流显示绿色对勾。
 
-### Step 5: Verify npm Publication
+### 第 5 步：验证 npm 发布
 
-Manually verify both packages are on npm with correct `latest` dist-tag.
+手动验证两个包都在 npm 上，带有正确的 `latest` dist-tag。
 
 ```bash
-# Check SDK
+# 检查 SDK
 npm view @bradygaster/squad-sdk version
-# Output: 0.8.22
+# 输出：0.8.22
 
 npm dist-tag ls @bradygaster/squad-sdk
-# Output should show: latest: 0.8.22
+# 输出应显示：latest: 0.8.22
 
-# Check CLI
+# 检查 CLI
 npm view @bradygaster/squad-cli version
-# Output: 0.8.22
+# 输出：0.8.22
 
 npm dist-tag ls @bradygaster/squad-cli
-# Output should show: latest: 0.8.22
+# 输出应显示：latest: 0.8.22
 ```
 
-**If versions don't match:** Something went wrong. Check workflow logs. DO NOT proceed with GitHub Release announcement until npm is correct.
+**如果版本不匹配：** 出了问题。检查工作流日志。在 npm 正确之前不要继续 GitHub 发布公告。
 
-**Checkpoint:** Both packages show correct version. `latest` dist-tags point to the new version.
+**检查点：** 两个包都显示正确版本。`latest` dist-tags 指向新版本。
 
-### Step 6: Test Installation
+### 第 6 步：测试安装
 
-Verify packages can be installed from npm (real-world smoke test).
+验证包可以从 npm 安装（真实世界的冒烟测试）。
 
 ```bash
-# Create temp directory
+# 创建临时目录
 mkdir /tmp/squad-release-test && cd /tmp/squad-release-test
 
-# Test SDK installation
+# 测试 SDK 安装
 npm init -y
 npm install @bradygaster/squad-sdk
 node -p "require('@bradygaster/squad-sdk/package.json').version"
-# Output: 0.8.22
+# 输出：0.8.22
 
-# Test CLI installation
+# 测试 CLI 安装
 npm install -g @bradygaster/squad-cli
 squad --version
-# Output: 0.8.22
+# 输出：0.8.22
 
-# Cleanup
+# 清理
 cd -
 rm -rf /tmp/squad-release-test
 ```
 
-**If installation fails:** npm registry issue or package metadata corruption. DO NOT announce release until this works.
+**如果安装失败：** npm 注册表问题或包元数据损坏。在此工作之前不要宣布发布。
 
-**Checkpoint:** Both packages install cleanly. Versions match.
+**检查点：** 两个包都干净安装。版本匹配。
 
-### Step 7: Sync dev to Next Preview
+### 第 7 步：将 dev 同步到下一个预览版
 
-After main release, sync dev to the next preview version.
+main 发布后，将 dev 同步到下一个预览版本。
 
 ```bash
-# Checkout dev
+# 检出 dev
 git checkout dev
 git pull origin dev
 
-# Bump to next preview version (e.g., 0.8.23-preview.1)
+# 升级到下一个预览版本（例如，0.8.23-preview.1）
 NEXT_VERSION="0.8.23-preview.1"
 
-# Validate semver
+# 验证 semver
 node -p "require('semver').valid('$NEXT_VERSION')"
-# Must output the version string, NOT null
+# 必须输出版本字符串，不是 null
 
-# Update all 3 package.json files
+# 更新所有 3 个 package.json 文件
 npm version $NEXT_VERSION --workspaces --include-workspace-root --no-git-tag-version
 
-# Commit
+# 提交
 git add package.json packages/squad-sdk/package.json packages/squad-cli/package.json
 git commit -m "chore: bump dev to $NEXT_VERSION
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 
-# Push
+# 推送
 git push origin dev
 ```
 
-**Checkpoint:** dev branch now shows next preview version. Future dev builds will publish to `@preview` dist-tag.
+**检查点：** dev 分支现在显示下一个预览版本。未来的 dev 构建将发布到 `@preview` dist-tag。
 
 ---
 
-## Manual Publish (Fallback)
+## 手动发布（回退）
 
-If `publish.yml` workflow fails or needs to be bypassed, use `workflow_dispatch` to manually trigger publish.
+如果 `publish.yml` 工作流失败或需要绕过，使用 `workflow_dispatch` 手动触发发布。
 
 ```bash
-# Trigger manual publish
+# 触发手动发布
 gh workflow run publish.yml -f version="0.8.22"
 
-# Monitor the run
+# 监视运行
 gh run watch
 ```
 
-**Rule:** Only use this if automated publish failed. Always investigate why automation failed and fix it for next release.
+**规则：** 仅当自动发布失败时使用。始终调查为什么自动化失败并为下次发布修复它。
 
 ---
 
-## Rollback Procedure
+## 回滚程序
 
-If a release is broken and needs to be rolled back:
+如果发布已损坏需要回滚：
 
-### 1. Unpublish from npm (Nuclear Option)
+### 1. 从 npm 取消发布（核选项）
 
-**WARNING:** npm unpublish is time-limited (24 hours) and leaves the version slot burned. Only use if version is critically broken.
+**警告：** npm 取消发布有时间限制（24 小时）并留下已烧毁的版本槽。仅在版本严重损坏时使用。
 
 ```bash
-# Unpublish (requires npm owner privileges)
+# 取消发布（需要 npm 所有者权限）
 npm unpublish @bradygaster/squad-sdk@0.8.22
 npm unpublish @bradygaster/squad-cli@0.8.22
 ```
 
-### 2. Deprecate on npm (Preferred)
+### 2. 在 npm 上弃用（首选）
 
-**Preferred approach:** Mark version as deprecated, publish a hotfix.
+**首选方法：** 将版本标记为已弃用，发布热修复。
 
 ```bash
-# Deprecate broken version
+# 弃用损坏的版本
 npm deprecate @bradygaster/squad-sdk@0.8.22 "Broken release, use 0.8.22.1 instead"
 npm deprecate @bradygaster/squad-cli@0.8.22 "Broken release, use 0.8.22.1 instead"
 
-# Publish hotfix version
-# (Follow this runbook with version 0.8.22.1)
+# 发布热修复版本
+# （使用版本 0.8.22.1 遵循此运行手册）
 ```
 
-### 3. Delete GitHub Release and Tag
+### 3. 删除 GitHub 发布和标签
 
 ```bash
-# Delete GitHub Release
+# 删除 GitHub 发布
 gh release delete "v0.8.22" --yes
 
-# Delete tag locally and remotely
+# 删除本地和远程标签
 git tag -d "v0.8.22"
 git push origin --delete "v0.8.22"
 ```
 
-### 4. Revert Commit on main
+### 4. 在 main 上恢复提交
 
 ```bash
-# Revert version bump commit
+# 恢复版本升级提交
 git checkout main
 git revert HEAD
 git push origin main
 ```
 
-**Checkpoint:** Tag and release deleted. main branch reverted. npm packages deprecated or unpublished.
+**检查点：** 标签和发布已删除。main 分支已恢复。npm 包已弃用或未发布。
 
 ---
 
-## Common Failure Modes
+## 常见故障模式
 
-### EOTP Error (npm OTP Required)
+### EOTP 错误（需要 npm OTP）
 
-**Symptom:** Workflow fails with `EOTP` error.  
-**Root cause:** NPM_TOKEN is a User token with 2FA enabled. CI can't provide OTP.  
-**Fix:** Replace NPM_TOKEN with an Automation token (no 2FA). See "NPM_TOKEN Verification" above.
+**症状：** 工作流失败并出现 `EOTP` 错误。  
+**根本原因：** NPM_TOKEN 是启用了 2FA 的 User 令牌。CI 无法提供 OTP。  
+**修复：** 将 NPM_TOKEN 替换为 Automation 令牌（无 2FA）。参见上面的 "NPM_TOKEN 验证"。
 
-### Verify Step 404 (npm Propagation Delay)
+### 验证步骤 404（npm 传播延迟）
 
-**Symptom:** Verify step fails with 404 even though publish succeeded.  
-**Root cause:** npm registry propagation delay (5-30 seconds).  
-**Fix:** Verify step now has retry loop (5 attempts, 15s interval). Should auto-resolve. If not, wait 2 minutes and re-run workflow.
+**症状：** 即使发布成功，验证步骤也失败并出现 404。  
+**根本原因：** npm 注册表传播延迟（5-30 秒）。  
+**修复：** 验证步骤现在有重试循环（5 次尝试，15 秒间隔）。应自动解决。如果没有，等待 2 分钟并重新运行工作流。
 
-### Version Mismatch (package.json ≠ tag)
+### 版本不匹配（package.json ≠ tag）
 
-**Symptom:** Verify step fails with "Package version (X) does not match target version (Y)".  
-**Root cause:** package.json version doesn't match the tag version.  
-**Fix:** Ensure all 3 package.json files were updated in Step 1. Re-run `npm version` if needed.
+**症状：** 验证步骤失败并出现 "Package version (X) does not match target version (Y)"。  
+**根本原因：** package.json 版本与标签版本不匹配。  
+**修复：** 确保所有 3 个 package.json 文件在第 1 步中已更新。如果需要，重新运行 `npm version`。
 
-### 4-Part Version Mangled by npm
+### 4 部分版本被 npm 损坏
 
-**Symptom:** Published version on npm doesn't match package.json (e.g., 0.8.21.4 became 0.8.2-1.4).  
-**Root cause:** 4-part versions are NOT valid semver. npm's parser misinterprets them.  
-**Fix:** NEVER use 4-part versions. Only 3-part (0.8.22) or prerelease (0.8.23-preview.1). Run `semver.valid()` before ANY commit.
+**症状：** npm 上发布的版本与 package.json 不匹配（例如，0.8.21.4 变成了 0.8.2-1.4）。  
+**根本原因：** 4 部分版本不是有效的 semver。npm 的解析器误解它们。  
+**修复：** 永远不要使用 4 部分版本。只有 3 部分（0.8.22）或预发布（0.8.23-preview.1）。在任何提交之前运行 `semver.valid()`。
 
-### Draft Release Didn't Trigger Workflow
+### 草稿发布未触发工作流
 
-**Symptom:** Release created but `publish.yml` never ran.  
-**Root cause:** Release was created as a draft. Draft releases don't emit `release: published` event.  
-**Fix:** Edit release and change to published: `gh release edit "v$VERSION" --draft=false`. Workflow should trigger immediately.
-
----
-
-## Validation Checklist
-
-Before starting ANY release, confirm:
-
-- [ ] Version is valid semver: `node -p "require('semver').valid('VERSION')"` returns the version string (NOT null)
-- [ ] NPM_TOKEN is an Automation token (no 2FA): `npm token list` shows `read-write` without OTP requirement
-- [ ] Branch is clean: `git status` shows "nothing to commit, working tree clean"
-- [ ] Tag doesn't exist: `git tag -l "vVERSION"` returns empty
-- [ ] `SKIP_BUILD_BUMP=1` is set: `echo $SKIP_BUILD_BUMP` returns `1`
-
-Before creating GitHub Release:
-
-- [ ] All 3 package.json files have matching versions: `grep '"version"' package.json packages/*/package.json`
-- [ ] Commit is pushed: `git log origin/main..main` returns empty
-- [ ] Tag is pushed: `git ls-remote --tags origin vVERSION` returns the tag SHA
-
-After GitHub Release:
-
-- [ ] Release is published (NOT draft): `gh release view "vVERSION"` output doesn't contain "(draft)"
-- [ ] Workflow is running: `gh run list --workflow=publish.yml --limit 1` shows "in_progress"
-
-After workflow completes:
-
-- [ ] Both jobs succeeded: Workflow shows green checkmarks
-- [ ] SDK on npm: `npm view @bradygaster/squad-sdk version` returns correct version
-- [ ] CLI on npm: `npm view @bradygaster/squad-cli version` returns correct version
-- [ ] `latest` tags correct: `npm dist-tag ls @bradygaster/squad-sdk` shows `latest: VERSION`
-- [ ] Packages install: `npm install @bradygaster/squad-cli` succeeds
-
-After dev sync:
-
-- [ ] dev branch has next preview version: `git show dev:package.json | grep version` shows next preview
+**症状：** 发布已创建但 `publish.yml` 从未运行。  
+**根本原因：** 发布被创建为草稿。草稿发布不会发出 `release: published` 事件。  
+**修复：** 编辑发布并更改为已发布：`gh release edit "v$VERSION" --draft=false`。工作流应立即触发。
 
 ---
 
-## Post-Mortem Reference
+## 验证检查清单
 
-This skill was created after the v0.8.22 release disaster. Full retrospective: `.squad/decisions/inbox/keaton-v0822-retrospective.md`
+在开始任何发布之前，确认：
 
-**Key learnings:**
-1. No release without a runbook = improvisation = disaster
-2. Semver validation is mandatory — 4-part versions break npm
-3. NPM_TOKEN type matters — User tokens with 2FA fail in CI
-4. Draft releases are a footgun — they don't trigger automation
-5. Retry logic is essential — npm propagation takes time
+- [ ] 版本是有效 semver：`node -p "require('semver').valid('VERSION')"` 返回版本字符串（不是 null）
+- [ ] NPM_TOKEN 是 Automation 令牌（无 2FA）：`npm token list` 显示不带 OTP 要求的 `read-write`
+- [ ] 分支是干净的：`git status` 显示 "nothing to commit, working tree clean"
+- [ ] 标签不存在：`git tag -l "vVERSION"` 返回空
+- [ ] `SKIP_BUILD_BUMP=1` 已设置：`echo $SKIP_BUILD_BUMP` 返回 `1`
 
-**Never again.**
+在创建 GitHub 发布之前：
+
+- [ ] 所有 3 个 package.json 文件具有匹配版本：`grep '"version"' package.json packages/*/package.json`
+- [ ] 提交已推送：`git log origin/main..main` 返回空
+- [ ] 标签已推送：`git ls-remote --tags origin vVERSION` 返回标签 SHA
+
+在 GitHub 发布之后：
+
+- [ ] 发布已发布（不是草稿）：`gh release view "vVERSION"` 输出不包含 "(draft)"
+- [ ] 工作流正在运行：`gh run list --workflow=publish.yml --limit 1` 显示 "in_progress"
+
+在工作流完成后：
+
+- [ ] 两个作业都成功：工作流显示绿色对勾
+- [ ] SDK 在 npm 上：`npm view @bradygaster/squad-sdk version` 返回正确版本
+- [ ] CLI 在 npm 上：`npm view @bradygaster/squad-cli version` 返回正确版本
+- [ ] `latest` 标签正确：`npm dist-tag ls @bradygaster/squad-sdk` 显示 `latest: VERSION`
+- [ ] 包安装：`npm install @bradygaster/squad-cli` 成功
+
+在 dev 同步后：
+
+- [ ] dev 分支具有下一个预览版本：`git show dev:package.json | grep version` 显示下一个预览
+
+---
+
+## 事后分析参考
+
+此技能是在 v0.8.22 发布灾难后创建的。完整回顾：`.squad/decisions/inbox/keaton-v0822-retrospective.md`
+
+**关键教训：**
+1. 没有运行手册的发布 = 即兴发挥 = 灾难
+2. Semver 验证是强制性的 —— 4 部分版本破坏 npm
+3. NPM_TOKEN 类型很重要 —— 带 2FA 的 User 令牌在 CI 中失败
+4. 草稿发布是陷阱 —— 它们不会触发自动化
+5. 重试逻辑是必要的 —— npm 传播需要时间
+
+**永不再犯。**

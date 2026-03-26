@@ -1,76 +1,76 @@
 ---
 name: "model-selection"
-description: "Per-agent model selection with 4-layer hierarchy and fallback chains"
+description: "每个智能体的模型选择，包含4层层次结构和回退链"
 domain: "orchestration"
 confidence: "high"
 source: "extracted"
 ---
 
-## Context
+## 上下文
 
-Before spawning an agent, the coordinator determines which model to use. This skill codifies the 4-layer hierarchy, role-to-model mappings, task complexity adjustments, and fallback chains. Applies to all agent spawns in Team Mode.
+在生成智能体之前，协调器确定使用哪个模型。此技能将4层层次结构、角色到模型映射、任务复杂度调整和回退链编纂成文。适用于团队模式中的所有智能体生成。
 
-## Patterns
+## 模式
 
-### 4-Layer Hierarchy
+### 4层层次结构
 
-Check these layers in order — first match wins:
+按顺序检查这些层 —— 第一个匹配获胜：
 
-**Layer 1 — User Override:** Did the user specify a model? ("use opus", "save costs", "use gpt-5.2-codex for this"). If yes, use that model. Session-wide directives ("always use haiku") persist until contradicted.
+**第1层 —— 用户覆盖：** 用户是否指定了模型？（"使用 opus"、"节省成本"、"为此使用 gpt-5.2-codex"）。如果是，使用该模型。会话范围指令（"始终使用 haiku"）持续到被反驳。
 
-**Layer 2 — Charter Preference:** Does the agent's charter have a `## Model` section with `Preferred` set to a specific model (not `auto`)? If yes, use that model.
+**第2层 —— Charter 偏好：** 智能体的 charter 是否有 `## Model` 部分且 `Preferred` 设置为特定模型（不是 `auto`）？如果是，使用该模型。
 
-**Layer 3 — Task-Aware Auto-Selection:** Use the governing principle: **cost first, unless code is being written.** Match the agent's task to determine output type, then select accordingly:
+**第3层 —— 任务感知自动选择：** 使用指导原则：**成本优先，除非在编写代码。** 将智能体的任务匹配以确定输出类型，然后相应选择：
 
-| Task Output | Model | Tier | Rule |
+| 任务输出 | 模型 | 等级 | 规则 |
 |-------------|-------|------|------|
-| Writing code (implementation, refactoring, test code, bug fixes) | `claude-sonnet-4.6` | Standard | Quality and accuracy matter for code. Use standard tier. |
-| Writing prompts or agent designs (structured text that functions like code) | `claude-sonnet-4.6` | Standard | Prompts are executable — treat like code. |
-| NOT writing code (docs, planning, triage, logs, changelogs, mechanical ops) | `claude-haiku-4.5` | Fast | Cost first. Haiku handles non-code tasks. |
-| Visual/design work requiring image analysis | `claude-opus-4.5` | Premium | Vision capability required. Overrides cost rule. |
+| 编写代码（实现、重构、测试代码、bug 修复） | `claude-sonnet-4.6` | 标准 | 代码的质量和准确性很重要。使用标准等级。 |
+| 编写提示或智能体设计（像代码一样功能的结构化文本） | `claude-sonnet-4.6` | 标准 | 提示是可执行的 —— 像代码一样对待。 |
+| 不编写代码（文档、规划、分流、日志、变更日志、机械操作） | `claude-haiku-4.5` | 快速 | 成本优先。Haiku 处理非代码任务。 |
+| 需要图像分析的视觉/设计工作 | `claude-opus-4.5` | 高级 | 需要视觉能力。覆盖成本规则。 |
 
-**Role-to-model mapping** (applying cost-first principle):
+**角色到模型映射**（应用成本优先原则）：
 
-| Role | Default Model | Why | Override When |
+| 角色 | 默认模型 | 原因 | 何时覆盖 |
 |------|--------------|-----|---------------|
-| Core Dev / Backend / Frontend | `claude-sonnet-4.6` | Writes code — quality first | Heavy code gen → `gpt-5.3-codex` |
-| Tester / QA | `claude-sonnet-4.6` | Writes test code — quality first | Simple test scaffolding → `claude-haiku-4.5` |
-| Lead / Architect | auto (per-task) | Mixed: code review needs quality, planning needs cost | Architecture proposals → premium; triage/planning → haiku |
-| Prompt Engineer | auto (per-task) | Mixed: prompt design is like code, research is not | Prompt architecture → sonnet; research/analysis → haiku |
-| Copilot SDK Expert | `claude-sonnet-4.6` | Technical analysis that often touches code | Pure research → `claude-haiku-4.5` |
-| Designer / Visual | `claude-opus-4.6` | Vision-capable model required | — (never downgrade — vision is non-negotiable) |
-| DevRel / Writer | `claude-haiku-4.5` | Docs and writing — not code | — |
-| Scribe / Logger | `claude-haiku-4.5` | Mechanical file ops — cheapest possible | — (never bump Scribe) |
-| Git / Release | `claude-haiku-4.5` | Mechanical ops — changelogs, tags, version bumps | — (never bump mechanical ops) |
+| 核心开发 / 后端 / 前端 | `claude-sonnet-4.6` | 编写代码 —— 质量优先 | 大量代码生成 → `gpt-5.3-codex` |
+| 测试人员 / QA | `claude-sonnet-4.6` | 编写测试代码 —— 质量优先 | 简单测试脚手架 → `claude-haiku-4.5` |
+| 组长 / 架构师 | 自动（按任务） | 混合：代码审查需要质量，规划需要成本 | 架构提案 → 高级；分流/规划 → haiku |
+| 提示工程师 | 自动（按任务） | 混合：提示设计像代码，研究不是 | 提示架构 → sonnet；研究/分析 → haiku |
+| Copilot SDK 专家 | `claude-sonnet-4.6` | 经常接触代码的技术分析 | 纯研究 → `claude-haiku-4.5` |
+| 设计师 / 视觉 | `claude-opus-4.6` | 需要视觉能力的模型 | —（永不降级 —— 视觉不可协商） |
+| 开发者关系 / 编写者 | `claude-haiku-4.5` | 文档和写作 —— 不是代码 | — |
+| 书记员 / 记录器 | `claude-haiku-4.5` | 机械文件操作 —— 尽可能便宜 | —（永不提升书记员） |
+| Git / 发布 | `claude-haiku-4.5` | 机械操作 —— 变更日志、标签、版本提升 | —（永不提升机械操作） |
 
-**Task complexity adjustments** (apply at most ONE — no cascading):
-- **Bump UP to premium:** architecture proposals, reviewer gates, security audits, multi-agent coordination (output feeds 3+ agents)
-- **Bump DOWN to fast/cheap:** typo fixes, renames, boilerplate, scaffolding, changelogs, version bumps
-- **Switch to code specialist (`gpt-5.3-codex`):** large multi-file refactors, complex implementation from spec, heavy code generation (500+ lines)
-- **Switch to analytical diversity (`gemini-3-pro-preview`):** code reviews where a second perspective helps, security reviews, architecture reviews after a rejection
+**任务复杂度调整**（最多应用一个 —— 无级联）：
+- **提升到高级：** 架构提案、审查者门禁、安全审计、多智能体协调（输出供给 3+ 智能体）
+- **降级到快速/便宜：** 拼写修复、重命名、样板、脚手架、变更日志、版本提升
+- **切换到代码专家（`gpt-5.3-codex`）：** 大型多文件重构、从规范复杂实现、大量代码生成（500+ 行）
+- **切换到分析多样性（`gemini-3-pro-preview`）：** 第二视角有帮助的代码审查、安全审查、拒绝后的架构审查
 
-**Layer 4 — Default:** If nothing else matched, use `claude-haiku-4.5`. Cost wins when in doubt, unless code is being produced.
+**第4层 —— 默认：** 如果没有其他匹配，使用 `claude-haiku-4.5`。有疑义时成本获胜，除非在生成代码。
 
-### Fallback Chains
+### 回退链
 
-If a spawn fails because the selected model is unavailable (plan restriction, org policy, rate limit, deprecation, or any other reason), silently retry with the next model in the chain. Do NOT tell the user about fallback attempts. Maximum 3 retries before jumping to the nuclear fallback.
+如果生成失败，因为所选模型不可用（计划限制、组织策略、速率限制、弃用或任何其他原因），静默用链中的下一个模型重试。不要告诉用户回退尝试。在跳到核回退之前最多3次重试。
 
 ```
-Premium:  claude-opus-4.6 → claude-opus-4.6-fast → claude-opus-4.5 → claude-sonnet-4.6 → (omit model param)
-Standard: claude-sonnet-4.6 → gpt-5.4 → claude-sonnet-4.5 → gpt-5.3-codex → claude-sonnet-4 → (omit model param)
-Fast:     claude-haiku-4.5 → gpt-5.1-codex-mini → gpt-4.1 → gpt-5-mini → (omit model param)
+高级：  claude-opus-4.6 → claude-opus-4.6-fast → claude-opus-4.5 → claude-sonnet-4.6 →（省略模型参数）
+标准： claude-sonnet-4.6 → gpt-5.4 → claude-sonnet-4.5 → gpt-5.3-codex → claude-sonnet-4 →（省略模型参数）
+快速：     claude-haiku-4.5 → gpt-5.1-codex-mini → gpt-4.1 → gpt-5-mini →（省略模型参数）
 ```
 
-`(omit model param)` = call the `task` tool WITHOUT the `model` parameter. The platform uses its built-in default. This is the nuclear fallback — it always works.
+`（省略模型参数）` = 不带 `model` 参数调用 `task` 工具。平台使用其内置默认。这是核回退 —— 它总是有效。
 
-**Fallback rules:**
-- If the user specified a provider ("use Claude"), fall back within that provider only before hitting nuclear
-- Never fall back UP in tier — a fast/cheap task should not land on a premium model
-- Log fallbacks to the orchestration log for debugging, but never surface to the user unless asked
+**回退规则：**
+- 如果用户指定了提供商（"使用 Claude"），在命中核回退之前仅在该提供商内回退
+- 永不向上回退等级 —— 快速/便宜任务不应落到高级模型
+- 记录回退到编排日志用于调试，但除非被询问，否则不向用户展示
 
-### Passing the Model to Spawns
+### 将模型传递给生成
 
-Pass the resolved model as the `model` parameter on every `task` tool call:
+将解析的模型作为每个 `task` 工具调用的 `model` 参数传递：
 
 ```
 agent_type: "general-purpose"
@@ -81,63 +81,63 @@ prompt: |
   ...
 ```
 
-Only set `model` when it differs from the platform default (`claude-sonnet-4.6`). If the resolved model IS `claude-sonnet-4.6`, you MAY omit the `model` parameter — the platform uses it as default.
+仅当它与平台默认（`claude-sonnet-4.6`）不同时设置 `model`。如果解析的模型是 `claude-sonnet-4.6`，你可以省略 `model` 参数 —— 平台使用它作为默认。
 
-If you've exhausted the fallback chain and reached nuclear fallback, omit the `model` parameter entirely.
+如果你已用尽回退链并到达核回退，完全省略 `model` 参数。
 
-### Spawn Output Format
+### 生成输出格式
 
-When spawning, include the model in your acknowledgment:
+生成时，在确认中包含模型：
 
 ```
-🔧 Fenster (claude-sonnet-4.6) — refactoring auth module
-🎨 Redfoot (claude-opus-4.6 · vision) — designing color system
-📋 Scribe (claude-haiku-4.5 · fast) — logging session
-⚡ Keaton (claude-opus-4.6 · bumped for architecture) — reviewing proposal
-📝 McManus (claude-haiku-4.5 · fast) — updating docs
+🔧 Fenster (claude-sonnet-4.6) —— 重构认证模块
+🎨 Redfoot (claude-opus-4.6 · 视觉) —— 设计颜色系统
+📋 Scribe (claude-haiku-4.5 · 快速) —— 记录会话
+⚡ Keaton (claude-opus-4.6 · 为架构提升) —— 审查提案
+📝 McManus (claude-haiku-4.5 · 快速) —— 更新文档
 ```
 
-Include tier annotation only when the model was bumped or a specialist was chosen. Default-tier spawns just show the model name.
+仅当模型被提升或选择了专家时才包含等级注释。默认等级生成只显示模型名称。
 
-### Valid Models
+### 有效模型
 
-**Premium:** `claude-opus-4.6`, `claude-opus-4.6-fast`, `claude-opus-4.5`
-**Standard:** `claude-sonnet-4.6`, `claude-sonnet-4.5`, `claude-sonnet-4`, `gpt-5.4`, `gpt-5.3-codex`, `gpt-5.2-codex`, `gpt-5.2`, `gpt-5.1-codex-max`, `gpt-5.1-codex`, `gpt-5.1`, `gpt-5`, `gemini-3-pro-preview`
-**Fast/Cheap:** `claude-haiku-4.5`, `gpt-5.1-codex-mini`, `gpt-5-mini`, `gpt-4.1`
+**高级：** `claude-opus-4.6`、`claude-opus-4.6-fast`、`claude-opus-4.5`
+**标准：** `claude-sonnet-4.6`、`claude-sonnet-4.5`、`claude-sonnet-4`、`gpt-5.4`、`gpt-5.3-codex`、`gpt-5.2-codex`、`gpt-5.2`、`gpt-5.1-codex-max`、`gpt-5.1-codex`、`gpt-5.1`、`gpt-5`、`gemini-3-pro-preview`
+**快速/便宜：** `claude-haiku-4.5`、`gpt-5.1-codex-mini`、`gpt-5-mini`、`gpt-4.1`
 
-## Examples
+## 示例
 
-**Example 1: Backend dev writing API endpoints**
-- Role: Backend Dev
-- Task: "implement REST endpoints for user management"
-- Layer 3 decision: writing code → `claude-sonnet-4.6` (standard tier)
-- Spawn: `🔧 Fenster (claude-sonnet-4.6) — implementing user API endpoints`
+**示例1：后端开发编写 API 端点**
+- 角色：后端开发
+- 任务："实现用户管理的 REST 端点"
+- 第3层决策：编写代码 → `claude-sonnet-4.6`（标准等级）
+- 生成：`🔧 Fenster (claude-sonnet-4.6) —— 实现用户 API 端点`
 
-**Example 2: User override**
-- User says: "use haiku for everything this session"
-- Layer 1 overrides all other layers
-- All spawns use `claude-haiku-4.5` regardless of role or task
+**示例2：用户覆盖**
+- 用户说："此会话所有东西都使用 haiku"
+- 第1层覆盖所有其他层
+- 所有生成使用 `claude-haiku-4.5`，无论角色或任务
 
-**Example 3: Complex refactor**
-- Role: Backend Dev
-- Task: "refactor 15 auth-related files to use new token system"
-- Layer 3 base: `claude-sonnet-4.5`
-- Task complexity: heavy multi-file refactor → switch to `gpt-5.2-codex`
-- Spawn: `🔧 Fenster (gpt-5.2-codex · code specialist) — refactoring auth to new token system`
+**示例3：复杂重构**
+- 角色：后端开发
+- 任务："重构 15 个认证相关文件以使用新令牌系统"
+- 第3层基础：`claude-sonnet-4.5`
+- 任务复杂度：大量多文件重构 → 切换到 `gpt-5.2-codex`
+- 生成：`🔧 Fenster (gpt-5.2-codex · 代码专家) —— 将认证重构到新令牌系统`
 
-**Example 4: Scribe logging**
-- Role: Scribe
-- Task: "log session to decisions.md"
-- Layer 3: NOT writing code → `claude-haiku-4.5`
-- Role mapping: Scribe always haiku, never bump
-- Spawn: `📋 Scribe (claude-haiku-4.5 · fast) — logging session`
+**示例4：书记员记录**
+- 角色：书记员
+- 任务："将会话记录到 decisions.md"
+- 第3层：不编写代码 → `claude-haiku-4.5`
+- 角色映射：书记员始终 haiku，永不提升
+- 生成：`📋 Scribe (claude-haiku-4.5 · 快速) —— 记录会话`
 
-## Anti-Patterns
+## 反模式
 
-- ❌ Falling back UP in tier (fast task landing on premium model)
-- ❌ Telling the user about fallback attempts ("Opus failed, trying Sonnet")
-- ❌ Bumping Scribe or mechanical ops agents to higher tiers
-- ❌ Using premium models for documentation or planning tasks
-- ❌ Applying multiple complexity adjustments (cascading bumps)
-- ❌ Forgetting to include model in spawn acknowledgment
-- ❌ Downgrading vision-required tasks from opus
+- ❌ 向上回退等级（快速任务落到高级模型）
+- ❌ 告诉用户回退尝试（"Opus 失败，尝试 Sonnet"）
+- ❌ 将书记员或机械操作智能体提升到更高等级
+- ❌ 对文档或规划任务使用高级模型
+- ❌ 应用多个复杂度调整（级联提升）
+- ❌ 忘记在生成确认中包含模型
+- ❌ 将需要视觉的任务从 opus 降级

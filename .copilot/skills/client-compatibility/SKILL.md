@@ -1,89 +1,89 @@
 ---
 name: "client-compatibility"
-description: "Platform detection and adaptive spawning for CLI vs VS Code vs other surfaces"
+description: "CLI vs VS Code vs 其他界面的平台检测和自适应生成"
 domain: "orchestration"
 confidence: "high"
 source: "extracted"
 ---
 
-## Context
+## 上下文
 
-Squad runs on multiple Copilot surfaces (CLI, VS Code, JetBrains, GitHub.com). The coordinator must detect its platform and adapt spawning behavior accordingly. Different tools are available on different platforms, requiring conditional logic for agent spawning, SQL usage, and response timing.
+Squad 在多个 Copilot 界面上运行（CLI、VS Code、JetBrains、GitHub.com）。协调器必须检测其平台并相应调整生成行为。不同平台上有不同的工具可用，需要智能体生成、SQL 使用和响应时间的条件逻辑。
 
-## Patterns
+## 模式
 
-### Platform Detection
+### 平台检测
 
-Before spawning agents, determine the platform by checking available tools:
+在生成智能体之前，通过检查可用工具确定平台：
 
-1. **CLI mode** — `task` tool is available → full spawning control. Use `task` with `agent_type`, `mode`, `model`, `description`, `prompt` parameters. Collect results via `read_agent`.
+1. **CLI 模式** —— `task` 工具可用 → 完整生成控制。使用带 `agent_type`、`mode`、`model`、`description`、`prompt` 参数的 `task`。通过 `read_agent` 收集结果。
 
-2. **VS Code mode** — `runSubagent` or `agent` tool is available → conditional behavior. Use `runSubagent` with the task prompt. Drop `agent_type`, `mode`, and `model` parameters. Multiple subagents in one turn run concurrently (equivalent to background mode). Results return automatically — no `read_agent` needed.
+2. **VS Code 模式** —— `runSubagent` 或 `agent` 工具可用 → 条件行为。使用带任务提示的 `runSubagent`。删除 `agent_type`、`mode` 和 `model` 参数。一轮中的多个子智能体并发运行（相当于后台模式）。结果自动返回 —— 无需 `read_agent`。
 
-3. **Fallback mode** — neither `task` nor `runSubagent`/`agent` available → work inline. Do not apologize or explain the limitation. Execute the task directly.
+3. **回退模式** —— `task` 和 `runSubagent`/`agent` 都不可用 → 内联工作。不要道歉或解释限制。直接执行任务。
 
-If both `task` and `runSubagent` are available, prefer `task` (richer parameter surface).
+如果 `task` 和 `runSubagent` 都可用，优先使用 `task`（更丰富的参数表面）。
 
-### VS Code Spawn Adaptations
+### VS Code 生成适配
 
-When in VS Code mode, the coordinator changes behavior in these ways:
+在 VS Code 模式时，协调器以这些方式更改行为：
 
-- **Spawning tool:** Use `runSubagent` instead of `task`. The prompt is the only required parameter — pass the full agent prompt (charter, identity, task, hygiene, response order) exactly as you would on CLI.
-- **Parallelism:** Spawn ALL concurrent agents in a SINGLE turn. They run in parallel automatically. This replaces `mode: "background"` + `read_agent` polling.
-- **Model selection:** Accept the session model. Do NOT attempt per-spawn model selection or fallback chains — they only work on CLI. In Phase 1, all subagents use whatever model the user selected in VS Code's model picker.
-- **Scribe:** Cannot fire-and-forget. Batch Scribe as the LAST subagent in any parallel group. Scribe is light work (file ops only), so the blocking is tolerable.
-- **Launch table:** Skip it. Results arrive with the response, not separately. By the time the coordinator speaks, the work is already done.
-- **`read_agent`:** Skip entirely. Results return automatically when subagents complete.
-- **`agent_type`:** Drop it. All VS Code subagents have full tool access by default. Subagents inherit the parent's tools.
-- **`description`:** Drop it. The agent name is already in the prompt.
-- **Prompt content:** Keep ALL prompt structure — charter, identity, task, hygiene, response order blocks are surface-independent.
+- **生成工具：** 使用 `runSubagent` 而不是 `task`。提示是唯一必需的参数 —— 传递完整的智能体提示（charter、身份、任务、卫生、响应顺序），完全像在 CLI 上一样。
+- **并行性：** 在**单轮**中生成**所有**并发智能体。它们自动并行运行。这替代了 `mode: "background"` + `read_agent` 轮询。
+- **模型选择：** 接受会话模型。不要尝试每次生成模型选择或回退链 —— 它们只在 CLI 上工作。在第 1 阶段，所有子智能体使用用户在 VS Code 模型选择器中选择的任何模型。
+- **书记员：** 不能即发即弃。将书记员批处理为任何并行组中的**最后一个**子智能体。书记员是轻工作（仅文件操作），所以阻塞是可容忍的。
+- **启动表：** 跳过它。结果随响应到达，不是分开的。到协调器说话时，工作已经完成。
+- **`read_agent`：** 完全跳过。结果在子智能体完成时自动返回。
+- **`agent_type`：** 删除它。所有 VS Code 子智能体默认具有完整工具访问权限。子智能体继承父级的工具。
+- **`description`：** 删除它。智能体名称已经在提示中。
+- **提示内容：** 保留所有提示结构 —— charter、身份、任务、卫生、响应顺序块与界面无关。
 
-### Feature Degradation Table
+### 功能降级表
 
-| Feature | CLI | VS Code | Degradation |
+| 功能 | CLI | VS Code | 降级 |
 |---------|-----|---------|-------------|
-| Parallel fan-out | `mode: "background"` + `read_agent` | Multiple subagents in one turn | None — equivalent concurrency |
-| Model selection | Per-spawn `model` param (4-layer hierarchy) | Session model only (Phase 1) | Accept session model, log intent |
-| Scribe fire-and-forget | Background, never read | Sync, must wait | Batch with last parallel group |
-| Launch table UX | Show table → results later | Skip table → results with response | UX only — results are correct |
-| SQL tool | Available | Not available | Avoid SQL in cross-platform code paths |
-| Response order bug | Critical workaround | Possibly necessary (unverified) | Keep the block — harmless if unnecessary |
+| 并行展开 | `mode: "background"` + `read_agent` | 一轮中的多个子智能体 | 无 —— 等效并发 |
+| 模型选择 | 每次生成 `model` 参数（4层层次结构） | 仅会话模型（第1阶段） | 接受会话模型，记录意图 |
+| 书记员即发即弃 | 后台，永不读取 | 同步，必须等待 | 与最后一组并行批处理 |
+| 启动表 UX | 显示表 → 稍后结果 | 跳过表 → 结果随响应 | 仅 UX —— 结果是正确的 |
+| SQL 工具 | 可用 | 不可用 | 避免 SQL 跨平台代码路径 |
+| 响应顺序 bug | 关键变通 | 可能需要（未验证） | 保留块 —— 如果不必要无害 |
 
-### SQL Tool Caveat
+### SQL 工具警告
 
-The `sql` tool is **CLI-only**. It does not exist on VS Code, JetBrains, or GitHub.com. Any coordinator logic or agent workflow that depends on SQL (todo tracking, batch processing, session state) will silently fail on non-CLI surfaces. Cross-platform code paths must not depend on SQL. Use filesystem-based state (`.squad/` files) for anything that must work everywhere.
+`sql` 工具是**仅 CLI**。它在 VS Code、JetBrains 或 GitHub.com 上不存在。任何依赖 SQL 的协调器逻辑或智能体工作流（待办跟踪、批处理、会话状态）在非 CLI 界面上将静默失败。跨平台代码路径不能依赖 SQL。对必须在任何地方工作的任何内容使用基于文件系统的状态（`.squad/` 文件）。
 
-## Examples
+## 示例
 
-**Example 1: CLI parallel spawn**
+**示例 1：CLI 并行生成**
 ```typescript
-// Coordinator detects task tool available → CLI mode
+// 协调器检测 task 工具可用 → CLI 模式
 task({ agent_type: "general-purpose", mode: "background", model: "claude-sonnet-4.5", ... })
 task({ agent_type: "general-purpose", mode: "background", model: "claude-haiku-4.5", ... })
-// Later: read_agent for both
+// 稍后：读取两者
 ```
 
-**Example 2: VS Code parallel spawn**
+**示例 2：VS Code 并行生成**
 ```typescript
-// Coordinator detects runSubagent available → VS Code mode
+// 协调器检测 runSubagent 可用 → VS Code 模式
 runSubagent({ prompt: "...Fenster charter + task..." })
 runSubagent({ prompt: "...Hockney charter + task..." })
-runSubagent({ prompt: "...Scribe charter + task..." }) // Last in group
-// Results return automatically, no read_agent
+runSubagent({ prompt: "...Scribe charter + task..." }) // 组中最后一个
+// 结果自动返回，无需 read_agent
 ```
 
-**Example 3: Fallback mode**
+**示例 3：回退模式**
 ```typescript
-// Neither task nor runSubagent available → work inline
-// Coordinator executes the task directly without spawning
+// task 和 runSubagent 都不可用 → 内联工作
+// 协调器直接执行任务而不生成
 ```
 
-## Anti-Patterns
+## 反模式
 
-- ❌ Using SQL tool in cross-platform workflows (breaks on VS Code/JetBrains/GitHub.com)
-- ❌ Attempting per-spawn model selection on VS Code (Phase 1 — only session model works)
-- ❌ Fire-and-forget Scribe on VS Code (must batch as last subagent)
-- ❌ Showing launch table on VS Code (results already inline)
-- ❌ Apologizing or explaining platform limitations to the user
-- ❌ Using `task` when only `runSubagent` is available
-- ❌ Dropping prompt structure (charter/identity/task) on non-CLI platforms
+- ❌ 在跨平台工作流中使用 SQL 工具（在 VS Code/JetBrains/GitHub.com 上中断）
+- ❌ 在 VS Code 上尝试每次生成模型选择（第 1 阶段 —— 只有会话模型有效）
+- ❌ 在 VS Code 上即发即弃书记员（必须作为最后一个子智能体批处理）
+- ❌ 在 VS Code 上显示启动表（结果已经内联）
+- ❌ 向用户道歉或解释平台限制
+- ❌ 只有 `runSubagent` 可用时使用 `task`
+- ❌ 在非 CLI 平台上删除提示结构（charter/身份/任务）

@@ -1,24 +1,24 @@
 ---
 name: "agent-conduct"
-description: "Shared hard rules enforced across all squad agents"
+description: "所有 squad 智能体必须遵循的共享硬性规则"
 domain: "team-governance"
 confidence: "high"
-source: "reskill extraction — Product Isolation Rule and Peer Quality Check appeared in all 20 agent charters"
+source: "reskill 提取 —— 产品隔离规则和同伴质量检查出现在所有 20 个智能体 charter 中"
 ---
 
-## Context
+## 上下文
 
-Every squad agent must follow these two hard rules. They were previously duplicated in every charter. Now they live here as a shared skill, loaded once.
+每个 squad 智能体必须遵循这两条硬性规则。它们以前在每个 charter 中重复。现在它们作为共享技能存在，加载一次。
 
-## Patterns
+## 模式
 
-### Product Isolation Rule (hard rule)
-Tests, CI workflows, and product code must NEVER depend on specific agent names from any particular squad. "Our squad" must not impact "the squad." No hardcoded references to agent names (Flight, EECOM, FIDO, etc.) in test assertions, CI configs, or product logic. Use generic/parameterized values. If a test needs agent names, use obviously-fake test fixtures (e.g., "test-agent-1", "TestBot").
+### 产品隔离规则（硬性规则）
+测试、CI 工作流和产品代码绝对不能依赖来自任何特定 squad 的特定智能体名称。"我们的 squad" 不能影响 "那个 squad"。测试断言、CI 配置或产品逻辑中不能硬编码引用智能体名称（Flight、EECOM、FIDO 等）。使用通用/参数化值。如果测试需要智能体名称，使用明显假的测试夹具（例如 "test-agent-1"、"TestBot"）。
 
-### Peer Quality Check (hard rule)
-Before finishing work, verify your changes don't break existing tests. Run the test suite for files you touched. If CI has been failing, check your changes aren't contributing to the problem. When you learn from mistakes, update your history.md.
+### 同伴质量检查（硬性规则）
+在完成工作之前，验证你的更改没有破坏现有测试。为你接触的文件运行测试套件。如果 CI 一直失败，检查你的更改是否没有加剧问题。当你从错误中学习时，更新你的 history.md。
 
-## Anti-Patterns
-- Don't hardcode dev team agent names in product code or tests
-- Don't skip test verification before declaring work done
-- Don't ignore pre-existing CI failures that your changes may worsen
+## 反模式
+- 不要在产品代码或测试中硬编码开发团队智能体名称
+- 不要在声明工作完成前跳过测试验证
+- 不要忽视你的更改可能恶化的预先存在的 CI 故障
