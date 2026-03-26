@@ -1,59 +1,102 @@
 {
+  // 项目名称：Squad 多智能体运行时
   "name": "@bradygaster/squad",
+  // 当前版本
   "version": "0.9.1",
+  // 标记为私有包（不发布到 npm）
   "private": true,
-  "description": "Squad — Programmable multi-agent runtime for GitHub Copilot, built on @github/copilot-sdk",
+  // 项目描述
+  "description": "Squad —— 面向 GitHub Copilot 的可编程多智能体运行时，基于 @github/copilot-sdk 构建",
+  // 使用 ES 模块（ESM）
   "type": "module",
+  // 工作区配置：packages 目录下的所有子目录都是工作区
   "workspaces": [
     "packages/*"
   ],
+  // npm 脚本命令
   "scripts": {
+    // 构建前置步骤：递增构建号、同步技能模板、同步模板
     "prebuild": "node scripts/bump-build.mjs && node scripts/sync-skill-templates.mjs && node scripts/sync-templates.mjs",
+    // 构建 SDK 和 CLI 包
     "build": "npm run build -w packages/squad-sdk && npm run build -w packages/squad-cli",
+    // 同步模板文件
     "sync-templates": "node scripts/sync-templates.mjs",
+    // 运行测试（一次性）
     "test": "vitest run",
+    // 运行测试（监视模式）
     "test:watch": "vitest",
+    // 类型检查
     "lint": "tsc --noEmit -p packages/squad-sdk/tsconfig.json && tsc --noEmit -p packages/squad-cli/tsconfig.json",
+    // ESLint 代码检查
     "lint:eslint": "eslint packages/ test/",
+    // 文档检查（Markdown 和拼写）
     "lint:docs": "markdownlint-cli2 && cspell --no-progress --dot \"docs/src/content/**/*.md\" \"README.md\"",
+    // 开发：创建 npm 链接
     "dev:link": "npm run build && cd packages/squad-sdk && npm link && cd ../squad-cli && npm link",
+    // 开发：移除 npm 链接
     "dev:unlink": "cd packages/squad-cli && npm unlink && cd ../squad-sdk && npm unlink",
+    // 构建文档
     "docs:build": "cd docs && npm run build",
+    // 开发模式运行文档
     "docs:dev": "cd docs && npm run dev",
+    // 预览文档
     "docs:preview": "cd docs && npm run preview"
   },
+  // Node.js 引擎要求
   "engines": {
     "node": ">=22.5.0"
   },
+  // 开发依赖
   "devDependencies": {
+    // OpenTelemetry API（可观测性）
     "@opentelemetry/api": "^1.9.0",
+    // OpenTelemetry 指标 SDK
     "@opentelemetry/sdk-metrics": "^2.5.1",
+    // OpenTelemetry 追踪 SDK
     "@opentelemetry/sdk-trace-base": "^2.5.1",
+    // Playwright 测试框架
     "@playwright/test": "^1.58.2",
+    // TypeScript ESLint 插件
     "@typescript-eslint/eslint-plugin": "^8.57.1",
+    // TypeScript ESLint 解析器
     "@typescript-eslint/parser": "^8.57.1",
+    // Vitest 覆盖率报告器
     "@vitest/coverage-v8": "^3.2.4",
+    // 拼写检查工具
     "cspell": "^9.7.0",
+    // ESLint 代码检查工具
     "eslint": "^10.1.0",
+    // Node.js ESLint 插件
     "eslint-plugin-n": "^17.24.0",
+    // 代码语法高亮
     "highlight.js": "^11.11.1",
+    // Markdown 解析器
     "markdown-it": "^14.1.1",
+    // Markdown lint 工具
     "markdownlint-cli2": "^0.21.0",
+    // Playwright 浏览器自动化
     "playwright": "^1.58.2",
+    // TypeScript 编译器
     "typescript": "^5.7.0",
+    // Vitest 测试框架
     "vitest": "^3.0.0"
   },
+  // 关键词标签
   "keywords": [
     "copilot",
     "multi-agent",
     "squad",
     "sdk"
   ],
+  // 许可证
   "license": "MIT",
+  // 项目主页
   "homepage": "https://github.com/bradygaster/squad#readme",
+  // Bug 报告地址
   "bugs": {
     "url": "https://github.com/bradygaster/squad/issues"
   },
+  // 代码仓库地址
   "repository": {
     "type": "git",
     "url": "https://github.com/bradygaster/squad.git"

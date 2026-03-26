@@ -1,20 +1,36 @@
 {
+  // TypeScript 编译器选项
   "compilerOptions": {
+    // 启用所有严格类型检查选项
     "strict": true,
+    // 目标 JavaScript 版本
     "target": "ES2022",
+    // 模块系统：NodeNext（支持 ESM）
     "module": "NodeNext",
+    // 模块解析策略：NodeNext
     "moduleResolution": "NodeNext",
+    // 生成 source map 文件（便于调试）
     "sourceMap": true,
+    // 启用 ES 模块互操作性
     "esModuleInterop": true,
+    // 跳过库文件的类型检查（加快编译）
     "skipLibCheck": true,
+    // 强制文件名大小写一致
     "forceConsistentCasingInFileNames": true,
+    // 允许导入 JSON 文件
     "resolveJsonModule": true,
+    // 确保每个文件可以独立编译（Babel 安全）
     "isolatedModules": true,
+    // 对索引访问进行未定义检查
     "noUncheckedIndexedAccess": true
   },
+  // 不包含直接编译的文件（使用项目引用）
   "files": [],
+  // TypeScript 项目引用配置
   "references": [
+    // SDK 包引用
     { "path": "packages/squad-sdk" },
+    // CLI 包引用
     { "path": "packages/squad-cli" }
   ]
 }

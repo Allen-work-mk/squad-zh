@@ -1,15 +1,32 @@
 {
-  "version": "0.2",
-  "language": "en",
-  "files": ["docs/src/content/**/*.md", "README.md"],
-  "ignorePaths": ["node_modules", "docs/dist", "*.json", "*.ts", "*.js", ".squad"],
-  "words": [
+  // CSpell 拼写检查配置文件
+  // CSpell 是一个用于检查代码和文档中拼写错误的工具
+
+  "version": "0.2",           // 配置文件版本
+  "language": "en",           // 默认语言：英语
+  "files": [                  // 要检查的文件
+    "docs/src/content/**/*.md",  // 文档目录下的所有 Markdown 文件
+    "README.md"                   // 项目根目录的 README
+  ],
+  "ignorePaths": [            // 忽略的路径
+    "node_modules",           // 依赖目录
+    "docs/dist",              // 构建输出目录
+    "*.json",                 // JSON 文件
+    "*.ts",                   // TypeScript 文件
+    "*.js",                   // JavaScript 文件
+    ".squad"                  // Squad 配置目录
+  ],
+  "words": [                  // 自定义词典（项目特定术语）
+    // 项目名称相关
     "squad", "bradygaster", "astro", "pagefind", "starlight",
+    // 技术术语
     "copilot", "subagent", "subagents", "MCP", "REPL", "CLI", "DevRel",
     "monorepo", "codespace", "codespaces", "worktree", "worktrees", "frontmatter",
+    // Squad 角色名称
     "ralph", "scribe", "pao", "fido", "eecom", "capcom",
     "retro", "inco", "guido", "booster", "gnc", "dsky", "vox",
     "sims", "telemetry", "handbook",
+    // 其他技术术语...
     "WIQL", "webhook", "webhooks", "dedup", "deduplicate",
     "triage", "triaging", "untriaged", "kanban", "lifecycle",
     "PRD", "SDK", "ADO", "CUDA", "RBAC", "RAAS", "OAuth", "JWT",
@@ -38,6 +55,12 @@
     "Tessio", "Triaging", "Futurama", "mklink", "slnx", "jqlang",
     "benleane", "TELMU", "Automator", "kedacore"
   ],
-  "dictionaries": ["en_US", "typescript", "node", "npm", "bash"],
-  "allowCompoundWords": true
+  "dictionaries": [           // 使用的基础词典
+    "en_US",                  // 美式英语
+    "typescript",             // TypeScript 术语
+    "node",                   // Node.js 术语
+    "npm",                    // npm 术语
+    "bash"                    // Bash 术语
+  ],
+  "allowCompoundWords": true  // 允许复合词（如 "worktree"）
 }
